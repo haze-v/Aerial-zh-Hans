@@ -379,17 +379,17 @@ final class AppPresentationController: NSObject {
 
         let alert = NSAlert()
         alert.messageText = String(localized: "Quit Aerial?")
-        alert.informativeText = """
+        alert.informativeText = String(localized: """
             Your wallpaper and screensaver keep running — they live in a macOS extension, not in this app.
 
             Quitting Aerial stops what the app itself takes care of in the background: video downloads, automatic pause when windows cover the wallpaper, live overlay data (weather, now playing) and keyboard shortcuts.
 
             You can close the window instead and keep Aerial running in the Dock.
-            """
-        alert.addButton(withTitle: "Quit")
-        alert.addButton(withTitle: "Close Window Instead")
+            """)
+        alert.addButton(withTitle: String(localized: "Quit"))
+        alert.addButton(withTitle: String(localized: "Close Window Instead"))
         alert.showsSuppressionButton = true
-        alert.suppressionButton?.title = "Don't ask again"
+        alert.suppressionButton?.title = String(localized: "Don't ask again")
         alert.suppressionButton?.state = .on
         NSApp.activate(ignoringOtherApps: true)
         let response = alert.runModal()

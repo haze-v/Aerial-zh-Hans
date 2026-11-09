@@ -358,7 +358,7 @@ struct LegacyAccessAssistView: View {
         VStack(spacing: 16) {
             ProgressView()
                 .controlSize(.large)
-            Text(message)
+            Text(LocalizedStringKey(message))
                 .font(.system(size: 14))
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
@@ -399,7 +399,7 @@ struct LegacyAccessAssistView: View {
                 .foregroundStyle(.red)
             Text("Migration failed")
                 .font(.system(size: 26, weight: .semibold))
-            Text(message)
+            Text(LocalizedStringKey(message))
                 .font(.system(size: 13))
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
@@ -425,7 +425,7 @@ struct LegacyAccessAssistView: View {
 
     private func header(_ title: String, _ subtitle: String) -> some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(title)
+            Text(LocalizedStringKey(title))
                 .font(.system(size: 20, weight: .semibold))
             Text(.init(subtitle))
                 .font(.system(size: 13))

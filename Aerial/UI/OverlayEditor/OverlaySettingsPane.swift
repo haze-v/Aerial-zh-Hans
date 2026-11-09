@@ -21,7 +21,7 @@ struct OverlaySettingsPane: View {
                         Image(systemName: instance.kind.iconName)
                             .font(.system(size: 28))
                             .foregroundStyle(.secondary)
-                        Text(instance.kind.displayName)
+                        Text(LocalizedStringKey(instance.kind.displayName))
                             .font(.title3.bold())
                     }
                     Text(instance.kind.description)

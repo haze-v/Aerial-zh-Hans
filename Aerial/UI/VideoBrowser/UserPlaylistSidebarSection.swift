@@ -114,7 +114,7 @@ struct UserPlaylistSidebarSection: View {
         guard let data = UserPlaylistManager.shared.exportData(id: summary.id) else { return }
 
         let panel = NSSavePanel()
-        panel.title = "Export Playlist"
+        panel.title = String(localized: "Export Playlist")
         panel.message = "Save \"\(summary.name)\" as a shareable playlist file."
         panel.prompt = "Export"
         panel.allowedContentTypes = [.json]

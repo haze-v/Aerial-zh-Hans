@@ -221,10 +221,10 @@ struct CacheSettingsPanel: View {
             }.value
             let alert = NSAlert()
             guard !plan.isEmpty else {
-                alert.messageText = "Nothing to trim"
-                alert.informativeText = "Every cached video is either a favourite or playing right now, so the cache can't be trimmed any further."
+                alert.messageText = String(localized: "Nothing to trim")
+                alert.informativeText = String(localized: "Every cached video is either a favourite or playing right now, so the cache can't be trimmed any further.")
                 alert.alertStyle = .informational
-                alert.addButton(withTitle: "OK")
+                alert.addButton(withTitle: String(localized: "OK"))
                 alert.runModal()
                 return
             }
@@ -235,7 +235,7 @@ struct CacheSettingsPanel: View {
             alert.informativeText = "This will delete \(count) video\(plural) (\(gigabytes) GB), oldest first. Favourites and the videos playing right now are kept. Deleted videos can be downloaded again later."
             alert.alertStyle = .warning
             alert.addButton(withTitle: "Delete \(count) Video\(plural)").hasDestructiveAction = true
-            alert.addButton(withTitle: "Cancel")
+            alert.addButton(withTitle: String(localized: "Cancel"))
             guard alert.runModal() == .alertFirstButtonReturn else { return }
 
             isTrimming = true
@@ -404,8 +404,8 @@ struct CacheSettingsPanel: View {
         if resolved == mountPoint || resolved.hasPrefix(mountPoint + "/") {
             // Aerial's own plumbing, not a user location.
             let alert = NSAlert()
-            alert.messageText = "Please choose a different folder"
-            alert.informativeText = "This folder is the mount point Aerial uses for the external cache image. Choose the folder that should hold the cache instead."
+            alert.messageText = String(localized: "Please choose a different folder")
+            alert.informativeText = String(localized: "This folder is the mount point Aerial uses for the external cache image. Choose the folder that should hold the cache instead.")
             alert.alertStyle = .warning
             alert.runModal()
             return
@@ -424,7 +424,7 @@ struct CacheSettingsPanel: View {
         if wantsImage, let problem = ExternalCacheImage.imageHostingProblem(folder: resolved) {
             errorLog("💽 rejected cache folder \(resolved): \(problem)")
             let alert = NSAlert()
-            alert.messageText = "This folder can't hold the cache image"
+            alert.messageText = String(localized: "This folder can't hold the cache image")
             alert.informativeText = problem
             alert.alertStyle = .warning
             alert.runModal()
@@ -441,10 +441,10 @@ struct CacheSettingsPanel: View {
            resolved == URL(fileURLWithPath: legacy).resolvingSymlinksInPath().path {
             let inventory = LegacyExternalCacheMigration.inventory(folder: legacy)
             let alert = NSAlert()
-            alert.messageText = "Move the videos in this folder into a disk image?"
+            alert.messageText = String(localized: "Move the videos in this folder into a disk image?")
             alert.informativeText = "Aerial keeps caches outside /Users/Shared in a disk image (\(ExternalCacheImage.bundleName)) so the wallpaper extension can play them. The image is created inside this folder and the \(inventory.count) video\(inventory.count == 1 ? "" : "s") in it (\(inventory.formattedBytes)), plus any Expansion packs, are moved in. Nothing is deleted."
-            alert.addButton(withTitle: "Convert")
-            alert.addButton(withTitle: "Cancel")
+            alert.addButton(withTitle: String(localized: "Convert"))
+            alert.addButton(withTitle: String(localized: "Cancel"))
             alert.alertStyle = .informational
             guard alert.runModal() == .alertFirstButtonReturn else { return }
             applyExternalCache(folder: legacy, migrateFrom: nil)
@@ -459,7 +459,7 @@ struct CacheSettingsPanel: View {
         let canMigrate = Cache.isExternalImageMode ? (!wantsImage && Cache.isAvailable) : true
 
         let alert = NSAlert()
-        alert.messageText = "Change cache location?"
+        alert.messageText = String(localized: "Change cache location?")
         let packsNote = PrefsCache.expansionsAtCacheLocation
             ? " Expansion packs stored at the cache location move along with the videos."
             : ""
@@ -472,10 +472,10 @@ struct CacheSettingsPanel: View {
             alert.informativeText = "What would you like to do with videos in the current cache folder?\(packsNote)"
         }
         if canMigrate {
-            alert.addButton(withTitle: "Move existing videos")
+            alert.addButton(withTitle: String(localized: "Move existing videos"))
         }
-        alert.addButton(withTitle: "Start fresh (keep old)")
-        alert.addButton(withTitle: "Cancel")
+        alert.addButton(withTitle: String(localized: "Start fresh (keep old)"))
+        alert.addButton(withTitle: String(localized: "Cancel"))
         alert.alertStyle = .informational
 
         let response = alert.runModal()
@@ -810,10 +810,10 @@ struct CacheSettingsPanel: View {
             ? " and \(packs) Expansion pack\(packs == 1 ? "" : "s") to \(Cache.defaultSourcesRoot)"
             : ""
         let alert = NSAlert()
-        alert.messageText = "Move the videos in this folder to the default location?"
+        alert.messageText = String(localized: "Move the videos in this folder to the default location?")
         alert.informativeText = "Aerial moves the \(videos) in it to \(Cache.defaultCachePath)\(packsText), where the wallpaper extension can play them, and switches the custom cache location off. Same disk, so the move takes seconds. Nothing is deleted."
-        alert.addButton(withTitle: "Move")
-        alert.addButton(withTitle: "Cancel")
+        alert.addButton(withTitle: String(localized: "Move"))
+        alert.addButton(withTitle: String(localized: "Cancel"))
         alert.alertStyle = .informational
         guard alert.runModal() == .alertFirstButtonReturn else { return }
 

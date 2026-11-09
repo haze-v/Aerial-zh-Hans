@@ -14,6 +14,10 @@ struct ScreenCoverageInfo: Identifiable {
 }
 
 struct DesktopSettingsPanel: View {
+    @State private var pauseOnHighCPU = false
+    @State private var cpuThreshold = 70.0
+    @State private var cpuHighLoadDuration = 5.0
+    @State private var cpuSampleInterval = 1.0
     @State private var autoPauseEnabled: Bool = true
     @State private var autoPauseThreshold: Double = 0.6
     @State private var screenCoverages: [ScreenCoverageInfo] = []
@@ -90,6 +94,7 @@ struct DesktopSettingsPanel: View {
                 // every OS — the occlusion auto-pause now drives the
                 // wallpaper extension on Sonoma+.
                 autoPauseSection
+                cpuPauseSection
 
                 pauseOnBatterySection
 
@@ -184,11 +189,11 @@ struct DesktopSettingsPanel: View {
                     .font(.system(size: 12))
                     .foregroundColor(.secondary)
 
-                if viewingMode != .independent {
+                if !viewingMode.usesPerDisplayPlayback {
                     HStack(alignment: .top, spacing: 6) {
                         Image(systemName: "info.circle")
                             .foregroundColor(.secondary)
-                        Text("In \(viewingMode.displayName) mode all screens share one playlist, so auto-pause acts on every screen together — any covered screen pauses the whole group.")
+                        Text("In \(String(localized: String.LocalizationValue(viewingMode.displayName))) mode all screens share one playlist, so auto-pause acts on every screen together — any covered screen pauses the whole group.")
                             .font(.system(size: 12))
                             .foregroundColor(.secondary)
                     }
@@ -229,7 +234,7 @@ struct DesktopSettingsPanel: View {
                             // threshold. The "paused (other screen)" badge
                             // tells the user why a visible screen would
                             // still be paused.
-                            let isShared = viewingMode != .independent
+                            let isShared = !viewingMode.usesPerDisplayPlayback
                             let anyWouldPause = screenCoverages.contains { $0.coverage >= autoPauseThreshold }
 
                             ForEach(screenCoverages) { screen in
@@ -377,6 +382,75 @@ struct DesktopSettingsPanel: View {
                     NSWorkspace.shared.icon(forFile: url.path))
         }
         return (id, NSWorkspace.shared.icon(for: .applicationBundle))
+    }
+
+    private var cpuPauseSection: some View {
+        GroupBox {
+            VStack(alignment: .leading, spacing: 12) {
+                Toggle("Pause when CPU usage is high", isOn: $pauseOnHighCPU)
+                    .onChange(of: pauseOnHighCPU) { _, enabled in
+                        Preferences.desktopPauseOnHighCPU = enabled
+                        WallpaperAutoPauseCoordinator.shared.reevaluate()
+                    }
+
+                Text("Pauses the desktop wallpaper when system CPU usage stays above the threshold for the set duration. Resumes after two consecutive samples below the threshold, if no other pause applies.")
+                    .font(.system(size: 12))
+                    .foregroundStyle(.secondary)
+
+                if pauseOnHighCPU {
+                    VStack(alignment: .leading, spacing: 6) {
+                        HStack {
+                            Text("CPU threshold")
+                            Spacer()
+                            Text("\(Int(cpuThreshold))%").monospacedDigit()
+                        }
+                        Slider(value: $cpuThreshold, in: 5...95, step: 5) {
+                            Text("CPU threshold")
+                        }
+                        .onChange(of: cpuThreshold) { _, threshold in
+                            Preferences.desktopCPUThreshold = threshold
+                            WallpaperAutoPauseCoordinator.shared.reevaluate()
+                        }
+                    }
+
+                    VStack(alignment: .leading, spacing: 6) {
+                        HStack {
+                            Text("High CPU duration")
+                            Spacer()
+                            Text("\(Int(cpuHighLoadDuration)) seconds").monospacedDigit()
+                        }
+                        Slider(value: $cpuHighLoadDuration, in: 1...30, step: 1) {
+                            Text("High CPU duration")
+                        }
+                        .onChange(of: cpuHighLoadDuration) { _, duration in
+                            Preferences.desktopCPUHighLoadDuration = duration
+                            WallpaperAutoPauseCoordinator.shared.reevaluate()
+                        }
+                    }
+
+                    VStack(alignment: .leading, spacing: 6) {
+                        HStack {
+                            Text("CPU sampling interval")
+                            Spacer()
+                            Text("\(Int(cpuSampleInterval)) seconds").monospacedDigit()
+                        }
+                        Slider(value: $cpuSampleInterval, in: 1...5, step: 1) {
+                            Text("CPU sampling interval")
+                        }
+                        .onChange(of: cpuSampleInterval) { _, interval in
+                            Preferences.desktopCPUSampleInterval = interval
+                            WallpaperAutoPauseCoordinator.shared.reevaluate()
+                        }
+                    }
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(12)
+        } label: {
+            Label("CPU Usage", systemImage: "cpu")
+                .font(Font.title3.bold())
+                .padding(4)
+        }
     }
 
     // MARK: - Pause on Battery Section
@@ -628,6 +702,10 @@ struct DesktopSettingsPanel: View {
     // MARK: - Load Settings
 
     private func loadSettings() {
+        pauseOnHighCPU = Preferences.desktopPauseOnHighCPU
+        cpuThreshold = Preferences.desktopCPUThreshold
+        cpuHighLoadDuration = Preferences.desktopCPUHighLoadDuration
+        cpuSampleInterval = Preferences.desktopCPUSampleInterval
         autoPauseEnabled = Preferences.desktopAutoPause
         autoPauseThreshold = Preferences.desktopAutoPauseThreshold
         ignoredApps = Preferences.desktopAutoPauseIgnoredApps

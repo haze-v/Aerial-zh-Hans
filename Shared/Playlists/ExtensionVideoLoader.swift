@@ -44,6 +44,7 @@ class ExtensionVideoLoader {
     /// After the first video, set to false so subsequent calls advance.
     /// Guarded by `stateLock`.
     private var isFirstVideoThisActivation = true
+    private var startedMirrorScopes: Set<String> = []
 
     /// One-shot self-heal guard for `tryPersistedPlaylist`: when no entry
     /// resolves against the in-memory catalog we refresh it from disk and
@@ -329,7 +330,10 @@ class ExtensionVideoLoader {
         // runs outside the lock.
         let scopeKey = screenUUID ?? "shared"
         let teardownResume = stateLock.withLock { pendingTeardownResume.removeValue(forKey: scopeKey) }
-        let isFirstActivation = stateLock.withLock { isFirstVideoThisActivation }
+        let mirror = PrefsDisplays.viewingMode == .independentMirror && screenUUID != nil
+        let isFirstActivation = stateLock.withLock {
+            mirror ? !startedMirrorScopes.contains(scopeKey) : isFirstVideoThisActivation
+        }
         let decision = PlaylistPopRule.decide(
             isFirstActivation: isFirstActivation,
             sidecarTimestamp: playlist.playbackTimestamp,
@@ -400,7 +404,10 @@ class ExtensionVideoLoader {
             return nil
         }
 
-        stateLock.withLock { isFirstVideoThisActivation = false }
+        stateLock.withLock {
+            isFirstVideoThisActivation = false
+            if mirror { startedMirrorScopes.insert(scopeKey) }
+        }
         // The popped entry is at playlist.currentIndex (popNextVideo set it). Read its
         // optional per-video play-duration override directly from the (freshly-loaded) entry.
         let playDuration = playlist.entries.indices.contains(playlist.currentIndex)
@@ -585,16 +592,39 @@ class ExtensionVideoLoader {
         }
     }
 
+    /// Align a follower's next-video cursor with the video copied from the leader.
+    func alignMirrorCursor(videoID: String?, screenUUID: String) -> Double? {
+        guard let videoID else { return nil }
+        loadPlaylistIfNeeded()
+        return stateLock.withLock {
+            guard var playlist = playlistState?.screenPlaylists[screenUUID] ?? playlistState?.sharedPlaylist,
+                  let index = playlist.index(ofVideoId: videoID) else { return nil }
+            playlist.currentIndex = index
+            playlist.playbackTimestamp = nil
+            playlistState?.screenPlaylists[screenUUID] = playlist
+            startedMirrorScopes.insert(screenUUID)
+            return playlist.entries[index].playDuration
+        }
+    }
+
     /// Update in-memory playlist position for immediate skip (called from Companion).
     func seekPlaylist(to index: Int, screenUUID: String?) {
-        // Force reload from disk to pick up any playlist changes (e.g. after download)
-        resetPlaylistCache()
+        // The mirror's per-display jumps can arrive together. Keep other
+        // displays' cursors intact; playlist-generation changes already reload the cache.
+        let mirror = PrefsDisplays.viewingMode == .independentMirror
+        if !mirror { resetPlaylistCache() }
         loadPlaylistIfNeeded()
         if var playlist = resolvePlaylist(screenUUID) {
             playlist.currentIndex = max(0, min(index, playlist.entries.count - 1))
             setPlaylist(playlist, for: screenUUID)
         }
-        stateLock.withLock { isFirstVideoThisActivation = true }
+        stateLock.withLock {
+            if mirror {
+                startedMirrorScopes.remove(screenUUID ?? "shared")
+            } else {
+                isFirstVideoThisActivation = true
+            }
+        }
     }
 
     /// Pop the previous video from the persisted playlist, scanning backward.
@@ -662,6 +692,7 @@ class ExtensionVideoLoader {
         playlistLoaded = false
         playlistState = nil
         isFirstVideoThisActivation = true
+        startedMirrorScopes.removeAll()
         catalogRefreshAttempted = false
     }
 

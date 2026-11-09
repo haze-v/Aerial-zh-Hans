@@ -26,7 +26,7 @@ class InfoWindowController: NSWindowController {
             defer: false
         )
 
-        window.title = "About Aerial"
+        window.title = String(localized: "About Aerial")
         window.contentViewController = hostingController
         window.isReleasedWhenClosed = false
         window.center()

@@ -70,7 +70,7 @@ struct AutoUpdatesPanel: View {
                             Spacer()
                             Picker("", selection: $checkFrequency) {
                                 ForEach(UpdateCheckFrequency.allCases, id: \.self) { freq in
-                                    Text(freq.rawValue).tag(freq)
+                                    Text(LocalizedStringKey(freq.rawValue)).tag(freq)
                                 }
                             }
                             .pickerStyle(.segmented)
@@ -91,7 +91,7 @@ struct AutoUpdatesPanel: View {
                             Spacer()
                             Picker("", selection: $autoInstallMode) {
                                 ForEach(AutoInstallMode.allCases, id: \.self) { mode in
-                                    Text(mode.rawValue).tag(mode)
+                                    Text(LocalizedStringKey(mode.rawValue)).tag(mode)
                                 }
                             }
                             .pickerStyle(.segmented)

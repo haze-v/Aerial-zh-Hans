@@ -282,7 +282,7 @@ final class ReleaseNotesWindowController: NSWindowController {
         let hosting = NSHostingController(rootView: ReleaseNotesView())
         let window = NSWindow(contentViewController: hosting)
         window.styleMask = [.titled, .closable, .miniaturizable, .resizable]
-        window.title = "What's New in Aerial"
+        window.title = String(localized: "What's New in Aerial")
         window.setContentSize(NSSize(width: 720, height: 480))
         window.isReleasedWhenClosed = false
         window.center()

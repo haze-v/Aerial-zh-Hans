@@ -459,7 +459,7 @@ final class LiveStreamRenderer: @unchecked Sendable {
         }
     }
 
-    func syncCompanionPauseReasons(user: Bool, battery: Bool, coverage: Bool, thermal: Bool, camera: Bool) {
+    func syncCompanionPauseReasons(user: Bool, battery: Bool, coverage: Bool, thermal: Bool, camera: Bool, cpu: Bool) {
         queue.async { [weak self] in
             guard let self else { return }
             var next = pauseReasons.intersection(.policy)
@@ -468,6 +468,7 @@ final class LiveStreamRenderer: @unchecked Sendable {
             if coverage { next.insert(.coverage) }
             if thermal { next.insert(.thermal) }
             if camera { next.insert(.camera) }
+            if cpu { next.insert(.cpu) }
             guard next != pauseReasons else { return }
             pauseReasons = next
             convergePlaybackState(context: "seed")

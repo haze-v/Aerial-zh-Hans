@@ -118,7 +118,7 @@ struct LayoutSettingsPane: View {
     @ViewBuilder
     private func marginRow(label: String, value: Binding<Int>) -> some View {
         HStack {
-            Text(label)
+            Text(LocalizedStringKey(label))
                 .frame(width: 70, alignment: .leading)
             Stepper(value: value, in: 0...500, step: 10) {
                 Text("\(value.wrappedValue) pt")
@@ -131,7 +131,7 @@ struct LayoutSettingsPane: View {
     @ViewBuilder
     private func shadowStepperRow(label: String, value: Binding<Int>, range: ClosedRange<Int>, suffix: String) -> some View {
         HStack {
-            Text(label)
+            Text(LocalizedStringKey(label))
                 .frame(width: 70, alignment: .leading)
             Stepper(value: value, in: range, step: 1) {
                 Text("\(value.wrappedValue) \(suffix)")
@@ -144,7 +144,7 @@ struct LayoutSettingsPane: View {
     @ViewBuilder
     private func shadowSliderRow(label: String, value: Binding<Double>, range: ClosedRange<Double>) -> some View {
         HStack {
-            Text(label)
+            Text(LocalizedStringKey(label))
                 .frame(width: 70, alignment: .leading)
             Slider(value: value, in: range)
             Text(String(format: "%.2f", value.wrappedValue))
@@ -156,7 +156,7 @@ struct LayoutSettingsPane: View {
     @ViewBuilder
     private func shadowOffsetRow(label: String, value: Binding<Double>) -> some View {
         HStack {
-            Text(label)
+            Text(LocalizedStringKey(label))
                 .frame(width: 70, alignment: .leading)
             Stepper(value: value, in: -20...20, step: 1) {
                 Text(String(format: "%.0f pt", value.wrappedValue))

@@ -165,7 +165,7 @@ class DisplayView: NSView {
                     }
 
                     // Show difference images in independant mode to simulate
-                    if PrefsDisplays.viewingMode == .independent {
+                    if PrefsDisplays.viewingMode.usesPerDisplayPlayback {
                         if idx < 2 {
                             idx += 1
                         } else {

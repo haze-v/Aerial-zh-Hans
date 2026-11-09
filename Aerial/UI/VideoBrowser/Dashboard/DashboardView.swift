@@ -53,6 +53,10 @@ struct DashboardView: View {
                         )
                 }
 
+                if model.viewingMode == .independentMirror {
+                    PlaybackSelectorButton(scope: .screen(nil))
+                }
+
                 if model.isIndependent {
                     ForEach(model.screenInfos) { screen in
                         DashboardScreenCard(screen: screen, model: model)

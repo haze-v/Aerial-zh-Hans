@@ -1,12 +1,72 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "\"On any battery power\" pauses as soon as the charger is unplugged. \"Only when battery is low\" waits until the remaining capacity drops below 20%.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "选择「使用电池时」会在拔掉电源后立即暂停。选择「仅在电量不足时」会在剩余电量低于 20% 时暂停。"
+          }
+        }
+      }
+    },
     "%@ ago": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "%@前"
+          }
+        }
+      }
+    },
+    "%@ is already in your library — nothing new to add.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "资料库中已有 %@，无需重复添加。"
+          }
+        }
+      }
+    },
+    "%@ videos will play as fallback": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "将播放 %@ 视频作为备选"
+          }
+        }
+      }
+    },
+    "%@ → %@ in %@": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ 将在 %3$@ 后切换到 %2$@"
+          }
+        }
+      }
+    },
+    "%@, not downloaded": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@，尚未下载"
+          }
+        }
+      }
+    },
+    "%lld %@": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld %@"
           }
         }
       }
@@ -31,12 +91,72 @@
         }
       }
     },
+    "%lld packs from this link are already in your library — nothing new to add.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此链接中的 %lld 个扩展包已在资料库中。"
+          }
+        }
+      }
+    },
+    "%lld pt": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld 磅"
+          }
+        }
+      }
+    },
+    "%lld seconds": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld 秒"
+          }
+        }
+      }
+    },
+    "%lld video%@": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld 个视频%@"
+          }
+        }
+      }
+    },
     "%llds": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "%lld 秒"
+          }
+        }
+      }
+    },
+    "(hardcoded)": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "（固定）"
+          }
+        }
+      }
+    },
+    "- **Location Services** : Aerial can use your position to show Weather forecasts, and to calculate your local sunset/sunrise times to adapt the content that plays.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "- **定位服务**：Aerial 可以使用你的位置显示天气预报，并计算当地的日出和日落时间，以调整播放内容。"
           }
         }
       }
@@ -57,6 +177,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "1.0 倍（原速）"
+          }
+        }
+      }
+    },
+    "A free, open-source macOS screen saver and video wallpaper app, made and maintained by Guillaume Louel.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "由 Guillaume Louel 开发和维护的免费开源 macOS 屏幕保护程序和动态墙纸应用。"
           }
         }
       }
@@ -97,6 +227,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "关于 Aerial"
+          }
+        }
+      }
+    },
+    "Access not yet granted — the cleaner can't run until you allow it.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "尚未授予访问权限。授权后才能清理。"
           }
         }
       }
@@ -271,6 +411,26 @@
         }
       }
     },
+    "Aerial 4 can look for old files from previous versions for migration and/or cleanup. macOS will ask you to give permission for this. I **highly recommend** you do if you used a previous version.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aerial 4 可以查找旧版本的文件以便迁移或清理。macOS 会请求访问权限。如果用过旧版本，建议允许访问。"
+          }
+        }
+      }
+    },
+    "Aerial 4 doesn't collect **any** telemetry or data of any kind. In order to work *locally*, some optional features will ask for system a permission, but **always** provide an alternative :": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aerial 4 不收集**任何**遥测信息或其他数据。部分可选功能需要系统权限才能在本地运行，也提供了其他使用方式："
+          }
+        }
+      }
+    },
     "Aerial 4 is ready": {
       "localizations": {
         "zh-Hans": {
@@ -287,6 +447,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Aerial 数据迁移"
+          }
+        }
+      }
+    },
+    "Aerial Discord": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aerial 的 Discord 社区"
+          }
+        }
+      }
+    },
+    "Aerial Dock icon preview": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aerial 程序坞图标预览"
           }
         }
       }
@@ -311,12 +491,32 @@
         }
       }
     },
+    "Aerial can sit in your menu bar as a compact popover, or run as a regular app in the Dock with the Video Library as its main window. You can switch any time in Settings → Advanced.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aerial 可以在菜单栏显示简洁面板，也可以作为程序坞应用，以视频资料库为主窗口。可随时在「设置 → 高级」切换。"
+          }
+        }
+      }
+    },
     "Aerial in your Dock": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "在程序坞中显示 Aerial"
+          }
+        }
+      }
+    },
+    "Aerial is free and open source. Expansions are extra video packs from independent artists — some are free, others are paid. Buying a paid expansion supports both the creator and Aerial's continued development. It's how we keep the project moving without ads or telemetry.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aerial 免费开源。扩展包由独立创作者提供，有免费和付费内容。购买付费扩展包可支持创作者和 Aerial 项目。"
           }
         }
       }
@@ -341,6 +541,26 @@
         }
       }
     },
+    "Aerial keeps caches outside /Users/Shared in a disk image so the wallpaper extension can play them. Nothing plays on the desktop until this folder is converted. The videos in it are moved into the image; nothing is deleted.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aerial 将 /Users/Shared 之外的缓存存入磁盘映像，供墙纸扩展读取。转换文件夹后，桌面才能播放。视频会移入映像，原有内容不会被删除。"
+          }
+        }
+      }
+    },
+    "Aerial menu bar popover preview": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aerial 菜单栏面板预览"
+          }
+        }
+      }
+    },
     "Aerial runs as your screensaver via the wallpaper extension.": {
       "localizations": {
         "zh-Hans": {
@@ -351,12 +571,32 @@
         }
       }
     },
+    "Aerial still appears to be set as the desktop wallpaper; this option takes effect once it isn't.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aerial 仍设为桌面墙纸。更换墙纸后，此选项才会生效。"
+          }
+        }
+      }
+    },
     "All Displays": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "所有显示器"
+          }
+        }
+      }
+    },
+    "All Fonts": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "所有字体"
           }
         }
       }
@@ -377,6 +617,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "所有显示器"
+          }
+        }
+      }
+    },
+    "All displays mirror the same video (alternates flipped).": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "各显示器镜像播放同一个视频，相邻屏幕画面翻转。"
+          }
+        }
+      }
+    },
+    "All displays show the same video.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "所有显示器同步播放同一个视频。"
           }
         }
       }
@@ -451,12 +711,42 @@
         }
       }
     },
+    "Alternatively, give Aerial **Full Disk Access** in System Settings › Privacy & Security, then come back and click **Check Again** (quit and reopen Aerial if it still fails).": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "也可以在「系统设置 → 隐私与安全性」中授予 Aerial **完全磁盘访问权限**，然后返回点击**重新检查**。若仍然失败，请退出并重新打开 Aerial。"
+          }
+        }
+      }
+    },
+    "Always show version (debug)": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "始终显示版本（调试）"
+          }
+        }
+      }
+    },
     "Any Time": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "任意时段"
+          }
+        }
+      }
+    },
+    "Appearance": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "外观"
           }
         }
       }
@@ -477,6 +767,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "遮挡墙纸的应用"
+          }
+        }
+      }
+    },
+    "Ask again next time Aerial starts": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "下次启动时再询问"
           }
         }
       }
@@ -651,6 +951,26 @@
         }
       }
     },
+    "Battery": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "电池"
+          }
+        }
+      }
+    },
+    "Battery level and charging status": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "电量和充电状态"
+          }
+        }
+      }
+    },
     "Beta": {
       "localizations": {
         "zh-Hans": {
@@ -667,6 +987,116 @@
           "stringUnit": {
             "state": "translated",
             "value": "测试版：动态墙纸扩展控制"
+          }
+        }
+      }
+    },
+    "Black": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "黑色"
+          }
+        }
+      }
+    },
+    "Black font weight": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "特粗"
+          }
+        }
+      }
+    },
+    "Blank vertical space": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "空白垂直间距"
+          }
+        }
+      }
+    },
+    "Bold": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "粗体"
+          }
+        }
+      }
+    },
+    "Bottom": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "下"
+          }
+        }
+      }
+    },
+    "Bottom Center": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "底部居中"
+          }
+        }
+      }
+    },
+    "Bottom Left": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "左下角"
+          }
+        }
+      }
+    },
+    "Bottom Right": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "右下角"
+          }
+        }
+      }
+    },
+    "Briefly shows the Aerial version number at the bottom of the screen when the screensaver starts.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "屏幕保护程序启动时，在屏幕底部短暂显示 Aerial 版本号。"
+          }
+        }
+      }
+    },
+    "Browse Expansions": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "浏览扩展包"
+          }
+        }
+      }
+    },
+    "Browse a category from the menu on the left, then drag videos onto this playlist's name in the sidebar — or right-click any video and choose \"Add to Playlist\".": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在左侧选择一个分类，将视频拖到侧边栏中的播放列表名称上。也可以右键点击视频，选择「添加到播放列表」。"
           }
         }
       }
@@ -737,6 +1167,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "按时段"
+          }
+        }
+      }
+    },
+    "CPU Usage": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CPU 使用率"
+          }
+        }
+      }
+    },
+    "CPU sampling interval": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CPU 采样间隔"
+          }
+        }
+      }
+    },
+    "CPU threshold": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CPU 使用率阈值"
           }
         }
       }
@@ -821,6 +1281,16 @@
         }
       }
     },
+    "Center": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "居中"
+          }
+        }
+      }
+    },
     "Centered on sunrise & sunset": {
       "localizations": {
         "zh-Hans": {
@@ -847,6 +1317,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "更改格式并删除视频"
+          }
+        }
+      }
+    },
+    "Change cache location?": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "更改缓存位置？"
           }
         }
       }
@@ -1051,6 +1531,16 @@
         }
       }
     },
+    "Clock": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "时钟"
+          }
+        }
+      }
+    },
     "Clock, weather & more": {
       "localizations": {
         "zh-Hans": {
@@ -1087,6 +1577,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "改为关闭窗口"
+          }
+        }
+      }
+    },
+    "Color": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "颜色"
+          }
+        }
+      }
+    },
+    "Color from video": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "从视频取色"
           }
         }
       }
@@ -1131,6 +1641,26 @@
         }
       }
     },
+    "Convert": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "转换"
+          }
+        }
+      }
+    },
+    "Convert Now": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "立即转换"
+          }
+        }
+      }
+    },
     "Convert Now…": {
       "localizations": {
         "zh-Hans": {
@@ -1147,6 +1677,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "复制"
+          }
+        }
+      }
+    },
+    "Count down from a set duration": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "按设定时长倒计时"
+          }
+        }
+      }
+    },
+    "Count down to a specific date": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "倒数到指定日期"
+          }
+        }
+      }
+    },
+    "Countdown": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "倒计时"
           }
         }
       }
@@ -1241,6 +1801,26 @@
         }
       }
     },
+    "Custom text, file, or shell command": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自定义文字、文件或 Shell 命令"
+          }
+        }
+      }
+    },
+    "Cycles overlays through positions every minute. Useful for OLED panels or any display you keep on for long stretches.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每分钟轮换叠加内容的位置，适合 OLED 屏幕或长时间保持亮屏的显示器。"
+          }
+        }
+      }
+    },
     "Daily": {
       "localizations": {
         "zh-Hans": {
@@ -1257,6 +1837,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "深色模式覆盖"
+          }
+        }
+      }
+    },
+    "Date": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "日期"
           }
         }
       }
@@ -1311,6 +1901,36 @@
         }
       }
     },
+    "Debug build only — cycles Battery.simulationState through off → on battery → on battery low. Lets you test pause-on-battery on Macs without a battery. Stripped from Release builds.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "仅调试版可用。依次模拟接通电源、使用电池和低电量，以便在无电池的 Mac 上测试电池暂停功能。"
+          }
+        }
+      }
+    },
+    "Debug build only — keeps the version pinned at the bottom-right in both wallpaper and screensaver modes (never auto-hides). Stripped from Release builds.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "仅调试版可用。在墙纸和屏幕保护程序的右下角始终显示版本号。"
+          }
+        }
+      }
+    },
+    "Decide later": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "稍后决定"
+          }
+        }
+      }
+    },
     "Default": {
       "localizations": {
         "zh-Hans": {
@@ -1327,6 +1947,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "删除"
+          }
+        }
+      }
+    },
+    "Delete %lld Video%@": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除 %lld 个视频%@"
           }
         }
       }
@@ -1411,6 +2041,26 @@
         }
       }
     },
+    "Disabling it removes the location names and translations that other sources rely on. Not recommended unless you know what you're doing.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "停用后，其他视频来源所依赖的地点名称和翻译会被移除。通常建议保持启用。"
+          }
+        }
+      }
+    },
+    "Discord": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Discord 社区"
+          }
+        }
+      }
+    },
     "Disk Usage": {
       "localizations": {
         "zh-Hans": {
@@ -1481,6 +2131,16 @@
         }
       }
     },
+    "Displays start with the same video and share a playlist. Each display can play, pause or skip independently.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "两屏都可播放时同步视频和进度。单屏暂停时保留当前画面，恢复后追上另一屏。"
+          }
+        }
+      }
+    },
     "Do you want to set these expansions to play now?": {
       "localizations": {
         "zh-Hans": {
@@ -1507,6 +2167,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "程序坞"
+          }
+        }
+      }
+    },
+    "Don't ask again": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不再询问"
           }
         }
       }
@@ -1691,12 +2361,42 @@
         }
       }
     },
+    "Drag to add": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "拖动添加"
+          }
+        }
+      }
+    },
     "Drag video files onto the drop zone above, or use Open Folder to add files manually.": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "将视频拖到上方区域，或点击「打开文件夹」手动添加。"
+          }
+        }
+      }
+    },
+    "Draws a solid band behind the menu bar so its text keeps the same color whatever the video shows. \"Color from video\" picks a tone from the top of each video. Desktop only; hidden when the menu bar is set to hide automatically.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在菜单栏后绘制纯色背景，让文字颜色保持一致。「取色视频」从每个视频顶部取色。仅适用于桌面，菜单栏设为自动隐藏时不显示。"
+          }
+        }
+      }
+    },
+    "Drive not connected — plug it in to convert.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "磁盘未连接。请连接后再转换。"
           }
         }
       }
@@ -1721,12 +2421,32 @@
         }
       }
     },
+    "During daylight keeps the sunrise period right after sunrise and the sunset period right before sunset. Centered splits each period half before, half after the event.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "「仅日照时段」将日出时段放在日出之后，日落时段放在日落之前。「以日出和日落为中心」将每个时段均分在对应时刻前后。"
+          }
+        }
+      }
+    },
     "Dusk": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "黄昏"
+          }
+        }
+      }
+    },
+    "Each display plays its own video — set per display below.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "各显示器可分别选择并播放不同视频。"
           }
         }
       }
@@ -1801,6 +2521,46 @@
         }
       }
     },
+    "Every 10 seconds": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每 10 秒"
+          }
+        }
+      }
+    },
+    "Every 30 seconds": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每 30 秒"
+          }
+        }
+      }
+    },
+    "Every cached video is either a favourite or playing right now, so the cache can't be trimmed any further.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "缓存视频都已收藏或正在播放，无法进一步清理。"
+          }
+        }
+      }
+    },
+    "Every minute": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每分钟"
+          }
+        }
+      }
+    },
     "Everything": {
       "localizations": {
         "zh-Hans": {
@@ -1821,12 +2581,32 @@
         }
       }
     },
+    "Expansion packs: %@ GB — stored beside the cache, not counted in the limit": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "扩展包占用 %@ GB，另行存储，不计入缓存上限。"
+          }
+        }
+      }
+    },
     "Expansions": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "扩展包"
+          }
+        }
+      }
+    },
+    "Export Diagnostics saves a zip of Aerial's logs and settings to attach to a bug report — review it before sharing.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "导出诊断信息会将 Aerial 日志和设置打包成 ZIP，便于附在问题报告中。分享前请检查内容。"
           }
         }
       }
@@ -1857,6 +2637,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "导出…"
+          }
+        }
+      }
+    },
+    "Extra rotation on top of the clip's own orientation metadata. Takes effect the next time the video plays.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在视频原始方向上额外旋转，下次播放时生效。"
           }
         }
       }
@@ -1931,6 +2721,16 @@
         }
       }
     },
+    "Filter what's playing — by location, time, scene, source, expansion, live feed, or playlist": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "按地点、时段、场景、来源、扩展包、实时源或播放列表筛选播放内容"
+          }
+        }
+      }
+    },
     "Filters": {
       "localizations": {
         "zh-Hans": {
@@ -1951,6 +2751,16 @@
         }
       }
     },
+    "Folder not found — choose a folder again or use the default location.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未找到文件夹。请重新选择，或使用默认位置。"
+          }
+        }
+      }
+    },
     "Follows system appearance": {
       "localizations": {
         "zh-Hans": {
@@ -1967,6 +2777,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "格式"
+          }
+        }
+      }
+    },
+    "Found a few leftovers from the previous Aerial:": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "找到了旧版 Aerial 的残留文件："
           }
         }
       }
@@ -2011,6 +2831,36 @@
         }
       }
     },
+    "Global rate applied to every Aerial 4 renderer. Defaults to 0.125× — Aerial videos are designed to play slowed-down.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "适用于所有 Aerial 4 播放器的速度。默认 0.125 倍，以慢速呈现航拍画面。"
+          }
+        }
+      }
+    },
+    "Go ahead": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "继续"
+          }
+        }
+      }
+    },
+    "Got an install link?": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已有安装链接？"
+          }
+        }
+      }
+    },
     "Grant Access…": {
       "localizations": {
         "zh-Hans": {
@@ -2027,6 +2877,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "支持 HDR"
+          }
+        }
+      }
+    },
+    "Handy if you need to restart the wallpaper agent regularly.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "适合需要经常重新启动墙纸服务时使用。"
+          }
+        }
+      }
+    },
+    "Heavy": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "厚重"
           }
         }
       }
@@ -2101,6 +2971,26 @@
         }
       }
     },
+    "Hides overlays whenever macOS shows the password prompt — over the screensaver or on the lock screen.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS 在屏幕保护程序或锁定屏幕显示密码提示时，隐藏叠加内容。"
+          }
+        }
+      }
+    },
+    "High CPU duration": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "持续超阈值时间"
+          }
+        }
+      }
+    },
     "Home": {
       "localizations": {
         "zh-Hans": {
@@ -2117,6 +3007,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "水平边距"
+          }
+        }
+      }
+    },
+    "Hourly": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每小时"
           }
         }
       }
@@ -2151,6 +3051,26 @@
         }
       }
     },
+    "ISS Live Cam, Garage Camera, …": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "空间站直播、车库摄像头等"
+          }
+        }
+      }
+    },
+    "Icon by Inferno design": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "图标由 Inferno design 设计"
+          }
+        }
+      }
+    },
     "If you see the default system wallpaper, or a black screen, use this feature. Restarting the wallpaper agent reloads Aerial's wallpaper extension; your desktop will flicker briefly.": {
       "localizations": {
         "zh-Hans": {
@@ -2181,6 +3101,26 @@
         }
       }
     },
+    "Ignored apps don't count toward the coverage threshold — useful for tools that keep a transparent window over the screen.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "计算遮挡比例时排除这些应用。适用于在屏幕上保留透明窗口的工具。"
+          }
+        }
+      }
+    },
+    "Immediately": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "立即"
+          }
+        }
+      }
+    },
     "Import Playlist": {
       "localizations": {
         "zh-Hans": {
@@ -2197,6 +3137,46 @@
           "stringUnit": {
             "state": "translated",
             "value": "导入播放列表…"
+          }
+        }
+      }
+    },
+    "In %@ mode all screens share one playlist, so auto-pause acts on every screen together — any covered screen pauses the whole group.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在 %@ 模式下，所有显示器使用同一播放器。任一显示器被遮挡时，所有显示器都会暂停。"
+          }
+        }
+      }
+    },
+    "In the menu bar, Aerial is a compact popover next to the clock. In the Dock, Aerial is a regular app: the Video Library becomes its main window and the Playback menu gains keyboard shortcuts. Switching takes effect immediately.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "菜单栏模式会在时钟旁显示 Aerial 面板。程序坞模式以视频资料库为主窗口，并在「播放」菜单提供快捷键。切换立即生效。"
+          }
+        }
+      }
+    },
+    "In wallpaper mode, moves overlays inward so they aren't covered by the Dock or menu bar. The screensaver is never offset.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在墙纸模式下向内移动叠加内容，避开程序坞和菜单栏。屏幕保护程序不受影响。"
+          }
+        }
+      }
+    },
+    "Include pre-releases which will contain new features, latest bugfixes, and the occasional new bugs.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "包含预发布版本，可提前体验新功能和最新修复，也可能遇到新问题。"
           }
         }
       }
@@ -2221,12 +3201,52 @@
         }
       }
     },
+    "Independent Mirror": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "独立播放镜像"
+          }
+        }
+      }
+    },
+    "Independent mirror": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "独立播放镜像"
+          }
+        }
+      }
+    },
     "Information": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "信息"
+          }
+        }
+      }
+    },
+    "Information about the video location": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "视频拍摄地点的信息"
+          }
+        }
+      }
+    },
+    "Inspector": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "检查器"
           }
         }
       }
@@ -2271,6 +3291,16 @@
         }
       }
     },
+    "Install via: %@": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "安装方式：%@"
+          }
+        }
+      }
+    },
     "Installed": {
       "localizations": {
         "zh-Hans": {
@@ -2301,6 +3331,26 @@
         }
       }
     },
+    "Inverts the colors of video playback for improved visibility. Takes effect on the next video.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "反转视频颜色以便观看，从下一个视频开始生效。"
+          }
+        }
+      }
+    },
+    "Keep": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保留"
+          }
+        }
+      }
+    },
     "Keep Custom Location": {
       "localizations": {
         "zh-Hans": {
@@ -2311,12 +3361,42 @@
         }
       }
     },
+    "Keep custom location": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保留自定义位置"
+          }
+        }
+      }
+    },
+    "Keep playing from the Aerial 3 cache folder": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "继续从 Aerial 3 缓存文件夹播放"
+          }
+        }
+      }
+    },
     "Keep the macOS source enabled": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "保持 macOS 视频来源启用"
+          }
+        }
+      }
+    },
+    "Keeps clocks and counters from shifting as digits change. May not work with every font.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "让时钟和计数器的数字保持等宽，避免数值变化时文字跳动。部分字体可能不支持。"
           }
         }
       }
@@ -2381,6 +3461,36 @@
         }
       }
     },
+    "Layout Settings": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "布局设置"
+          }
+        }
+      }
+    },
+    "Left": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "左"
+          }
+        }
+      }
+    },
+    "Light": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "细体"
+          }
+        }
+      }
+    },
     "Light/Dark Mode": {
       "localizations": {
         "zh-Hans": {
@@ -2417,6 +3527,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "动态墙纸"
+          }
+        }
+      }
+    },
+    "Local time": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "本地时间"
           }
         }
       }
@@ -2467,6 +3587,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "地点"
+          }
+        }
+      }
+    },
+    "Looking for support?": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "需要帮助？"
+          }
+        }
+      }
+    },
+    "Loop this video for this long (m:ss of playtime), then advance. Leave empty to play once.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "按指定时长循环此视频，再切换到下一个。格式为分:秒，留空则仅播放一次。"
           }
         }
       }
@@ -2531,6 +3671,16 @@
         }
       }
     },
+    "Medium": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "中等"
+          }
+        }
+      }
+    },
     "Menu Bar": {
       "localizations": {
         "zh-Hans": {
@@ -2557,6 +3707,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "菜单栏背景"
+          }
+        }
+      }
+    },
+    "Message": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "消息"
+          }
+        }
+      }
+    },
+    "Migrate": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "迁移"
+          }
+        }
+      }
+    },
+    "Migrate Now": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "立即迁移"
           }
         }
       }
@@ -2641,6 +3821,16 @@
         }
       }
     },
+    "Monospaced digits": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "等宽数字"
+          }
+        }
+      }
+    },
     "Monthly": {
       "localizations": {
         "zh-Hans": {
@@ -2681,12 +3871,32 @@
         }
       }
     },
+    "Move": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "移动"
+          }
+        }
+      }
+    },
     "Move Data to New Location": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "将数据移至新位置"
+          }
+        }
+      }
+    },
+    "Move Now": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "立即移动"
           }
         }
       }
@@ -2701,12 +3911,72 @@
         }
       }
     },
+    "Move existing videos": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "移动已有视频"
+          }
+        }
+      }
+    },
+    "Move into a disk image": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "移入磁盘映像"
+          }
+        }
+      }
+    },
+    "Move my videos manually": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "手动移动我的视频"
+          }
+        }
+      }
+    },
+    "Move the videos in this folder into a disk image?": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "将此文件夹中的视频移入磁盘映像？"
+          }
+        }
+      }
+    },
+    "Move the videos in this folder to the default location?": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "将此文件夹中的视频移至默认位置？"
+          }
+        }
+      }
+    },
     "Move to Default…": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "移至默认位置…"
+          }
+        }
+      }
+    },
+    "Move to the default location": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "移至默认位置"
           }
         }
       }
@@ -2807,6 +4077,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "新建播放列表…"
+          }
+        }
+      }
+    },
+    "New packs install in an Expansions folder at the cache location. Inside the disk image the wallpaper extension can play them.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新扩展包安装在缓存目录的 Expansions 文件夹。扩展包位于磁盘映像中时，墙纸扩展即可播放。"
           }
         }
       }
@@ -2991,6 +4271,16 @@
         }
       }
     },
+    "No video track found in %@": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在 %@ 中找不到视频轨道"
+          }
+        }
+      }
+    },
     "No videos found": {
       "localizations": {
         "zh-Hans": {
@@ -3081,6 +4371,26 @@
         }
       }
     },
+    "Nothing is carried over": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "从空白配置开始"
+          }
+        }
+      }
+    },
+    "Nothing to trim": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有可清理的内容"
+          }
+        }
+      }
+    },
     "Now Playing": {
       "localizations": {
         "zh-Hans": {
@@ -3091,12 +4401,62 @@
         }
       }
     },
+    "Now playing from audio players": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "音频播放器的正在播放信息"
+          }
+        }
+      }
+    },
     "OK": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "好"
+          }
+        }
+      }
+    },
+    "Off": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "关闭"
+          }
+        }
+      }
+    },
+    "Offset X": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "水平偏移"
+          }
+        }
+      }
+    },
+    "Offset Y": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "垂直偏移"
+          }
+        }
+      }
+    },
+    "On Quit": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "退出时"
           }
         }
       }
@@ -3121,6 +4481,16 @@
         }
       }
     },
+    "One video spans across all displays.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "同一个视频横跨所有显示器。"
+          }
+        }
+      }
+    },
     "Only download on trusted Wi-Fi networks": {
       "localizations": {
         "zh-Hans": {
@@ -3137,6 +4507,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "仅在电量不足时"
+          }
+        }
+      }
+    },
+    "Opacity": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不透明度"
+          }
+        }
+      }
+    },
+    "Opacity: %lld%%": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不透明度：%lld%%"
           }
         }
       }
@@ -3211,6 +4601,16 @@
         }
       }
     },
+    "Open any video and tap Download in the inspector to start building your cache. Recent downloads will show up here.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "打开任意视频，在检查器中点击「下载」即可缓存。最近下载的内容会显示在这里。"
+          }
+        }
+      }
+    },
     "Open both folders": {
       "localizations": {
         "zh-Hans": {
@@ -3247,6 +4647,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "打开叠加内容编辑器"
+          }
+        }
+      }
+    },
+    "Opens a sheet to paste an install URL": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "打开面板以粘贴安装链接"
           }
         }
       }
@@ -3311,12 +4721,52 @@
         }
       }
     },
+    "Overlays each wallpaper window with corner markers, an identity chip and a running counter. Only useful when troubleshooting display issues with us — leave it off otherwise.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在墙纸窗口上显示角标、标识和计数，用于排查显示问题。日常使用可关闭。"
+          }
+        }
+      }
+    },
     "Override if only one display remains": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "仅剩一个显示器时覆盖设置"
+          }
+        }
+      }
+    },
+    "Packs there are hidden until the image is attached.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "挂载映像后才会显示其中的扩展包。"
+          }
+        }
+      }
+    },
+    "Paste a manifest URL to install a pack you've purchased or received.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "粘贴清单网址，安装已购买或收到的扩展包。"
+          }
+        }
+      }
+    },
+    "Paste the install URL you received. This is typically a manifest URL from a paid expansion's confirmation email or a community pack you'd like to add.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "粘贴收到的安装链接，通常可在付费扩展包确认邮件或社区扩展包页面找到。"
           }
         }
       }
@@ -3347,6 +4797,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "暂停墙纸"
+          }
+        }
+      }
+    },
+    "Pause all displays": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "暂停所有显示器"
           }
         }
       }
@@ -3391,6 +4851,16 @@
         }
       }
     },
+    "Pause stops every Aerial 4 renderer (timebase rate 0). Resume restores the configured speed. Pause is global — the toggle affects all displays.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "暂停会停止所有 Aerial 4 播放器。继续播放时恢复设定速度。此开关控制所有显示器。"
+          }
+        }
+      }
+    },
     "Pause the wallpaper": {
       "localizations": {
         "zh-Hans": {
@@ -3411,12 +4881,32 @@
         }
       }
     },
+    "Pause this display": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "暂停此显示器"
+          }
+        }
+      }
+    },
     "Pause under thermal pressure": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "温度过高时暂停"
+          }
+        }
+      }
+    },
+    "Pause when CPU usage is high": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CPU 使用率过高时暂停"
           }
         }
       }
@@ -3451,12 +4941,112 @@
         }
       }
     },
+    "Paused — Low Power Mode": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已暂停（低电量模式）"
+          }
+        }
+      }
+    },
+    "Paused — camera in use": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已暂停（正在使用摄像头）"
+          }
+        }
+      }
+    },
+    "Paused — display covered": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已暂停（显示器被遮挡）"
+          }
+        }
+      }
+    },
+    "Paused — high CPU usage": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已暂停（CPU 使用率过高）"
+          }
+        }
+      }
+    },
+    "Paused — on battery": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已暂停（使用电池）"
+          }
+        }
+      }
+    },
+    "Paused — thermal pressure": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已暂停（温度过高）"
+          }
+        }
+      }
+    },
+    "Pauses the desktop wallpaper when system CPU usage stays above the threshold for the set duration. Resumes after two consecutive samples below the threshold, if no other pause applies.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "整机 CPU 使用率连续高于阈值达到设定时间时暂停桌面墙纸。连续两次采样低于阈值，且没有其他暂停条件时恢复播放。"
+          }
+        }
+      }
+    },
+    "Pauses the wallpaper whenever any app uses a camera — videoconferences, recordings — and resumes when it turns off. Aerial only reads the camera's on/off state, never the picture.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "视频会议或录制等操作使用摄像头时暂停墙纸，摄像头关闭后恢复。Aerial 只读取摄像头的开启状态。"
+          }
+        }
+      }
+    },
     "Pauses the wallpaper while macOS Low Power Mode is enabled. Click the popover's play button to override either pause for the current session.": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "macOS 开启低电量模式时暂停墙纸。点击菜单栏面板的播放按钮可临时继续。"
+          }
+        }
+      }
+    },
+    "Pick a starting point. Nothing here is permanent — every option can be changed later in Settings.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "选择初始配置。之后可以在「设置」中调整所有选项。"
+          }
+        }
+      }
+    },
+    "Pick how much information rides on top of the video. The Modern preset is a starting point — you can fine-tune everything later.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "选择要在视频上显示的信息。「现代」预设可作为起点，之后还可以调整。"
           }
         }
       }
@@ -3501,6 +5091,16 @@
         }
       }
     },
+    "Play this on %@ — Shift-click to choose a display": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在 %@ 上播放。按住 Shift 点击可选择显示器。"
+          }
+        }
+      }
+    },
     "Playback": {
       "localizations": {
         "zh-Hans": {
@@ -3537,6 +5137,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "播放速度（1⁄8 倍至 1 倍）"
+          }
+        }
+      }
+    },
+    "Played at every video change, in both wallpaper and screensaver mode. Manual skips use a quicker fade.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "墙纸和屏幕保护程序每次切换视频时都会使用过渡。手动切换时会加快淡入淡出。"
           }
         }
       }
@@ -3601,12 +5211,42 @@
         }
       }
     },
+    "Plays the video's own soundtrack when playback runs at full speed — in the screensaver, or on the wallpaper with speed set to 100%. With multiple displays, audio comes from the main display only. The lock screen stays silent.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "原速播放时输出视频原声，适用于屏幕保护程序或速度设为 100% 的墙纸。多显示器时仅主显示器播放声音，锁定屏幕保持静音。"
+          }
+        }
+      }
+    },
     "Plays:": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "播放："
+          }
+        }
+      }
+    },
+    "Please choose a different folder": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请选择其他文件夹"
+          }
+        }
+      }
+    },
+    "Position": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "位置"
           }
         }
       }
@@ -3647,6 +5287,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "预览直播流"
+          }
+        }
+      }
+    },
+    "Preview — %@": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "预览 — %@"
           }
         }
       }
@@ -3711,6 +5361,16 @@
         }
       }
     },
+    "Provided by OpenWeather": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "由 OpenWeather 提供"
+          }
+        }
+      }
+    },
     "Queued for Download": {
       "localizations": {
         "zh-Hans": {
@@ -3761,6 +5421,46 @@
         }
       }
     },
+    "Radius": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "半径"
+          }
+        }
+      }
+    },
+    "Re-resolve": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重新解析"
+          }
+        }
+      }
+    },
+    "Re-resolve Stream": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重新解析直播流"
+          }
+        }
+      }
+    },
+    "Re-resolve via yt-dlp": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "使用 yt-dlp 重新解析"
+          }
+        }
+      }
+    },
     "Receive beta updates": {
       "localizations": {
         "zh-Hans": {
@@ -3801,6 +5501,26 @@
         }
       }
     },
+    "Recommended — a quick move on the same disk": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "推荐：在同一磁盘内快速移动"
+          }
+        }
+      }
+    },
+    "Recommended — carry over videos, sources and settings": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "推荐：迁移视频、来源和设置"
+          }
+        }
+      }
+    },
     "Reconnect": {
       "localizations": {
         "zh-Hans": {
@@ -3831,12 +5551,42 @@
         }
       }
     },
+    "Regular": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "常规"
+          }
+        }
+      }
+    },
     "Remove": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "移除"
+          }
+        }
+      }
+    },
+    "Remove Aerial Companion.app from /Applications": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "从「应用程序」中移除 Aerial Companion.app"
+          }
+        }
+      }
+    },
+    "Remove Aerial.saver from ~/Library/Screen Savers": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "从 ~/Library/Screen Savers 移除 Aerial.saver"
           }
         }
       }
@@ -3851,12 +5601,32 @@
         }
       }
     },
+    "Remove Overlay": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "移除叠加内容"
+          }
+        }
+      }
+    },
     "Remove from favorites": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "取消收藏"
+          }
+        }
+      }
+    },
+    "Removes the legacy install entirely. Uncheck if you want to keep the old data as a backup — you can clean it up later.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "移除整个旧版应用。若想保留旧数据作为备份，请取消勾选，之后也可再清理。"
           }
         }
       }
@@ -3877,6 +5647,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "替换视频"
+          }
+        }
+      }
+    },
+    "Replaces the translucent popover background with a solid color. Useful when transparency makes labels hard to read.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "将半透明面板背景换成纯色，方便阅读文字。"
           }
         }
       }
@@ -3907,6 +5687,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "重置所有设置？"
+          }
+        }
+      }
+    },
+    "Reset all to defaults": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "全部恢复默认"
           }
         }
       }
@@ -3961,12 +5751,32 @@
         }
       }
     },
+    "Resolved: %@": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已解析：%@"
+          }
+        }
+      }
+    },
     "Restart": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "重新启动"
+          }
+        }
+      }
+    },
+    "Restart Transmuxer": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重启转封装"
           }
         }
       }
@@ -3981,12 +5791,32 @@
         }
       }
     },
+    "Restart ffmpeg transmuxer": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重启 ffmpeg 转封装"
+          }
+        }
+      }
+    },
     "Restart the wallpaper agent": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "重新启动墙纸服务"
+          }
+        }
+      }
+    },
+    "Restart the wallpaper agent — use it if you see the default wallpaper or a black screen": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "如果看到系统默认墙纸或黑屏，可重新启动墙纸服务"
           }
         }
       }
@@ -4011,6 +5841,16 @@
         }
       }
     },
+    "Resume all displays": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "继续播放所有显示器"
+          }
+        }
+      }
+    },
     "Resume the animated wallpaper": {
       "localizations": {
         "zh-Hans": {
@@ -4027,6 +5867,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "继续播放墙纸"
+          }
+        }
+      }
+    },
+    "Resume this display": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "继续播放此显示器"
+          }
+        }
+      }
+    },
+    "Right": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "右"
           }
         }
       }
@@ -4087,6 +5947,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "保存"
+          }
+        }
+      }
+    },
+    "Scale": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "缩放"
           }
         }
       }
@@ -4197,6 +6067,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "选中的显示器"
+          }
+        }
+      }
+    },
+    "Semibold": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "半粗体"
           }
         }
       }
@@ -4331,6 +6211,16 @@
         }
       }
     },
+    "Settings that apply to all overlays in this layout.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "应用于此布局中所有叠加内容的设置。"
+          }
+        }
+      }
+    },
     "Settings…": {
       "localizations": {
         "zh-Hans": {
@@ -4341,12 +6231,32 @@
         }
       }
     },
+    "Shadow": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "阴影"
+          }
+        }
+      }
+    },
     "Shift overlays clear of the Dock and menu bar": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "避开程序坞与菜单栏放置叠加内容"
+          }
+        }
+      }
+    },
+    "Shifts where each display's slice sits in the spanned video — use it to compensate for bezels and physical alignment. Replaces the global margins above.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "调整跨屏视频在每块显示器上的画面位置，补偿边框和摆放偏差。启用后替代上方的全局边距。"
           }
         }
       }
@@ -4511,12 +6421,32 @@
         }
       }
     },
+    "Shows the screensaver overlays while the screen is locked (Aerial as wallpaper). The password prompt still follows the option above.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "将 Aerial 设为墙纸时，在锁定屏幕上显示屏幕保护程序的叠加内容。密码提示仍遵循上方设置。"
+          }
+        }
+      }
+    },
     "Shuffle": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "随机播放"
+          }
+        }
+      }
+    },
+    "Size: %lldpt": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "大小：%lld 磅"
           }
         }
       }
@@ -4547,6 +6477,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "手动跳过视频会重新计时。"
+          }
+        }
+      }
+    },
+    "Skips take effect immediately on the next frame boundary. If Aerial 4 isn't currently the selected wallpaper, the click is logged but has no visible effect.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "切换会在下一帧生效。需要先将 Aerial 4 设为墙纸才能看到变化。"
           }
         }
       }
@@ -4591,12 +6531,42 @@
         }
       }
     },
+    "Start Fresh?": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "全新开始？"
+          }
+        }
+      }
+    },
     "Start Screensaver": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "启动屏幕保护程序"
+          }
+        }
+      }
+    },
+    "Start fresh": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "全新开始"
+          }
+        }
+      }
+    },
+    "Start fresh (keep old)": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重新开始（保留旧数据）"
           }
         }
       }
@@ -4671,6 +6641,16 @@
         }
       }
     },
+    "Strict (0°) and Official (0.83°) switch at true sunrise/sunset. Civil (6°), Nautical (12°) and Astronomical (18°) switch at dawn/dusk, based on how far the Sun sits below the horizon.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "严格（0°）和官方（0.83°）按实际日出和日落切换。民用（6°）、航海（12°）和天文（18°）按太阳低于地平线的角度在晨昏时切换。"
+          }
+        }
+      }
+    },
     "Sunrise": {
       "localizations": {
         "zh-Hans": {
@@ -4687,6 +6667,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "日出和日落计算"
+          }
+        }
+      }
+    },
+    "Sunrise/sunset times for this mode are computed from your coordinates. Without Location access Aerial can't pick them up.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此模式根据坐标计算日出和日落时间，需要为 Aerial 授予定位权限。"
           }
         }
       }
@@ -4771,12 +6761,42 @@
         }
       }
     },
+    "Switches the Video Library sidebar to this expansion": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在视频资料库侧边栏打开此扩展包"
+          }
+        }
+      }
+    },
+    "System": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "系统"
+          }
+        }
+      }
+    },
     "Test Location": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "测试位置"
+          }
+        }
+      }
+    },
+    "Text": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "文字"
           }
         }
       }
@@ -4791,12 +6811,42 @@
         }
       }
     },
+    "Thank you for supporting third-party video makers who also support the Aerial project!": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "感谢支持同样为 Aerial 项目提供帮助的第三方视频作者！"
+          }
+        }
+      }
+    },
     "Thank you for your support": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "感谢支持"
+          }
+        }
+      }
+    },
+    "The %@ copy will be removed and %@ will be downloaded instead.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "将移除 %1$@ 版本，改为下载 %2$@ 版本。"
+          }
+        }
+      }
+    },
+    "The %@ copy will be removed from your cache and %@ will be downloaded in its place.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "将从缓存中移除 %1$@ 版本，改为下载 %2$@ 版本。"
           }
         }
       }
@@ -4811,6 +6861,86 @@
         }
       }
     },
+    "The display must stay on longer than the screensaver delay, or the screensaver never shows. Change when the display turns off in System Settings.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "显示器关闭的等待时间须长于屏幕保护程序的启动等待时间。可在系统设置中调整关闭显示器的时间。"
+          }
+        }
+      }
+    },
+    "The setting is only available for syncing your preferences to other Macs.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此设置仅用于将偏好同步到其他 Mac。"
+          }
+        }
+      }
+    },
+    "The videos stay in the folder, unused": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "视频留在原文件夹"
+          }
+        }
+      }
+    },
+    "The wallpaper extension can't read this folder": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "墙纸扩展无法读取此文件夹"
+          }
+        }
+      }
+    },
+    "These belonged to a previous Aerial version and aren't needed anymore.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这些文件由旧版 Aerial 创建，现已不再需要。"
+          }
+        }
+      }
+    },
+    "These controls drive the new Aerial 4 wallpaper extension. They take effect when Aerial 4 is set as your wallpaper in System Settings → Wallpaper. The legacy wallpaper mode (Wallpaper panel) is unaffected by these settings.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这些控件用于 Aerial 4 墙纸扩展。在「系统设置 → 墙纸」中将 Aerial 4 设为墙纸后生效。"
+          }
+        }
+      }
+    },
+    "Thin": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "极细体"
+          }
+        }
+      }
+    },
+    "This deletes the aerial videos macOS downloaded for its own wallpaper. macOS will re-download them if you use a macOS aerial wallpaper.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此操作会删除 macOS 下载的系统航拍视频。再次使用系统航拍墙纸时，macOS 会重新下载。"
+          }
+        }
+      }
+    },
     "This display": {
       "localizations": {
         "zh-Hans": {
@@ -4821,12 +6951,62 @@
         }
       }
     },
+    "This folder can't hold the cache image": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此文件夹无法存放缓存映像"
+          }
+        }
+      }
+    },
+    "This folder is the mount point Aerial uses for the external cache image. Choose the folder that should hold the cache instead.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此文件夹是 Aerial 外部缓存映像的挂载点。请选择用于存放缓存的文件夹。"
+          }
+        }
+      }
+    },
+    "This folder needs a cache disk image": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此文件夹需要缓存磁盘映像"
+          }
+        }
+      }
+    },
     "This is what's currently playing": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "当前播放内容"
+          }
+        }
+      }
+    },
+    "This will reset all your screensaver settings to their defaults.\n\nAre you sure you want to reset your settings?": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这将把所有屏幕保护程序设置恢复为默认值。\n\n确定重置吗？"
+          }
+        }
+      }
+    },
+    "This will:": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此操作将："
           }
         }
       }
@@ -4871,12 +7051,42 @@
         }
       }
     },
+    "Time of day: %@. Tap to override.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "时段：%@。点击可覆盖。"
+          }
+        }
+      }
+    },
+    "Timer": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "计时器"
+          }
+        }
+      }
+    },
     "Times": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "时间"
+          }
+        }
+      }
+    },
+    "Tip: you can select multiple videos at a time by dragging a selection box around them, or with Shift-click.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "提示：可拖出选框，或按住 Shift 点击以选中多个视频。"
           }
         }
       }
@@ -4891,12 +7101,72 @@
         }
       }
     },
+    "Today's date": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今天的日期"
+          }
+        }
+      }
+    },
+    "Toggle Overlays palette": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "显示或隐藏叠加内容面板"
+          }
+        }
+      }
+    },
     "Toggle pause / resume:": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "暂停或继续："
+          }
+        }
+      }
+    },
+    "Top": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "上"
+          }
+        }
+      }
+    },
+    "Top Center": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "顶部居中"
+          }
+        }
+      }
+    },
+    "Top Left": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "左上角"
+          }
+        }
+      }
+    },
+    "Top Right": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "右上角"
           }
         }
       }
@@ -4937,6 +7207,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "按上限清理缓存…"
+          }
+        }
+      }
+    },
+    "Trim the cache to %lld GB?": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "将缓存清理到 %lld GB 以下？"
           }
         }
       }
@@ -4997,6 +7277,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "显示器关闭等待时间"
+          }
+        }
+      }
+    },
+    "Ultra Light": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "超细体"
           }
         }
       }
@@ -5111,12 +7401,62 @@
         }
       }
     },
+    "Use the internal cache": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "使用内部缓存"
+          }
+        }
+      }
+    },
+    "Use this option if you want to reduce risk of burn-in on  your monitors.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "启用此选项可降低显示器烧屏风险。"
+          }
+        }
+      }
+    },
+    "Version %@ (%@)": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "版本 %@（%@）"
+          }
+        }
+      }
+    },
+    "Vertical Spacer": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "垂直间距"
+          }
+        }
+      }
+    },
     "Vertical margin": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "垂直边距"
+          }
+        }
+      }
+    },
+    "Via": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "来自"
           }
         }
       }
@@ -5157,6 +7497,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "视频格式"
+          }
+        }
+      }
+    },
+    "Videos (and Expansion packs, if enabled below) are kept in a disk image in the cache folder (%@) so the wallpaper extension can read them.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "视频保存在缓存文件夹的磁盘映像（%@）中，供墙纸扩展读取。也可在下方启用将扩展包存入映像。"
           }
         }
       }
@@ -5241,6 +7591,36 @@
         }
       }
     },
+    "We detected an existing Aerial install on your Mac. You can carry over your data, or start with a clean Aerial 4 — your choice.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这台 Mac 上已有 Aerial。可以迁移现有数据，也可以全新开始使用 Aerial 4。"
+          }
+        }
+      }
+    },
+    "Weather": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "天气"
+          }
+        }
+      }
+    },
+    "Website": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "网站"
+          }
+        }
+      }
+    },
     "Weekly": {
       "localizations": {
         "zh-Hans": {
@@ -5251,12 +7631,52 @@
         }
       }
     },
+    "Weight": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "字重"
+          }
+        }
+      }
+    },
     "Welcome to Aerial 4": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "欢迎使用 Aerial 4"
+          }
+        }
+      }
+    },
+    "Welcome to Aerial 4 !": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "欢迎使用 Aerial 4！"
+          }
+        }
+      }
+    },
+    "Welcome to Aerial 4.1": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "欢迎使用 Aerial 4.1"
+          }
+        }
+      }
+    },
+    "What's New in Aerial": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aerial 更新内容"
           }
         }
       }
@@ -5281,12 +7701,42 @@
         }
       }
     },
+    "When Aerial is in the Dock, its icon shows the number of videos left to download. In the menu bar, a small dot on the Aerial icon plays the same role.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在程序坞中，Aerial 图标会显示待下载视频数量。菜单栏模式会在图标上显示小圆点。"
+          }
+        }
+      }
+    },
     "When enabled, each screen can have a different set of overlays.": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "启用后，每个屏幕可以使用不同的叠加内容。"
+          }
+        }
+      }
+    },
+    "When enabled, wallpaper/fullscreen mode gets a separate overlay layout from the screensaver.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "启用后，墙纸和全屏模式使用独立于屏幕保护程序的叠加布局。"
+          }
+        }
+      }
+    },
+    "When the screensaver starts, play the next video in the playlist instead of resuming the last one where it stopped.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "屏幕保护程序启动时直接播放列表中的下一个视频。"
           }
         }
       }
@@ -5307,6 +7757,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "在哪显示 Aerial？"
+          }
+        }
+      }
+    },
+    "White": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "白色"
           }
         }
       }
@@ -5351,12 +7811,92 @@
         }
       }
     },
+    "You can also hide the video so it doesn't get redownloaded in the future.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "也可以隐藏该视频，避免日后重新下载。"
+          }
+        }
+      }
+    },
+    "You can also hide the videos so they don't get redownloaded in the future.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "也可以隐藏这些视频，避免日后重新下载。"
+          }
+        }
+      }
+    },
+    "You can always choose what plays yourself by using the selection tools in the main popover.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可随时在主面板中选择要播放的内容。"
+          }
+        }
+      }
+    },
+    "You have %lld packs that can be moved to the new location.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可将 %lld 个扩展包移至新位置。"
+          }
+        }
+      }
+    },
+    "You have 1 pack that can be moved to the new location.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可将 1 个扩展包移至新位置。"
+          }
+        }
+      }
+    },
+    "You've just installed %lld packs:": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "刚刚安装了 %lld 个扩展包："
+          }
+        }
+      }
+    },
+    "You've just installed:": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "刚刚安装："
+          }
+        }
+      }
+    },
     "Your cache takes %@ of disk space": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "缓存占用 %@ 磁盘空间"
+          }
+        }
+      }
+    },
+    "Your existing data will remain in the old location but won't be used. You can delete it manually later if desired.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "现有数据会保留在原位置。之后如有需要，可手动删除。"
           }
         }
       }
@@ -5381,6 +7921,136 @@
         }
       }
     },
+    "Your wallpaper and screensaver keep running — they live in a macOS extension, not in this app.\n\nQuitting Aerial stops what the app itself takes care of in the background: video downloads, automatic pause when windows cover the wallpaper, live overlay data (weather, now playing) and keyboard shortcuts.\n\nYou can close the window instead and keep Aerial running in the Dock.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "退出后，墙纸和屏幕保护程序会由 macOS 扩展继续运行。\n\nAerial 的后台功能会停止，包括视频下载、遮挡时自动暂停、实时叠加数据（天气、正在播放）和键盘快捷键。\n\n也可以只关闭窗口，让 Aerial 继续在程序坞中运行。"
+          }
+        }
+      }
+    },
+    "at %@": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "于 %@"
+          }
+        }
+      }
+    },
+    "beta": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "测试版"
+          }
+        }
+      }
+    },
+    "cloned": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "同步播放"
+          }
+        }
+      }
+    },
+    "cm": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "厘米"
+          }
+        }
+      }
+    },
+    "ffmpeg is required": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "需要 ffmpeg"
+          }
+        }
+      }
+    },
+    "https://… or rtsp://… or a YouTube link": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HTTPS、RTSP 或 YouTube 链接"
+          }
+        }
+      }
+    },
+    "in %@": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@后"
+          }
+        }
+      }
+    },
+    "independent": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "独立播放"
+          }
+        }
+      }
+    },
+    "independent mirror": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "独立播放镜像"
+          }
+        }
+      }
+    },
+    "installed": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已安装"
+          }
+        }
+      }
+    },
+    "macOS 26 never prunes its wallpaper-image cache. If you've used Aerial's wallpaper continuity it can grow to many GB over time; Aerial keeps it under 2 GB.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS 26 不会自动清理墙纸图片缓存。长期使用 Aerial 墙纸时，缓存可能累积到数 GB。Aerial 会将其控制在 2 GB 以下。"
+          }
+        }
+      }
+    },
+    "macOS Reduce Motion is enabled. Aerial honors this setting: video fades are disabled, and other transitions (speed changes, occlusion handoffs) are reduced.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS 已启用「减弱动态效果」。Aerial 会关闭视频淡入淡出，并减少速度变化和遮挡切换时的过渡效果。"
+          }
+        }
+      }
+    },
     "macOS Wallpaper Videos": {
       "localizations": {
         "zh-Hans": {
@@ -5391,12 +8061,92 @@
         }
       }
     },
+    "macOS downloads its own aerial videos for the system wallpaper and never deletes them. If you use Aerial instead, they're wasted space — but if you do use a macOS aerial wallpaper, macOS will re-download what it needs.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS 会下载系统墙纸用的航拍视频。使用 Aerial 时可清理这些缓存以释放空间，切回系统航拍墙纸时 macOS 会按需重新下载。"
+          }
+        }
+      }
+    },
+    "macOS has downloaded %lld video%@, using %@.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS 已下载 %1$lld 个视频%2$@，占用 %3$@。"
+          }
+        }
+      }
+    },
+    "mirrored": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "镜像播放"
+          }
+        }
+      }
+    },
+    "once": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "一次"
+          }
+        }
+      }
+    },
     "paused (other screen)": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "已暂停（其他屏幕）"
+          }
+        }
+      }
+    },
+    "spanned": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "跨屏播放"
+          }
+        }
+      }
+    },
+    "would pause": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "将暂停"
+          }
+        }
+      }
+    },
+    "would pause all": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "将暂停所有显示器"
+          }
+        }
+      }
+    },
+    "yt-dlp is required": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "需要 yt-dlp"
           }
         }
       }

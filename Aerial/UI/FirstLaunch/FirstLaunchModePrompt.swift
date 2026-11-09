@@ -499,9 +499,9 @@ struct UpgradePromptView: View {
 
     private func header(_ title: String, _ subtitle: String) -> some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(title)
+            Text(LocalizedStringKey(title))
                 .font(.system(size: 20, weight: .semibold))
-            Text(subtitle)
+            Text(LocalizedStringKey(subtitle))
                 .font(.system(size: 13))
                 .foregroundColor(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -664,7 +664,7 @@ class UpgradePromptWindowController: NSWindowController {
             backing: .buffered,
             defer: false
         )
-        window.title = "Welcome to Aerial 4.1"
+        window.title = String(localized: "Welcome to Aerial 4.1")
         window.isReleasedWhenClosed = false
         window.center()
 

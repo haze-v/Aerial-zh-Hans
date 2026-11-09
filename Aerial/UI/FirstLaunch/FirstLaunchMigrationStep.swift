@@ -270,7 +270,7 @@ struct FirstLaunchMigrationStep: View {
                 .foregroundStyle(.red)
             Text("Migration failed")
                 .font(.system(size: 26, weight: .semibold))
-            Text(message)
+            Text(LocalizedStringKey(message))
                 .font(.system(size: 13))
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)

@@ -59,7 +59,7 @@ struct VideoBrowserSidebar: View {
             // playback from the shared playlist — surface that single
             // row labelled by the active mode instead of a generic
             // "Now Playing".
-            if PrefsDisplays.viewingMode == .independent {
+            if PrefsDisplays.viewingMode.usesPerDisplayPlayback {
                 ForEach(playbackManager.availableScreens) { screen in
                     sidebarRow(
                         icon: "display",
@@ -332,7 +332,7 @@ struct VideoBrowserSidebar: View {
         case .cloned: return "Cloned"
         case .spanned: return "Spanned"
         case .mirrored: return "Mirrored"
-        case .independent: return "Now Playing"  // unused; this row is hidden in independent mode
+        case .independent, .independentMirror: return "Now Playing"  // unused; this row is hidden in independent mode
         }
     }
 
@@ -342,7 +342,7 @@ struct VideoBrowserSidebar: View {
         case .cloned: return "rectangle.on.rectangle"
         case .spanned: return "rectangle.split.2x1"
         case .mirrored: return "rectangle.2.swap"
-        case .independent: return "play.circle"
+        case .independent, .independentMirror: return "play.circle"
         }
     }
 

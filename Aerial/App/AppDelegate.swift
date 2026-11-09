@@ -577,6 +577,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationWillTerminate(_ aNotification: Notification) {
+        WallpaperControl.shared.setCPUPaused(false)
         presentation.persistWindowState()
 
         // External-drive cache image: detach unless another Companion

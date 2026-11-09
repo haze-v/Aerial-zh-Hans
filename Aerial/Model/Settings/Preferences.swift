@@ -279,6 +279,28 @@ struct Preferences {
         set { manager.setValue(newValue, forKeyPath: \.nowPlayingMode) }
     }
 
+    // MARK: - CPU-aware wallpaper pause
+
+    static var desktopPauseOnHighCPU: Bool {
+        get { manager.getValue(forKeyPath: \.desktopPauseOnHighCPU) }
+        set { manager.setValue(newValue, forKeyPath: \.desktopPauseOnHighCPU) }
+    }
+
+    static var desktopCPUThreshold: Double {
+        get { manager.getValue(forKeyPath: \.desktopCPUThreshold) }
+        set { manager.setValue(newValue, forKeyPath: \.desktopCPUThreshold) }
+    }
+
+    static var desktopCPUHighLoadDuration: Double {
+        get { manager.getValue(forKeyPath: \.desktopCPUHighLoadDuration) }
+        set { manager.setValue(newValue, forKeyPath: \.desktopCPUHighLoadDuration) }
+    }
+
+    static var desktopCPUSampleInterval: Double {
+        get { manager.getValue(forKeyPath: \.desktopCPUSampleInterval) }
+        set { manager.setValue(newValue, forKeyPath: \.desktopCPUSampleInterval) }
+    }
+
     // MARK: - Battery-aware pause
 
     /// Master switch — when true, desktop wallpaper and fullscreen-window

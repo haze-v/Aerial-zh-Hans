@@ -105,7 +105,7 @@ final class DashboardModel: ObservableObject {
 
     var viewingMode: ViewingMode { PrefsDisplays.viewingMode }
 
-    var isIndependent: Bool { viewingMode == .independent }
+    var isIndependent: Bool { viewingMode.usesPerDisplayPlayback }
 
     /// Whether overlays are configured per-screen (vs. common to all).
     var overlayPerScreen: Bool { OverlayConfigManager.shared.config.perScreen }
@@ -125,6 +125,7 @@ final class DashboardModel: ObservableObject {
     func modeDescription(_ mode: ViewingMode) -> String {
         switch mode {
         case .independent: return "Each display plays its own video — set per display below."
+        case .independentMirror: return "Displays start with the same video and share a playlist. Each display can play, pause or skip independently."
         case .cloned:      return "All displays show the same video."
         case .spanned:     return "One video spans across all displays."
         case .mirrored:    return "All displays mirror the same video (alternates flipped)."
@@ -138,15 +139,16 @@ final class DashboardModel: ObservableObject {
     /// view) so the side effects stay consistent.
     func applyViewingModeChange(_ newMode: ViewingMode) {
         guard newMode != PrefsDisplays.viewingMode else { return }
-        PrefsDisplays.viewingMode = newMode
-        WallpaperControl.shared.displaysConfigDidChange()
+        playbackManager.changeViewingMode(newMode)
 
         // Rebuild the shared playlist for the new topology.
         // `regenerate(for: nil)` also clears stale per-screen playlists when
         // leaving independent.
-        PlaylistManager.shared.regenerate(for: nil,
-                                          mode: PrefsVideos.newShouldPlay,
-                                          filterStrings: PrefsVideos.newShouldPlayString)
+        if newMode != .independentMirror {
+            PlaylistManager.shared.regenerate(for: nil,
+                                              mode: PrefsVideos.newShouldPlay,
+                                              filterStrings: PrefsVideos.newShouldPlayString)
+        }
 
         // The extension restarts playback on its own when the playlist
         // generation bumps; rescan downloads under the new mode.

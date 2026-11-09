@@ -313,7 +313,7 @@ private struct EmptyPositionDropZone: View {
                     isTargeted ? Color.aerial : Color.white.opacity(0.3),
                     style: StrokeStyle(lineWidth: 1, dash: [5, 3])
                 )
-            Text(position.displayName)
+            Text(LocalizedStringKey(position.displayName))
                 .font(.caption)
                 .foregroundStyle(.white.opacity(isTargeted ? 0.9 : 0.5))
         }

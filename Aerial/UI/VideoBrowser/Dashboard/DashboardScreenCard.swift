@@ -68,7 +68,9 @@ struct DashboardScreenCard: View {
             Text(screen.name)
                 .font(.system(size: 15, weight: .semibold))
                 .fixedSize()
-            PlaybackSelectorButton(scope: .screen(screenUUID))
+            if model.viewingMode != .independentMirror {
+                PlaybackSelectorButton(scope: .screen(screenUUID))
+            }
             Spacer(minLength: 0)
         }
     }
@@ -125,14 +127,16 @@ struct DashboardScreenCard: View {
 
 /// Prev / play-pause / next transport for a Dashboard mini-player.
 /// Observes `PlaybackManager` directly so the play/pause icon tracks live
-/// playback state. Prev/next are scoped to `screenUUID`; play/pause is
-/// global (all displays) in v1 — the help text says so. Shared by both the
-/// per-screen and the shared cards (kept here, non-private, to avoid adding
-/// a new file to the project).
+/// playback state. Previous/next follow the card scope. Independent Mirror
+/// also scopes manual pause to the card's display.
 struct DashboardTransportControls: View {
     @ObservedObject var playbackManager: PlaybackManager
     let screenUUID: String?
     let entryCount: Int
+    @State private var screenPaused = false
+
+    private var pauseScope: String? { playbackManager.mirrorPauseScope(screenUUID) }
+    private var paused: Bool { pauseScope == nil ? playbackManager.isPaused : screenPaused }
 
     var body: some View {
         HStack(spacing: 10) {
@@ -144,7 +148,12 @@ struct DashboardTransportControls: View {
             .help("Previous video")
 
             Button {
-                playbackManager.togglePause()
+                if let pauseScope {
+                    WallpaperControl.shared.toggleScreenUserPause(pauseScope)
+                    reloadPause()
+                } else {
+                    playbackManager.togglePause()
+                }
             } label: {
                 Image(systemName: pauseIcon)
             }
@@ -161,14 +170,24 @@ struct DashboardTransportControls: View {
         .controlSize(.large)
         // The wallpaper is the extension — only an empty playlist disables the transport.
         .disabled(entryCount == 0)
+        .onAppear(perform: reloadPause)
+        .onChange(of: pauseScope) { _, _ in reloadPause() }
+        .onReceive(WallpaperStatusMonitor.shared.$status) { _ in reloadPause() }
+    }
+
+    private func reloadPause() {
+        screenPaused = pauseScope.map { WallpaperControl.shared.screenUserPaused($0) } ?? false
     }
 
     private var pauseIcon: String {
-        playbackManager.isPaused ? "play.fill" : "pause.fill"
+        paused ? "play.fill" : "pause.fill"
     }
 
     private var pauseHelp: String {
-        (playbackManager.isPaused ? "Resume" : "Pause") + " — affects all displays"
+        if pauseScope != nil {
+            return paused ? String(localized: "Resume this display") : String(localized: "Pause this display")
+        }
+        return paused ? String(localized: "Resume all displays") : String(localized: "Pause all displays")
     }
 }
 
@@ -186,7 +205,7 @@ struct DashboardPauseMention: View {
 
     var body: some View {
         if let m = mention {
-            Label(m.text, systemImage: m.icon)
+            Label(LocalizedStringKey(m.text), systemImage: m.icon)
                 .font(.system(size: 12))
                 .foregroundColor(.secondary)
                 .lineLimit(1)

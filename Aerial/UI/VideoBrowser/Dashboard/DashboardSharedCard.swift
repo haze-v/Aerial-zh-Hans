@@ -78,7 +78,7 @@ struct DashboardSharedCard: View {
         case .cloned:   return "rectangle.on.rectangle"
         case .spanned:  return "rectangle.split.2x1"
         case .mirrored: return "rectangle.2.swap"
-        case .independent: return "display"   // not reached in this card
+        case .independent, .independentMirror: return "display"   // not reached in this card
         }
     }
 

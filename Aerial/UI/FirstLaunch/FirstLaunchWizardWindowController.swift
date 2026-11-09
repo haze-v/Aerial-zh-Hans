@@ -25,7 +25,7 @@ class FirstLaunchWizardWindowController: NSWindowController {
             backing: .buffered,
             defer: false
         )
-        window.title = "Welcome to Aerial 4 !"
+        window.title = String(localized: "Welcome to Aerial 4 !")
         window.isReleasedWhenClosed = false
         window.center()
 

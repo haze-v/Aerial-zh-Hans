@@ -88,6 +88,19 @@ final class WallpaperControlListener: @unchecked Sendable {
         return lastApplied.thermalPaused
     }
 
+    func mirrorScreenCanPlay(_ uuid: String) -> Bool {
+        lock.withLock {
+            let state = lastApplied
+            let inputs = state.effectivePauseInputs(rendererKey: uuid, isBroadcast: false)
+            return state.desktopWallpaperActive && !inputs.user && !inputs.coverage && !state.batteryPaused && !state.thermalPaused
+                && !state.cameraPaused && !state.cpuPaused
+        }
+    }
+
+    var currentCPUPaused: Bool {
+        lock.withLock { lastApplied.cpuPaused }
+    }
+
     /// Camera-in-use pause flag Companion wants. Cold-start acquires
     /// seed the renderer's `.camera` reason from this.
     var currentCameraPaused: Bool {
@@ -232,6 +245,15 @@ final class WallpaperControlListener: @unchecked Sendable {
         // mirror doesn't show the first second at the 1 Hz poll rate.
         wakeContentsSwapPresenters()
         applyDeltas(from: previous, to: fresh)
+        if PrefsDisplays.viewingMode == .independentMirror {
+            let scopes = fresh.screens.keys.filter { uuid in
+                guard let after = fresh.screens[uuid] else { return false }
+                let before = previous.screens[uuid] ?? WallpaperScreenControl()
+                return after.advanceCounter != before.advanceCounter || after.regressCounter != before.regressCounter
+                    || after.jumpToken != before.jumpToken
+            }
+            if scopes.count == 1 { scheduleIndependentMirrorSync(preferredScreen: scopes.first) }
+        }
         dumpTopology(reason: "control-reconcile v\(fresh.version)")
         writeWallpaperStatus(reason: "reconcile")
     }
@@ -258,7 +280,8 @@ final class WallpaperControlListener: @unchecked Sendable {
                 battery: state.batteryPaused,
                 coverage: inputs.coverage,
                 thermal: state.thermalPaused,
-                camera: state.cameraPaused
+                camera: state.cameraPaused,
+                cpu: state.cpuPaused
             )
         }
         reassertAudioOwnership(context: "rebaseline")
@@ -310,9 +333,10 @@ final class WallpaperControlListener: @unchecked Sendable {
             debugLog("[WallpaperControl] user pause \(prev.paused) → \(next.paused)\(next.desktopWallpaperActive ? "" : " (desktop wallpaper inactive — ignored)")")
             if next.desktopWallpaperActive {
                 forEachRenderer { shared in
-                    next.paused
-                        ? shared.renderer.pause(reason: .user)
-                        : shared.renderer.resume(reason: .user)
+                    let inputs = next.effectivePauseInputs(
+                        rendererKey: shared.rendererKey, isBroadcast: shared.rendererKey == broadcastRendererKey
+                    )
+                    inputs.user ? shared.renderer.pause(reason: .user) : shared.renderer.resume(reason: .user)
                 }
             }
         }
@@ -338,6 +362,15 @@ final class WallpaperControlListener: @unchecked Sendable {
                 next.cameraPaused
                     ? shared.renderer.pause(reason: .camera)
                     : shared.renderer.resume(reason: .camera)
+            }
+        }
+
+        if next.cpuPaused != prev.cpuPaused {
+            debugLog("[WallpaperControl] CPU pause \(prev.cpuPaused) → \(next.cpuPaused)")
+            forEachRenderer { shared in
+                next.cpuPaused
+                    ? shared.renderer.pause(reason: .cpu)
+                    : shared.renderer.resume(reason: .cpu)
             }
         }
 
@@ -497,6 +530,13 @@ final class WallpaperControlListener: @unchecked Sendable {
                     sharedHandlerState.clearPendingSwitch(key: shared.rendererKey)
                     ExtensionVideoLoader.shared.seekPlaylist(to: targetIndex, screenUUID: scope)
                     shared.renderer.jumpNow()
+                }
+            }
+            if nextS.userPaused != prevS.userPaused {
+                applyToScreen(uuid: uuid) { shared in
+                    guard shared.rendererKey != broadcastRendererKey else { return }
+                    let inputs = next.effectivePauseInputs(rendererKey: shared.rendererKey, isBroadcast: false)
+                    inputs.user ? shared.renderer.pause(reason: .user) : shared.renderer.resume(reason: .user)
                 }
             }
             if nextS.autoPaused != prevS.autoPaused {

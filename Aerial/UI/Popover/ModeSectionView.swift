@@ -20,6 +20,13 @@ struct ModeSectionView: View {
     /// refreshed on appear and on every status echo.
     @State private var wallpaperPaused = WallpaperControl.shared.currentPaused
 
+    private var pauseScope: String? { playbackManager.mirrorPauseScope(playbackManager.effectiveScreenUUID) }
+
+    private func reloadPause() {
+        wallpaperPaused = pauseScope.map { WallpaperControl.shared.screenUserPaused($0) }
+            ?? WallpaperControl.shared.currentPaused
+    }
+
     var body: some View {
         HStack(spacing: 8) {
             // Screensaver button — starts the OS screensaver now (which
@@ -36,10 +43,8 @@ struct ModeSectionView: View {
             // Wallpaper button.
             wallpaperButton
         }
-        .onAppear { wallpaperPaused = WallpaperControl.shared.currentPaused }
-        .onReceive(statusMonitor.$status) { _ in
-            wallpaperPaused = WallpaperControl.shared.currentPaused
-        }
+        .onAppear(perform: reloadPause)
+        .onReceive(statusMonitor.$status) { _ in reloadPause() }
     }
 
     /// Wallpaper control: a play/pause toggle for the wallpaper extension.
@@ -50,8 +55,12 @@ struct ModeSectionView: View {
     private var wallpaperButton: some View {
         Button(action: {
             if statusMonitor.isRunning {
-                wallpaperPaused.toggle()
-                WallpaperControl.shared.setPaused(wallpaperPaused)
+                if let pauseScope {
+                    WallpaperControl.shared.toggleScreenUserPause(pauseScope)
+                } else {
+                    WallpaperControl.shared.setPaused(!wallpaperPaused)
+                }
+                reloadPause()
             } else {
                 _ = Helpers.shell(launchPath: "/usr/bin/open", arguments: [
                     "x-apple.systempreferences:com.apple.Wallpaper-Settings.extension"
@@ -79,6 +88,7 @@ struct ModeSectionView: View {
         if !statusMonitor.isRunning {
             return "Choose Aerial 4 in System Settings → Wallpaper to use the live wallpaper"
         }
+        if pauseScope != nil { return wallpaperPaused ? "Resume this display" : "Pause this display" }
         return wallpaperPaused ? "Resume the animated wallpaper" : "Pause the wallpaper (static frame)"
     }
 

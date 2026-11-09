@@ -1,10 +1,14 @@
 # Aerial 简体中文版
 
-Aerial 4.1.10 简体中文版本。
+Aerial 简体中文版本。
 
-- 汉化菜单栏、视频资料库、墙纸选择和常用设置，包含 540 条简体中文翻译。部分高级说明和视频名称仍可能显示英文。
-- 在 Apple Silicon Mac 上验证了 Release 构建、墙纸扩展加载，以及锁屏后解锁继续播放。
-- 构建时用 Xcode 打开 `Aerial.xcodeproj`，选择 `Aerial` scheme。需要 macOS 26 或更新版本和 Xcode。命令行可用本地签名构建：
+- 汉化菜单栏、视频资料库、墙纸选择、设置、首次启动向导和叠加编辑器。
+- CPU 自动暂停可设置采样间隔、占用率阈值和持续时间。连续两次采样低于阈值后恢复。
+- 独立播放镜像会在屏幕均可播放时对齐视频和进度，单屏恢复后跟随正在播放的屏幕。
+
+打开 [最新版本](https://github.com/x-xxxx/Aerial-zh-Hans/releases/latest) 中的 DMG，将 Aerial 拖入「应用程序」。此安装包适用于 Apple Silicon 和 macOS 26 或更新版本。旧版先手动安装一次，之后可在应用内检查此仓库的更新。
+
+构建需要 Xcode。打开 `Aerial.xcodeproj` 并选择 `Aerial` scheme，或运行：
 
 ```bash
 xcodebuild -project Aerial.xcodeproj -scheme Aerial -configuration Release \

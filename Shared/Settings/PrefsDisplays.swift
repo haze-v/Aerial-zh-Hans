@@ -26,7 +26,11 @@ enum AspectMode: Int {
 }
 
 enum ViewingMode: Int {
-    case independent, cloned, spanned, mirrored
+    case independent, cloned, spanned, mirrored, independentMirror
+
+    var usesPerDisplayPlayback: Bool {
+        self == .independent || self == .independentMirror
+    }
 
     /// Lowercase, sentence-friendly label. Used by settings panels that
     /// embed the mode name into a sentence ("In spanned mode...").
@@ -36,6 +40,7 @@ enum ViewingMode: Int {
         case .cloned:      return "cloned"
         case .spanned:     return "spanned"
         case .mirrored:    return "mirrored"
+        case .independentMirror: return "independent mirror"
         }
     }
 }

@@ -235,7 +235,7 @@ final class WallpaperControl: @unchecked Sendable {
     /// changes can't move a wallpaper that's paused anyway.
     var currentNonCoveragePaused: Bool {
         controlQueue.sync {
-            state.paused || state.batteryPaused || state.thermalPaused || state.cameraPaused
+            state.paused || state.batteryPaused || state.thermalPaused || state.cameraPaused || state.cpuPaused
         }
     }
 
@@ -343,6 +343,29 @@ final class WallpaperControl: @unchecked Sendable {
         }
     }
 
+    func screenUserPaused(_ screenUUID: String) -> Bool {
+        controlQueue.sync { state.screens[screenUUID]?.userPaused ?? false }
+    }
+
+    func toggleScreenUserPause(_ screenUUID: String) {
+        mutate("toggleScreenUserPause") { state in
+            state.screens[screenUUID, default: WallpaperScreenControl()].userPaused.toggle()
+            return true
+        }
+    }
+
+    func clearScreenUserPauses() {
+        mutate("clearScreenUserPauses") { state in
+            let paused = state.screens.keys.filter { state.screens[$0]?.userPaused == true }
+            for uuid in paused { state.screens[uuid]?.userPaused = false }
+            return !paused.isEmpty
+        }
+    }
+
+    var currentCPUPaused: Bool {
+        controlQueue.sync { state.cpuPaused }
+    }
+
     /// Set the battery-pause flag. Separate from `setPaused` (the user's
     /// static/animated intent): the extension pauses when EITHER is set,
     /// but clearing battery-pause never resumes a user-paused (still)
@@ -396,6 +419,15 @@ final class WallpaperControl: @unchecked Sendable {
         mutate("setThermalPaused(\(paused))") { state in
             guard paused != state.thermalPaused else { return false }
             state.thermalPaused = paused
+            return true
+        }
+    }
+
+    /// Change the CPU-load pause independently of all other pause reasons.
+    func setCPUPaused(_ paused: Bool) {
+        mutate("setCPUPaused(\(paused))") { state in
+            guard paused != state.cpuPaused else { return false }
+            state.cpuPaused = paused
             return true
         }
     }

@@ -62,7 +62,7 @@ struct CommonOverlaySettingsView: View {
                 Text("Semibold").tag("semibold")
                 Text("Bold").tag("bold")
                 Text("Heavy").tag("heavy")
-                Text("Black").tag("black")
+                Text("Black font weight").tag("black")
             }
 
             // Font size
@@ -84,7 +84,7 @@ struct CommonOverlaySettingsView: View {
             // Position picker
             Picker("Position", selection: $instance.position) {
                 ForEach(OverlayPosition.allCases) { position in
-                    Text(position.displayName).tag(position)
+                    Text(LocalizedStringKey(position.displayName)).tag(position)
                 }
             }
         }
@@ -116,7 +116,7 @@ struct CommonOverlaySettingsView: View {
         if isSelected {
             Label(title, systemImage: "checkmark")
         } else {
-            Text(title)
+            Text(LocalizedStringKey(title))
         }
     }
 }

@@ -18,6 +18,7 @@ class PlaylistManager {
     // MARK: - Private Properties
 
     private var state: PlaylistState
+    private var mirrorScreens: Set<String> = []
     private let queue = DispatchQueue(label: "com.glouel.aerial.playlist", attributes: .concurrent)
     private let store = JSONPreferencesStore.shared
 
@@ -343,7 +344,7 @@ class PlaylistManager {
 
             // Clear stale per-screen playlists when regenerating the shared playlist
             // in non-independent mode (they're leftovers from a previous viewing mode)
-            if screenUUID == nil && PrefsDisplays.viewingMode != .independent {
+            if screenUUID == nil && !PrefsDisplays.viewingMode.usesPerDisplayPlayback {
                 state.screenPlaylists.removeAll()
             }
 
@@ -399,10 +400,12 @@ class PlaylistManager {
                 state.sharedPlaylist = refreshPlaylist(shared, mode: mode, filterStrings: shared.filterStrings, excluding: excluding)
             }
 
-            // Regenerate each per-screen playlist
-            for (uuid, playlist) in state.screenPlaylists {
-                if let mode = NewShouldPlay(rawValue: playlist.filterMode) {
-                    state.screenPlaylists[uuid] = refreshPlaylist(playlist, mode: mode, filterStrings: playlist.filterStrings, excluding: excluding)
+            // Independent Mirror reuses the shared refresh in persist().
+            if PrefsDisplays.viewingMode != .independentMirror {
+                for (uuid, playlist) in state.screenPlaylists {
+                    if let mode = NewShouldPlay(rawValue: playlist.filterMode) {
+                        state.screenPlaylists[uuid] = refreshPlaylist(playlist, mode: mode, filterStrings: playlist.filterStrings, excluding: excluding)
+                    }
                 }
             }
 
@@ -534,7 +537,8 @@ class PlaylistManager {
     }
 
     /// Reload the active user playlist from disk (called when user edits the playlist).
-    func reloadActiveUserPlaylistIfNeeded(for screenUUID: String? = nil) {
+    func reloadActiveUserPlaylistIfNeeded(for requestedScreen: String? = nil) {
+        let screenUUID = PrefsDisplays.viewingMode == .independentMirror ? nil : requestedScreen
         guard let activeId = activeUserPlaylistId(for: screenUUID) else { return }
         guard let manifest = UserPlaylistManager.shared.playlist(id: activeId) else { return }
 
@@ -727,7 +731,7 @@ class PlaylistManager {
             }
             // Only the scopes the extension actually plays: per-screen
             // playlists can outlive a switch away from independent mode.
-            guard PrefsDisplays.viewingMode == .independent else {
+            guard PrefsDisplays.viewingMode.usesPerDisplayPlayback else {
                 return isPlaying(state.sharedPlaylist) ? [nil] : []
             }
             return state.screenPlaylists.filter { isPlaying($0.value) }.map { $0.key }
@@ -878,9 +882,51 @@ class PlaylistManager {
         }
     }
 
+    /// Seed all screens with the same playlist, then keep their own playback positions.
+    func updateMirrorScreens(_ screenUUIDs: [String], startTogether: Bool = false) {
+        let index: Int? = queue.sync(flags: .barrier) {
+            let screens = Set(screenUUIDs)
+            guard startTogether || mirrorScreens != screens else { return nil }
+            mirrorScreens = screens
+            if startTogether {
+                state.screenPlaylists.removeAll()
+                if state.sharedPlaylist == nil {
+                    state.sharedPlaylist = buildFreshPlaylist(
+                        mode: PrefsVideos.newShouldPlay, filterStrings: PrefsVideos.newShouldPlayString
+                    )
+                }
+                // Ignore old per-screen cursors from the previous viewing mode.
+                state.sharedPlaylist?.generatedAt = Date()
+            }
+            persist(forceSignal: startTogether)
+            guard startTogether, let shared = state.sharedPlaylist, !shared.entries.isEmpty else { return nil }
+            return shared.currentIndex
+        }
+        if let index { WallpaperControl.shared.jumpToVideo(index: index, screenUUID: nil) }
+        postPlaylistDidChange(nil)
+    }
+
+    private func syncMirrorPlaylists() {
+        guard PrefsDisplays.viewingMode == .independentMirror,
+              let shared = state.sharedPlaylist else { return }
+        for uuid in mirrorScreens {
+            var playlist = shared
+            if let current = state.screenPlaylists[uuid],
+               current.filterMode == shared.filterMode,
+               current.filterStrings == shared.filterStrings,
+               current.entries.indices.contains(current.currentIndex),
+               let index = shared.entries.firstIndex(where: { $0.videoId == current.entries[current.currentIndex].videoId }) {
+                playlist.currentIndex = index
+                playlist.playbackTimestamp = current.playbackTimestamp
+            }
+            state.screenPlaylists[uuid] = playlist
+        }
+    }
+
     /// `forceSignal` bypasses the content-signature gate and bumps every
     /// screen — only for changes the signature can't see (video format).
     private func persist(forceSignal: Bool = false) {
+        syncMirrorPlaylists()
         store.write(state, to: PlaylistState.fileURL)
 
         // Signal the wallpaper extension ONLY for scopes whose CONTENT

@@ -816,12 +816,103 @@ func writeWallpaperStatus(reason: String) {
         }
     }
     status.autoPausedScreens = WallpaperControlListener.shared.autoPausedScreens()
+    scheduleIndependentMirrorSync()
     _ = JSONPreferencesStore.shared.write(status, to: WallpaperStatusState.fileURL)
     CFNotificationCenterPostNotification(
         CFNotificationCenterGetDarwinNotifyCenter(),
         CFNotificationName(WallpaperStatusState.darwinNotificationName as CFString),
         nil, nil, true
     )
+}
+
+/// Aligns eligible per-display renderers without adding a polling timer.
+private let mirrorSyncQueue = DispatchQueue(label: "aerial-wallpaper-mirror-sync", qos: .utility)
+private nonisolated(unsafe) var mirrorSyncWork: DispatchWorkItem?
+private nonisolated(unsafe) var mirrorLeaderKey: String?
+private nonisolated(unsafe) var requestedMirrorLeader: String?
+
+func scheduleIndependentMirrorSync(preferredScreen: String? = nil) {
+    mirrorSyncQueue.async {
+        mirrorSyncWork?.cancel()
+        guard PrefsDisplays.viewingMode == .independentMirror else {
+            mirrorLeaderKey = nil
+            requestedMirrorLeader = nil
+            return
+        }
+        if let preferredScreen { requestedMirrorLeader = preferredScreen }
+        let work = DispatchWorkItem { synchronizeIndependentMirror() }
+        mirrorSyncWork = work
+        mirrorSyncQueue.asyncAfter(deadline: .now() + .milliseconds(350), execute: work)
+    }
+}
+
+private func mirrorPlaybackAllowed() -> Bool {
+    PrefsDisplays.viewingMode == .independentMirror
+        && !sharedHandlerState.isNotificationScreensaverActive
+        && !sharedHandlerState.allWallpapers().contains { $0.wallpaper.mirror.lastPresentationMode == "locked" }
+}
+
+private func mirrorSnapshot(_ shared: SharedRenderer) -> VideoRenderer.StatusSnapshot? {
+    guard shared.rendererKey != broadcastRendererKey, shared.renderer.subscriberCount > 0,
+          WallpaperControlListener.shared.mirrorScreenCanPlay(shared.rendererKey) else { return nil }
+    let snapshot = shared.renderer.statusSnapshot()
+    guard !snapshot.saverActive, snapshot.pauseReasons.isEmpty, snapshot.rate > 0,
+          snapshot.position.isFinite else { return nil }
+    return snapshot
+}
+
+private func synchronizeIndependentMirror() {
+    guard mirrorPlaybackAllowed() else { return }
+    let preferred = requestedMirrorLeader
+    requestedMirrorLeader = nil
+    let ready = sharedHandlerState.allRenderers().compactMap { shared in
+        mirrorSnapshot(shared).map { (shared: shared, snapshot: $0) }
+    }.sorted { $0.shared.rendererKey < $1.shared.rendererKey }
+    // A screen that resumes must follow the screen that was already playing.
+    guard let leader = ready.first(where: { $0.shared.rendererKey == preferred })
+        ?? ready.first(where: { $0.shared.rendererKey == mirrorLeaderKey })
+        ?? ready.first else { return }
+    mirrorLeaderKey = leader.shared.rendererKey
+    let source = leader.shared
+    let snapshot = leader.snapshot
+    for follower in ready where follower.shared.rendererKey != source.rendererKey {
+        let sameVideo = follower.snapshot.assetURL == snapshot.assetURL
+        if sameVideo {
+            // Both file renderers use the same host clock. Leave small
+            // differences alone to avoid repeatedly rebuilding decoders.
+            guard source.renderer is VideoRenderer,
+                  abs(follower.snapshot.position - snapshot.position) > 0.18 else { continue }
+        }
+        let target = follower.shared
+        let sourceID = source.renderer.nowPlayingOverride?.id
+            ?? ExtensionVideoLoader.shared.videoId(forLocalPath: snapshot.assetURL.path)
+        let playDuration = ExtensionVideoLoader.shared.alignMirrorCursor(videoID: sourceID, screenUUID: target.rendererKey)
+        let selection: PlaybackSelection
+        if let live = source.renderer.nowPlayingOverride,
+           let entry = VideoList.instance.videos.first(where: { $0.id == live.id }),
+           let liveSelection = playbackSelection(for: entry, resumeAt: nil) {
+            selection = liveSelection
+        } else if source.renderer is VideoRenderer {
+            selection = .file(url: snapshot.assetURL, resumeAt: snapshot.position,
+                              rotation: rotationOverride(for: snapshot.assetURL), playDuration: playDuration)
+        } else {
+            continue
+        }
+        sharedHandlerState.clearPendingSwitch(key: target.rendererKey)
+        let stillEligible: @Sendable () -> Bool = {
+            guard mirrorPlaybackAllowed(),
+                  let current = mirrorSnapshot(source), current.assetURL == snapshot.assetURL,
+                  mirrorSnapshot(target) != nil else { return false }
+            return sharedHandlerState.allRenderers().contains { $0 === target }
+                && sharedHandlerState.allRenderers().contains { $0 === source }
+        }
+        let position: @Sendable () -> Double? = {
+            guard let latest = mirrorSnapshot(source), latest.assetURL == snapshot.assetURL else { return nil }
+            return latest.position
+        }
+        switchSharedRenderer(key: target.rendererKey, to: selection, playlistScreenUUID: target.rendererKey,
+                             startPosition: position, shouldApply: stillEligible)
+    }
 }
 
 /// Debounced status write for ORGANIC video changes (natural EOF
@@ -1298,7 +1389,8 @@ private func seedPauseState(_ renderer: any PlaybackRenderer, rendererKey: Strin
         battery: listener.currentBatteryPaused,
         coverage: inputs.coverage,
         thermal: listener.currentThermalPaused,
-        camera: listener.currentCameraPaused
+        camera: listener.currentCameraPaused,
+        cpu: listener.currentCPUPaused
     )
 }
 
@@ -1596,6 +1688,7 @@ private func makeRenderer(
     rendererKey: String,
     playlistScreenUUID: String?,
     onFailure: (@Sendable () -> Void)? = nil,
+    startPosition: (@Sendable () -> Double?)? = nil,
     completion: @escaping @Sendable (any PlaybackRenderer, URL) -> Void
 ) {
     switch selection {
@@ -1604,7 +1697,8 @@ private func makeRenderer(
             let renderer: VideoRenderer
             do {
                 renderer = try await VideoRenderer.create(videoURL: videoURL, startAt: resumeAt,
-                                                          extraRotation: rotation, playDuration: playDuration)
+                                                          extraRotation: rotation, playDuration: playDuration,
+                                                          startPosition: startPosition)
             } catch {
                 debugLog("  Renderer create failed (key=\(shortKey(rendererKey))): \(error).")
                 showNoVideoFallbackForUnfedWindows(key: rendererKey, reason: "renderer create failed")
@@ -1869,8 +1963,11 @@ private nonisolated(unsafe) var switchesInFlight: Set<String> = []
 /// (`replaceRenderer` keeps the refCount), migrates the subscriber
 /// layers, re-seeds live state, and stops the old engine. Hard cut —
 /// no ghost transition across engines (v1).
-func switchSharedRenderer(key: String, to selection: PlaybackSelection, playlistScreenUUID: String?) {
+func switchSharedRenderer(key: String, to selection: PlaybackSelection, playlistScreenUUID: String?,
+                          startPosition: (@Sendable () -> Double?)? = nil,
+                          shouldApply: (@Sendable () -> Bool)? = nil) {
     rendererSwitchQueue.async {
+        guard shouldApply?() != false else { return }
         guard !switchesInFlight.contains(key) else {
             debugLog("  engine switch already in flight for key=\(shortKey(key)) — ignoring")
             return
@@ -1883,7 +1980,8 @@ func switchSharedRenderer(key: String, to selection: PlaybackSelection, playlist
             // A failed create never reaches the completion below, which is
             // where the in-flight mark used to be cleared — without this
             // the key stayed blocked for every later engine switch.
-            onFailure: { rendererSwitchQueue.async { switchesInFlight.remove(key) } }
+            onFailure: { rendererSwitchQueue.async { switchesInFlight.remove(key) } },
+            startPosition: startPosition
         ) { newRenderer, videoURL in
             // Three hops, order preserved: replace (switch queue) →
             // migrate the windows (handler queue, which owns the presenter
@@ -1891,6 +1989,11 @@ func switchSharedRenderer(key: String, to selection: PlaybackSelection, playlist
             // (switch queue again: stop() is a bounded renderer-queue sync,
             // never run on the handler queue).
             rendererSwitchQueue.async {
+                guard shouldApply?() != false else {
+                    switchesInFlight.remove(key)
+                    newRenderer.stop()
+                    return
+                }
                 let candidate = SharedRenderer(rendererKey: key, videoURL: videoURL, renderer: newRenderer)
                 guard let old = sharedHandlerState.replaceRenderer(key: key, candidate: candidate) else {
                     switchesInFlight.remove(key)

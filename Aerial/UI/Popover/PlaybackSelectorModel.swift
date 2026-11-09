@@ -60,6 +60,7 @@ final class PlaybackSelectorModel: ObservableObject {
     // MARK: - Scope
 
     var effectiveScreenUUID: String? {
+        guard PrefsDisplays.viewingMode != .independentMirror else { return nil }
         switch scope {
         case .popover: return playbackManager.effectiveScreenUUID
         case .screen(let uuid): return uuid

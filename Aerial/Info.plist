@@ -38,9 +38,13 @@
 		<true/>
 	</dict>
 	<key>SUFeedURL</key>
-	<string>https://aerialscreensaver.github.io/appcast.xml</string>
+	<string>https://github.com/x-xxxx/Aerial-zh-Hans/releases/latest/download/appcast.xml</string>
 	<key>SUPublicEDKey</key>
-	<string>8VgyFnUp44Aj4mvoEyrhru/WHllgXNzmnls+jrZ1xiY=</string>
+	<string>HddQNnr/4aUXGaAb2ZRxnL3TEYM7xRlC3XUNfkEmlVs=</string>
+	<key>SURequireSignedFeed</key>
+	<true/>
+	<key>SUVerifyUpdateBeforeExtraction</key>
+	<true/>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
 	<key>UTExportedTypeDeclarations</key>

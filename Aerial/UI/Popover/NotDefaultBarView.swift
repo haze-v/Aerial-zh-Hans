@@ -18,7 +18,7 @@ struct NotDefaultBarView: View {
 
     var body: some View {
         HStack {
-            Text(message)
+            Text(LocalizedStringKey(message))
                 .font(.system(size: 13, weight: .medium))
 
             Spacer()

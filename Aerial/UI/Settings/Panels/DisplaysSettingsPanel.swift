@@ -191,6 +191,7 @@ struct DisplaysSettingsPanel: View {
                             Image(systemName: "display")
                             Text("Independent")
                         }.tag(ViewingMode.independent)
+                        Label("Independent Mirror", systemImage: "display.2").tag(ViewingMode.independentMirror)
                         HStack(spacing: 8) {
                             Image(systemName: "rectangle.on.rectangle")
                             Text("Cloned")
@@ -208,9 +209,8 @@ struct DisplaysSettingsPanel: View {
                     .accentColor(.aerial)
                     .frame(width: 220, alignment: .trailing)
                     .onChange(of: viewingMode) { newValue in
-                        PrefsDisplays.viewingMode = newValue
+                        PlaybackManager.shared.changeViewingMode(newValue)
                         displayViewRefresh = UUID()
-                        WallpaperControl.shared.displaysConfigDidChange()
                     }
                 }
 

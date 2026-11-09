@@ -50,6 +50,9 @@ struct WallpaperScreenControl: Codable, Equatable {
     /// overrides an explicit user pause.
     var autoPaused: Bool = false
 
+    /// Manual pause for this screen in Independent Mirror mode.
+    var userPaused: Bool = false
+
     /// Monotonic token bumped by Companion to request an immediate jump
     /// to `jumpIndex` in this screen's playlist (the dashboard/popover
     /// playlist click). A token (not just an index) so re-jumping to the
@@ -94,6 +97,9 @@ struct WallpaperControlState: Codable, Equatable {
     /// Separate from `paused`/`batteryPaused` for the same reason those
     /// are separate: clearing one source must never un-pause another.
     var thermalPaused: Bool = false
+
+    /// Independent desktop CPU-load pause, owned by Companion.
+    var cpuPaused: Bool = false
 
     /// Camera-in-use pause flag, set by Companion's camera monitor while
     /// any camera device is running (and the pref is on) — covers
@@ -222,6 +228,7 @@ extension WallpaperScreenControl {
         regressCounter = try c.decodeIfPresent(Int.self, forKey: .regressCounter) ?? 0
         playlistGeneration = try c.decodeIfPresent(Int.self, forKey: .playlistGeneration) ?? 0
         autoPaused = try c.decodeIfPresent(Bool.self, forKey: .autoPaused) ?? false
+        userPaused = try c.decodeIfPresent(Bool.self, forKey: .userPaused) ?? false
         jumpToken = try c.decodeIfPresent(Int.self, forKey: .jumpToken) ?? 0
         jumpIndex = try c.decodeIfPresent(Int.self, forKey: .jumpIndex) ?? 0
     }
@@ -235,6 +242,7 @@ extension WallpaperControlState {
         paused = try c.decodeIfPresent(Bool.self, forKey: .paused) ?? false
         batteryPaused = try c.decodeIfPresent(Bool.self, forKey: .batteryPaused) ?? false
         thermalPaused = try c.decodeIfPresent(Bool.self, forKey: .thermalPaused) ?? false
+        cpuPaused = try c.decodeIfPresent(Bool.self, forKey: .cpuPaused) ?? false
         cameraPaused = try c.decodeIfPresent(Bool.self, forKey: .cameraPaused) ?? false
         screens = try c.decodeIfPresent([String: WallpaperScreenControl].self, forKey: .screens) ?? [:]
         settingsGeneration = try c.decodeIfPresent(Int.self, forKey: .settingsGeneration) ?? 0
@@ -266,7 +274,8 @@ extension WallpaperControlState {
         let covered = isBroadcast
             ? screens.values.contains { $0.autoPaused }
             : (screens[rendererKey]?.autoPaused ?? false)
-        return (paused, covered)
+        let screenPaused = !isBroadcast && (screens[rendererKey]?.userPaused ?? false)
+        return (paused || screenPaused, covered)
     }
 }
 

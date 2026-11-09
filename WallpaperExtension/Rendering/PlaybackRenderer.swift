@@ -47,7 +47,7 @@ protocol PlaybackRenderer: AnyObject {
     // Pause-reason model
     func pause(reason: PauseReasons)
     func resume(reason: PauseReasons)
-    func syncCompanionPauseReasons(user: Bool, battery: Bool, coverage: Bool, thermal: Bool, camera: Bool)
+    func syncCompanionPauseReasons(user: Bool, battery: Bool, coverage: Bool, thermal: Bool, camera: Bool, cpu: Bool)
     func applyActivityPolicy(paused: Bool, animated: Bool)
 
     // Saver / lock modes

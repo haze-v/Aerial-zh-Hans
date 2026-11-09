@@ -24,6 +24,7 @@
 
 import AppKit
 import Combine
+import Darwin
 import os
 
 @MainActor
@@ -44,6 +45,13 @@ final class WallpaperAutoPauseCoordinator {
     private var watches: [String: Watch] = [:]
     private var coveredScreens: Set<String> = []
     private var cancellable: AnyCancellable?
+
+    private var cpuTimer: DispatchSourceTimer?
+    private var cpuInterval: Double = 0
+    private var cpuThreshold: Double = 0
+    private var cpuHighLoadDuration: Double = 0
+    private var cpuSample: CPUUsageSample?
+    private var cpuPauseRule = CPUPauseRule()
 
     private var pollTimer: DispatchSourceTimer?
     /// uuid → displayID mirror of `watches`, readable from the poll
@@ -85,6 +93,7 @@ final class WallpaperAutoPauseCoordinator {
         // Screensaver-only installs have no desktop wallpaper to protect;
         // a coverage flag would only leak into saver sessions.
         let desktopActive = WallpaperControl.shared.desktopWallpaperActive
+        updateCPUSampling(active: desktopActive, running: monitor.isRunning && !presenting)
         let shouldWatch = Preferences.desktopAutoPause
             && monitor.isRunning
             && desktopActive
@@ -128,6 +137,71 @@ final class WallpaperAutoPauseCoordinator {
     /// mutation so a user resume acts on fresh coverage within a tick.
     nonisolated func pokePoll() {
         pollCadence.withLock { $0.force = true }
+    }
+
+    // MARK: - System CPU sampling
+
+    private func updateCPUSampling(active: Bool, running: Bool) {
+        guard active, Preferences.desktopPauseOnHighCPU else {
+            stopCPUSampling()
+            WallpaperControl.shared.setCPUPaused(false)
+            return
+        }
+
+        guard running else {
+            stopCPUSampling()
+            return
+        }
+
+        let interval = Preferences.desktopCPUSampleInterval
+        let threshold = Preferences.desktopCPUThreshold
+        let duration = Preferences.desktopCPUHighLoadDuration
+        guard cpuTimer == nil || interval != cpuInterval || threshold != cpuThreshold
+                || duration != cpuHighLoadDuration else { return }
+
+        stopCPUSampling()
+        cpuInterval = interval
+        cpuThreshold = threshold
+        cpuHighLoadDuration = duration
+        cpuSample = CPUUsageSample.read()
+        let timer = DispatchSource.makeTimerSource(queue: .main)
+        timer.schedule(deadline: .now() + interval, repeating: interval, leeway: .milliseconds(100))
+        timer.setEventHandler { [weak self] in
+            MainActor.assumeIsolated { self?.sampleCPU() }
+        }
+        cpuTimer = timer
+        timer.resume()
+    }
+
+    private func stopCPUSampling() {
+        cpuTimer?.cancel()
+        cpuTimer = nil
+        cpuSample = nil
+        cpuPauseRule = CPUPauseRule()
+    }
+
+    private func sampleCPU() {
+        let previous = cpuSample
+        cpuSample = CPUUsageSample.read()
+        guard let previous, let current = cpuSample else {
+            cpuPauseRule = CPUPauseRule()
+            return
+        }
+
+        let elapsed = current.timestamp - previous.timestamp
+        let busy = current.busy &- previous.busy
+        let idle = current.idle &- previous.idle
+        let total = Double(busy) + Double(idle)
+        // A delayed tick (e.g. after sleep) doesn't prove sustained load.
+        guard elapsed > 0, elapsed <= cpuInterval * 2, total > 0 else {
+            cpuPauseRule = CPUPauseRule()
+            return
+        }
+        let usage = Double(busy) / total * 100
+        if let paused = cpuPauseRule.record(usage: usage, threshold: cpuThreshold, elapsed: elapsed, pauseAfter: cpuHighLoadDuration),
+           paused != WallpaperControl.shared.currentCPUPaused {
+            WallpaperControl.shared.setCPUPaused(paused)
+        }
     }
 
     // MARK: - Watch bookkeeping (main)
@@ -265,5 +339,49 @@ final class WallpaperAutoPauseCoordinator {
         // screen still flagged — matching the desktop path's "any
         // covered screen pauses all" semantics.
         WallpaperControl.shared.setAutoPaused(covered, screenUUID: uuid)
+    }
+}
+
+
+/// Tracks consecutive CPU samples before changing the desktop pause.
+private struct CPUPauseRule {
+    private var highDuration: Double = 0
+    private var lowSamples = 0
+
+    mutating func record(usage: Double, threshold: Double, elapsed: Double, pauseAfter: Double) -> Bool? {
+        if usage > threshold {
+            lowSamples = 0
+            highDuration += elapsed
+            return highDuration >= pauseAfter ? true : nil
+        }
+        highDuration = 0
+        guard usage < threshold else {
+            lowSamples = 0
+            return nil
+        }
+        lowSamples = min(lowSamples + 1, 2)
+        return lowSamples == 2 ? false : nil
+    }
+}
+
+/// Aggregate user, system, nice and idle ticks across all CPU cores.
+private struct CPUUsageSample {
+    let timestamp: Double
+    let busy: UInt32
+    let idle: UInt32
+
+    static func read() -> Self? {
+        let host = mach_host_self()
+        defer { mach_port_deallocate(mach_task_self_, host) }
+        var load = host_cpu_load_info()
+        var count = mach_msg_type_number_t(MemoryLayout<host_cpu_load_info>.size / MemoryLayout<integer_t>.size)
+        let result = withUnsafeMutablePointer(to: &load) { pointer in
+            pointer.withMemoryRebound(to: integer_t.self, capacity: Int(count)) {
+                host_statistics(host, HOST_CPU_LOAD_INFO, $0, &count)
+            }
+        }
+        guard result == KERN_SUCCESS else { return nil }
+        let (user, system, idle, nice) = load.cpu_ticks
+        return Self(timestamp: ProcessInfo.processInfo.systemUptime, busy: user &+ system &+ nice, idle: idle)
     }
 }

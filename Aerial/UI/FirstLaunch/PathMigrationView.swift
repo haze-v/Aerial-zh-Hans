@@ -50,7 +50,7 @@ struct PathMigrationView: View {
                 .font(.title)
                 .fontWeight(.bold)
 
-            Text(description)
+            Text(LocalizedStringKey(description))
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
 
@@ -96,7 +96,7 @@ struct PathMigrationView: View {
                 .font(.title2)
                 .fontWeight(.semibold)
 
-            Text(message)
+            Text(LocalizedStringKey(message))
                 .multilineTextAlignment(.center)
                 .foregroundColor(.secondary)
         }
@@ -114,7 +114,7 @@ struct PathMigrationView: View {
                 .font(.title2)
                 .fontWeight(.semibold)
 
-            Text(message)
+            Text(LocalizedStringKey(message))
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
 
@@ -157,11 +157,11 @@ struct PathMigrationView: View {
 
     private func confirmStartFresh() {
         let alert = NSAlert()
-        alert.messageText = "Start Fresh?"
-        alert.informativeText = "Your existing data will remain in the old location but won't be used. You can delete it manually later if desired."
+        alert.messageText = String(localized: "Start Fresh?")
+        alert.informativeText = String(localized: "Your existing data will remain in the old location but won't be used. You can delete it manually later if desired.")
         alert.alertStyle = .informational
-        alert.addButton(withTitle: "Start Fresh")
-        alert.addButton(withTitle: "Cancel")
+        alert.addButton(withTitle: String(localized: "Start Fresh"))
+        alert.addButton(withTitle: String(localized: "Cancel"))
 
         if alert.runModal() == .alertFirstButtonReturn {
             startMigration(type: .startFresh)

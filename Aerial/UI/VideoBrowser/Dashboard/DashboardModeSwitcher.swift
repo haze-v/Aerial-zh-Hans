@@ -19,6 +19,7 @@ struct DashboardModeSwitcher: View {
     var body: some View {
         Picker("", selection: Binding(get: { current }, set: { onChange($0) })) {
             Label("Independent", systemImage: "display").tag(ViewingMode.independent)
+            Label("Independent Mirror", systemImage: "display.2").tag(ViewingMode.independentMirror)
             Label("Cloned", systemImage: "rectangle.on.rectangle").tag(ViewingMode.cloned)
             Label("Spanned", systemImage: "rectangle.split.2x1").tag(ViewingMode.spanned)
             Label("Mirrored", systemImage: "rectangle.2.swap").tag(ViewingMode.mirrored)

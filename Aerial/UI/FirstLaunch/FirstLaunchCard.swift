@@ -33,7 +33,7 @@ struct FirstLaunchCard: View {
                 .frame(height: 96)
 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(title)
+                    Text(LocalizedStringKey(title))
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundColor(.primary)
                     Text(tagline)

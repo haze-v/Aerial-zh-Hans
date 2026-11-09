@@ -166,6 +166,11 @@ struct CompanionSettings: Codable {
     /// `"lowBattery"`: pause only when on battery AND remaining capacity is below 20%.
     var desktopPauseOnBatteryMode: String
 
+    var desktopPauseOnHighCPU: Bool
+    var desktopCPUThreshold: Double
+    var desktopCPUHighLoadDuration: Double
+    var desktopCPUSampleInterval: Double
+
     // MARK: - Thermal / Low Power Mode pause
 
     /// Pause the wallpaper while thermal pressure is `.serious` or
@@ -273,6 +278,10 @@ struct CompanionSettings: Codable {
          nowPlayingMode: String? = nil,
          desktopPauseOnBattery: Bool = false,
          desktopPauseOnBatteryMode: String = "anyBattery",
+         desktopPauseOnHighCPU: Bool = false,
+         desktopCPUThreshold: Double = 70,
+         desktopCPUHighLoadDuration: Double = 5,
+         desktopCPUSampleInterval: Double = 1,
          desktopPauseOnThermal: Bool = true,
          desktopPauseOnLowPower: Bool = false,
          desktopPauseOnCamera: Bool = false,
@@ -308,6 +317,10 @@ struct CompanionSettings: Codable {
         self.nowPlayingMode = nowPlayingMode
         self.desktopPauseOnBattery = desktopPauseOnBattery
         self.desktopPauseOnBatteryMode = desktopPauseOnBatteryMode
+        self.desktopPauseOnHighCPU = desktopPauseOnHighCPU
+        self.desktopCPUThreshold = desktopCPUThreshold
+        self.desktopCPUHighLoadDuration = desktopCPUHighLoadDuration
+        self.desktopCPUSampleInterval = desktopCPUSampleInterval
         self.desktopPauseOnThermal = desktopPauseOnThermal
         self.desktopPauseOnLowPower = desktopPauseOnLowPower
         self.desktopPauseOnCamera = desktopPauseOnCamera
@@ -351,6 +364,10 @@ struct CompanionSettings: Codable {
         nowPlayingMode = try container.decodeIfPresent(String.self, forKey: .nowPlayingMode)
         desktopPauseOnBattery = try container.decodeIfPresent(Bool.self, forKey: .desktopPauseOnBattery) ?? false
         desktopPauseOnBatteryMode = try container.decodeIfPresent(String.self, forKey: .desktopPauseOnBatteryMode) ?? "anyBattery"
+        desktopPauseOnHighCPU = try container.decodeIfPresent(Bool.self, forKey: .desktopPauseOnHighCPU) ?? false
+        desktopCPUThreshold = min(95, max(5, try container.decodeIfPresent(Double.self, forKey: .desktopCPUThreshold) ?? 70))
+        desktopCPUHighLoadDuration = min(30, max(1, try container.decodeIfPresent(Double.self, forKey: .desktopCPUHighLoadDuration) ?? 5))
+        desktopCPUSampleInterval = min(5, max(1, try container.decodeIfPresent(Double.self, forKey: .desktopCPUSampleInterval) ?? 1))
         desktopPauseOnThermal = try container.decodeIfPresent(Bool.self, forKey: .desktopPauseOnThermal) ?? true
         desktopPauseOnLowPower = try container.decodeIfPresent(Bool.self, forKey: .desktopPauseOnLowPower) ?? false
         desktopPauseOnCamera = try container.decodeIfPresent(Bool.self, forKey: .desktopPauseOnCamera) ?? false

@@ -55,6 +55,7 @@ struct PauseReasons: OptionSet, Equatable {
     /// Camera-in-use rule (WallpaperControlState.cameraPaused) — pause
     /// during videoconferences without coverage-threshold tuning.
     static let camera = PauseReasons(rawValue: 1 << 5)
+    static let cpu = PauseReasons(rawValue: 1 << 6)
 
     var summary: String {
         var parts: [String] = []
@@ -64,6 +65,7 @@ struct PauseReasons: OptionSet, Equatable {
         if contains(.coverage) { parts.append("coverage") }
         if contains(.thermal) { parts.append("thermal") }
         if contains(.camera) { parts.append("camera") }
+        if contains(.cpu) { parts.append("cpu") }
         return parts.isEmpty ? "none" : parts.joined(separator: "+")
     }
 }
@@ -676,7 +678,7 @@ final class VideoRenderer: @unchecked Sendable {
     /// shortly after — calling `start()`; until then the timebase
     /// stays at rate 0 and no feeding happens.
     static func create(videoURL: URL, startAt: Double? = nil, extraRotation: Int = 0,
-                       playDuration: Double? = nil) async throws -> VideoRenderer {
+                       playDuration: Double? = nil, startPosition: (@Sendable () -> Double?)? = nil) async throws -> VideoRenderer {
         let asset = AVURLAsset(url: videoURL)
         let tracks = try await asset.loadTracks(withMediaType: .video)
         guard let track = tracks.first else {
@@ -687,7 +689,7 @@ final class VideoRenderer: @unchecked Sendable {
         let fps = (try? await track.load(.nominalFrameRate)) ?? 30
         let presentation = await loadPresentation(track: track, extraRotation: extraRotation)
         debugLog("🔄 [Renderer] \(videoURL.lastPathComponent): \(presentation.summary)\(playForSuffix(playDuration))")
-        return try VideoRenderer(asset: asset, videoTrack: track, frameRate: fps, startAt: startAt,
+        return try VideoRenderer(asset: asset, videoTrack: track, frameRate: fps, startAt: startPosition?() ?? startAt,
                                  presentation: presentation, playDuration: playDuration)
     }
 
@@ -1021,10 +1023,10 @@ final class VideoRenderer: @unchecked Sendable {
     }
 
     /// Bulk-set the Companion-driven reasons (user/battery/coverage/
-    /// thermal/camera), preserving `.policy`. Used to seed fresh
+    /// thermal/camera/CPU), preserving `.policy`. Used to seed fresh
     /// renderers at acquire/rekey and by the control listener's lineage
     /// re-baseline.
-    func syncCompanionPauseReasons(user: Bool, battery: Bool, coverage: Bool, thermal: Bool, camera: Bool) {
+    func syncCompanionPauseReasons(user: Bool, battery: Bool, coverage: Bool, thermal: Bool, camera: Bool, cpu: Bool) {
         queue.async { [weak self] in
             guard let self else { return }
             var next = pauseReasons.intersection(.policy)
@@ -1033,6 +1035,7 @@ final class VideoRenderer: @unchecked Sendable {
             if coverage { next.insert(.coverage) }
             if thermal { next.insert(.thermal) }
             if camera { next.insert(.camera) }
+            if cpu { next.insert(.cpu) }
             guard next != pauseReasons else { return }
             pauseReasons = next
             reassertPlaybackState(context: "seed")

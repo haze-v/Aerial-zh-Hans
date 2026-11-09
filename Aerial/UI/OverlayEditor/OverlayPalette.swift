@@ -39,9 +39,9 @@ struct OverlayPalette: View {
                 .frame(width: 28, height: 28)
 
             VStack(alignment: .leading, spacing: 2) {
-                Text(kind.displayName)
+                Text(LocalizedStringKey(kind.displayName))
                     .font(.system(size: 14, weight: .semibold))
-                Text(kind.description)
+                Text(LocalizedStringKey(kind.description))
                     .font(.system(size: 11))
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
@@ -65,9 +65,9 @@ struct OverlayPalette: View {
                     .frame(width: 28, height: 28)
 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(kind.displayName)
+                    Text(LocalizedStringKey(kind.displayName))
                         .font(.system(size: 14, weight: .semibold))
-                    Text(kind.description)
+                    Text(LocalizedStringKey(kind.description))
                         .font(.system(size: 11))
                         .foregroundStyle(.secondary)
                         .lineLimit(1)

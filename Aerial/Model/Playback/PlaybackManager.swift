@@ -124,7 +124,7 @@ class PlaybackManager: ObservableObject {
 
     /// Effective screen UUID for playlist queries — non-nil only in independent mode.
     var effectiveScreenUUID: String? {
-        guard PrefsDisplays.viewingMode == .independent else { return nil }
+        guard PrefsDisplays.viewingMode.usesPerDisplayPlayback else { return nil }
         return popoverScreenUUID
     }
 
@@ -205,6 +205,23 @@ class PlaybackManager: ObservableObject {
 
     // MARK: - Screen Management
 
+    func changeViewingMode(_ mode: ViewingMode) {
+        let previous = PrefsDisplays.viewingMode
+        guard mode != previous else { return }
+        PrefsDisplays.viewingMode = mode
+        if previous == .independentMirror {
+            WallpaperControl.shared.clearScreenUserPauses()
+        }
+        if mode == .independentMirror {
+            PlaylistManager.shared.updateMirrorScreens(availableScreens.map(\.uuid), startTogether: true)
+        }
+        WallpaperControl.shared.displaysConfigDidChange()
+    }
+
+    func mirrorPauseScope(_ screenUUID: String?) -> String? {
+        PrefsDisplays.viewingMode == .independentMirror ? screenUUID : nil
+    }
+
     /// Refresh the list of available screens
     func refreshScreenList() {
         availableScreens = NSScreen.screens.map { screen in
@@ -213,6 +230,9 @@ class PlaybackManager: ObservableObject {
                        width: screen.frame.width,
                        height: screen.frame.height,
                        isMain: screen.frame.origin == .zero)
+        }
+        if PrefsDisplays.viewingMode == .independentMirror {
+            PlaylistManager.shared.updateMirrorScreens(availableScreens.map(\.uuid))
         }
     }
 
@@ -678,6 +698,9 @@ class PlaybackManager: ObservableObject {
         }
         if isCameraPaused {
             return ("video.fill", "Paused — camera in use")
+        }
+        if WallpaperControl.shared.currentCPUPaused {
+            return ("cpu", String(localized: "Paused — high CPU usage"))
         }
         if isCoveragePaused(for: screenUUID) {
             return ("macwindow", "Paused — display covered")

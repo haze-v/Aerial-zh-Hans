@@ -237,7 +237,7 @@ class OverlayEditorWindowController: NSWindowController {
             backing: .buffered,
             defer: false
         )
-        panel.title = "Overlays"
+        panel.title = String(localized: "Overlays")
         panel.becomesKeyOnlyIfNeeded = true
         panel.isFloatingPanel = true
         panel.isReleasedWhenClosed = false
@@ -288,7 +288,7 @@ class OverlayEditorWindowController: NSWindowController {
             backing: .buffered,
             defer: false
         )
-        panel.title = "Inspector"
+        panel.title = String(localized: "Inspector")
         panel.becomesKeyOnlyIfNeeded = false
         panel.isFloatingPanel = true
         panel.isReleasedWhenClosed = false
