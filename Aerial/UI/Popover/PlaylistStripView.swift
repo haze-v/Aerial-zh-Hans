@@ -168,7 +168,14 @@ struct PlaylistSectionView: View {
 
     private var randomJumpButton: some View {
         Button {
-            if let index = entries.indices.filter({ $0 != selectedIdx }).randomElement() {
+            if PrefsDisplays.viewingMode == .independent {
+                for screen in playbackManager.availableScreens {
+                    guard let choice = randomCandidates(for: screen.uuid).randomElement() else { continue }
+                    PlaylistManager.shared.setCurrentIndex(choice.index, for: screen.uuid)
+                    playbackManager.skipTo(playlistIndex: choice.index, screenUUID: screen.uuid)
+                    debugLog("[RandomJump] screen=\(screen.uuid) video=\(choice.entry.videoId)")
+                }
+            } else if let index = entries.indices.filter({ $0 != selectedIdx }).randomElement() {
                 tapEntry(index: index)
             }
         } label: {
@@ -178,7 +185,9 @@ struct PlaylistSectionView: View {
                 .contentShape(Rectangle())
         }
         .buttonStyle(.borderless)
-        .disabled(entries.count < 2)
+        .disabled(PrefsDisplays.viewingMode == .independent
+                  ? !playbackManager.availableScreens.contains { !randomCandidates(for: $0.uuid).isEmpty }
+                  : entries.count < 2)
         .help("Jump to a random video")
         .accessibilityLabel("Jump to a random video")
     }
@@ -554,6 +563,20 @@ struct PlaylistSectionView: View {
         PlaylistManager.shared.setCurrentIndex(playlistIndex, for: scopeScreenUUID)
         // Route the jump to the wallpaper extension (the player).
         playbackManager.skipTo(playlistIndex: playlistIndex, screenUUID: scopeScreenUUID)
+    }
+
+    /// 每块屏幕按自己的播放列表和时段筛选随机候选，避开当前视频。
+    private func randomCandidates(for screenUUID: String) -> [(index: Int, entry: PlaylistEntry)] {
+        let playlist = PlaylistManager.shared.allEntries(for: screenUUID)
+        let current = PlaylistManager.shared.currentIndex(for: screenUUID)
+        let currentID = playlist.indices.contains(current) ? playlist[current].videoId : nil
+        let restricted = TimeManagement.sharedInstance.shouldRestrictPlaybackToDayNightVideo().0
+        return playlist.enumerated().compactMap { index, entry in
+            guard entry.videoId != currentID,
+                  let video = videoById[entry.videoId],
+                  !restricted || TimeManagement.videoMatchesCurrentTime(video) else { return nil }
+            return (index, entry)
+        }
     }
 
     private func downloadEntry(videoId: String) {
