@@ -21,7 +21,7 @@ final class VideoBrowserWindowController: NSWindowController {
             backing: .buffered,
             defer: false
         )
-        window.title = "Video Library"
+        window.title = String(localized: "Video Library")
         window.contentViewController = hosting
         window.isReleasedWhenClosed = false
         window.minSize = NSSize(width: 1230, height: 830)

@@ -128,7 +128,7 @@ struct ActivityContentView: View {
     private func sectionView(_ section: ActivitySection) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 6) {
-                Text(section.title)
+                Text(LocalizedStringKey(section.title))
                     .font(.system(size: 16, weight: .semibold))
                 Text("\(section.entries.count)")
                     .font(.system(size: 12, weight: .medium))

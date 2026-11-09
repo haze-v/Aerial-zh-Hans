@@ -235,7 +235,7 @@ struct VideoBrowserSidebar: View {
                     .foregroundColor(highContrastSelected ? .white
                                      : (isSelected ? .aerial : .secondary))
                     .frame(width: 20)
-                Text(title)
+                Text(LocalizedStringKey(title))
                     .font(.system(size: 14))
                     .foregroundColor(highContrastSelected ? .white : .primary)
                 if showNewBadge {
@@ -287,7 +287,7 @@ struct VideoBrowserSidebar: View {
                 .font(.system(size: 15))
                 .foregroundColor(.secondary)
                 .frame(width: 20)
-            Text(title)
+            Text(LocalizedStringKey(title))
                 .font(.system(size: 14))
         }
     }

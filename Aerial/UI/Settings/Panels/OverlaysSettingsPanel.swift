@@ -130,7 +130,7 @@ struct OverlaysSettingsPanel: View {
 
                     Picker("Rotate overlays", selection: $rotationMode) {
                         ForEach(OverlayRotationMode.allCases) { mode in
-                            Text(mode.displayName).tag(mode)
+                            Text(LocalizedStringKey(mode.displayName)).tag(mode)
                         }
                     }
                     .onChange(of: rotationMode) { _, newValue in

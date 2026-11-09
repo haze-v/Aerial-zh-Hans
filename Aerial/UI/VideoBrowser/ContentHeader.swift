@@ -27,12 +27,12 @@ struct ContentHeader<Actions: View>: View {
                 HStack(spacing: 8) {
                     Image(systemName: icon)
                         .font(.system(size: 18))
-                    Text(title)
+                    Text(LocalizedStringKey(title))
                         .font(.system(size: 17, weight: .semibold))
                 }
 
                 if let description, !description.isEmpty {
-                    Text(description)
+                    Text(LocalizedStringKey(description))
                         .font(.system(size: 12))
                         .foregroundColor(.secondary)
                         .fixedSize(horizontal: false, vertical: true)

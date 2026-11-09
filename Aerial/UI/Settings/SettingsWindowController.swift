@@ -21,7 +21,7 @@ final class SettingsWindowController: NSWindowController {
             backing: .buffered,
             defer: false
         )
-        window.title = "Aerial Settings"
+        window.title = String(localized: "Aerial Settings")
         window.contentViewController = hosting
         window.isReleasedWhenClosed = false
         window.minSize = NSSize(width: 950, height: 700)

@@ -271,7 +271,7 @@ struct CacheSettingsPanel: View {
             Circle()
                 .fill(color)
                 .frame(width: 8, height: 8)
-            Text(label)
+            Text(LocalizedStringKey(label))
                 .font(.system(size: 11))
                 .foregroundColor(.secondary)
         }

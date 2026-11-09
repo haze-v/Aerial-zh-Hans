@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		F0A411100000000000000002 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = F0A411100000000000000001 /* Localizable.xcstrings */; };
 		03076A072505EF8E00CDF16C /* kofi1@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 03076A062505EF8E00CDF16C /* kofi1@2x.png */; };
 		031A3A6724D835B10011E738 /* InfoWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 031A3A6524D835B10011E738 /* InfoWindowController.swift */; };
 		0333115924D85CCA00E4622D /* String+version.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0333115824D85CCA00E4622D /* String+version.swift */; };
@@ -465,6 +466,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		F0A411100000000000000001 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Resources/Localizable.xcstrings; sourceTree = "<group>"; };
 		03076A062505EF8E00CDF16C /* kofi1@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "kofi1@2x.png"; sourceTree = "<group>"; };
 		031A3A6524D835B10011E738 /* InfoWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoWindowController.swift; sourceTree = "<group>"; };
 		0333115824D85CCA00E4622D /* String+version.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+version.swift"; sourceTree = "<group>"; };
@@ -862,6 +864,7 @@
 			isa = PBXGroup;
 			children = (
 				F0RG96065299974164545FA4 /* App */,
+				F0A411100000000000000001 /* Localizable.xcstrings */,
 				F0RG8509D026948570441BBA /* Model */,
 				F0RG97CA60AAE09FB0331358 /* Resources */,
 				F0RG62E38F567443C5AF7CC3 /* UI */,
@@ -1721,6 +1724,7 @@
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				"zh-Hans",
 				en,
 				Base,
 			);
@@ -1747,6 +1751,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F0A411100000000000000002 /* Localizable.xcstrings in Resources */,
 				033B0B7224E9749400622CA7 /* moon.zzz.pdf in Resources */,
 				03CE4F5D24CB0CA900494D32 /* Assets.xcassets in Resources */,
 				033B0B7324E9749400622CA7 /* exclamationmark.bubble.pdf in Resources */,
@@ -2364,7 +2369,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 26.0;
-				MARKETING_VERSION = 4.1.9;
+				MARKETING_VERSION = 4.1.10;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.glouel.Aerial-App";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -2395,7 +2400,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 26.0;
-				MARKETING_VERSION = 4.1.9;
+				MARKETING_VERSION = 4.1.10;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.glouel.Aerial-App";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -2462,7 +2467,7 @@
 					"@executable_path/../../../../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 26.0;
-				MARKETING_VERSION = 4.1.9;
+				MARKETING_VERSION = 4.1.10;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.glouel.Aerial-App.Aerial4WallpaperExtension";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -2496,7 +2501,7 @@
 					"@executable_path/../../../../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 26.0;
-				MARKETING_VERSION = 4.1.9;
+				MARKETING_VERSION = 4.1.10;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.glouel.Aerial-App.Aerial4WallpaperExtension";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;

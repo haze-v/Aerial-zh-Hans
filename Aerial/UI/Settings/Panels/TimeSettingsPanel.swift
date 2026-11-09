@@ -152,7 +152,7 @@ struct TimeSettingsPanel: View {
                             Spacer()
                             Picker("", selection: $sunEventWindow) {
                                 ForEach(sunEventWindowOptions, id: \.value) { option in
-                                    Text(option.label).tag(option.value)
+                                    Text(LocalizedStringKey(option.label)).tag(option.value)
                                 }
                             }
                             .pickerStyle(.menu)
@@ -191,7 +191,7 @@ struct TimeSettingsPanel: View {
                                 Spacer()
                                 Picker("", selection: $solarMode) {
                                     ForEach(solarModeOptions, id: \.value) { option in
-                                        Text(option.label).tag(option.value)
+                                        Text(LocalizedStringKey(option.label)).tag(option.value)
                                     }
                                 }
                                 .pickerStyle(.menu)
@@ -366,7 +366,7 @@ struct TimeSettingsPanel: View {
                 Image(systemName: icon)
                     .foregroundColor(disabled ? .secondary.opacity(0.5) : .secondary)
                     .frame(width: 20)
-                Text(label)
+                Text(LocalizedStringKey(label))
                     .font(.system(size: 14))
                     .foregroundColor(disabled ? .secondary : .primary)
             }
@@ -554,7 +554,7 @@ struct TimeBarView: View {
             RoundedRectangle(cornerRadius: 3)
                 .fill(color)
                 .frame(width: 12, height: 12)
-            Text(label)
+            Text(LocalizedStringKey(label))
                 .foregroundColor(.secondary)
         }
     }

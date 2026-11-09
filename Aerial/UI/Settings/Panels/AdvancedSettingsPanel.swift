@@ -172,7 +172,7 @@ struct AdvancedSettingsPanel: View {
                             Spacer()
                             Picker("", selection: $transitionStyle) {
                                 ForEach(WallpaperTransitionStyle.allCases, id: \.self) { style in
-                                    Text(style.displayName).tag(style)
+                                    Text(LocalizedStringKey(style.displayName)).tag(style)
                                 }
                             }
                             .pickerStyle(.menu)
@@ -189,7 +189,7 @@ struct AdvancedSettingsPanel: View {
                                 Spacer()
                                 Picker("", selection: $transitionDuration) {
                                     ForEach(transitionDurations, id: \.seconds) { option in
-                                        Text(option.label).tag(option.seconds)
+                                        Text(LocalizedStringKey(option.label)).tag(option.seconds)
                                     }
                                 }
                                 .pickerStyle(.menu)

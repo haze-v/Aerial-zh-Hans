@@ -90,10 +90,10 @@ struct SettingsNavItem: View {
                 .frame(width: 32, height: 32)
 
             VStack(alignment: .leading, spacing: 2) {
-                Text(panel.title)
+                Text(LocalizedStringKey(panel.title))
                     .font(.system(size: 14, weight: .medium))
 
-                Text(panel.description)
+                Text(LocalizedStringKey(panel.description))
                     .font(.system(size: 11))
                     .foregroundColor(.secondary)
             }

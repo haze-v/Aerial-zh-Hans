@@ -1,3 +1,20 @@
+# Aerial 简体中文版
+
+Aerial 4.1.10 简体中文版本。
+
+- 汉化菜单栏、视频资料库、墙纸选择和常用设置，包含 540 条简体中文翻译。部分高级说明和视频名称仍可能显示英文。
+- 在 Apple Silicon Mac 上验证了 Release 构建、墙纸扩展加载，以及锁屏后解锁继续播放。
+- 构建时用 Xcode 打开 `Aerial.xcodeproj`，选择 `Aerial` scheme。需要 macOS 26 或更新版本和 Xcode。命令行可用本地签名构建：
+
+```bash
+xcodebuild -project Aerial.xcodeproj -scheme Aerial -configuration Release \
+  -derivedDataPath DerivedData CODE_SIGN_IDENTITY=- CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM= build
+```
+
+构建产物位于 `DerivedData/Build/Products/Release/Aerial.app`。
+
+---
+
 # Aerial 4
 
 [![Total downloads](https://img.shields.io/github/downloads/AerialScreensaver/Aerial/total?style=flat-square&logo=apple&logoColor=white)](https://github.com/AerialScreensaver/Aerial/releases) [![Latest release](https://img.shields.io/github/v/release/AerialScreensaver/Aerial?style=flat-square)](https://github.com/AerialScreensaver/Aerial/releases/latest)

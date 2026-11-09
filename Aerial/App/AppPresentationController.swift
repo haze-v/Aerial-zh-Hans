@@ -378,7 +378,7 @@ final class AppPresentationController: NSObject {
         }
 
         let alert = NSAlert()
-        alert.messageText = "Quit Aerial?"
+        alert.messageText = String(localized: "Quit Aerial?")
         alert.informativeText = """
             Your wallpaper and screensaver keep running — they live in a macOS extension, not in this app.
 
@@ -418,7 +418,7 @@ final class AppPresentationController: NSObject {
         let paused = MainActor.assumeIsolated { PlaybackManager.shared.isPaused }
 
         func item(_ title: String, _ action: Selector, enabled: Bool = true) -> NSMenuItem {
-            let item = NSMenuItem(title: title, action: action, keyEquivalent: "")
+            let item = NSMenuItem(title: String(localized: String.LocalizationValue(title)), action: action, keyEquivalent: "")
             item.target = self
             item.isEnabled = enabled
             return item

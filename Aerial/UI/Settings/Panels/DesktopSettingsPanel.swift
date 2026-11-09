@@ -140,7 +140,7 @@ struct DesktopSettingsPanel: View {
                         Spacer()
                         Picker("", selection: $autoAdvanceMinutes) {
                             ForEach(autoAdvanceIntervals, id: \.minutes) { option in
-                                Text(option.label).tag(option.minutes)
+                                Text(LocalizedStringKey(option.label)).tag(option.minutes)
                             }
                         }
                         .pickerStyle(.menu)
@@ -519,7 +519,7 @@ struct DesktopSettingsPanel: View {
             VStack(alignment: .leading, spacing: 16) {
                 Picker("Menu bar background", selection: $menuBarBackground) {
                     ForEach(MenuBarBackgroundStyle.allCases, id: \.self) { style in
-                        Text(style.displayName).tag(style)
+                        Text(LocalizedStringKey(style.displayName)).tag(style)
                     }
                 }
                 .pickerStyle(.menu)

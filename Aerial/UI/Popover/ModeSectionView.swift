@@ -67,7 +67,7 @@ struct ModeSectionView: View {
             )
         }
         .buttonStyle(.plain)
-        .help(wallpaperButtonHelp)
+        .help(LocalizedStringKey(wallpaperButtonHelp))
     }
 
     private var wallpaperButtonIcon: String {
@@ -91,7 +91,7 @@ struct ModeSectionView: View {
         VStack(spacing: 4) {
             Image(systemName: (isActive && stopWhenActive) ? "stop.fill" : icon)
                 .font(.system(size: 20, weight: .semibold))
-            Text(title)
+            Text(LocalizedStringKey(title))
                 .font(.body)
         }
         .foregroundColor(.aerial)
