@@ -1,99 +1,62 @@
 # Aerial 简体中文版
 
-Aerial 简体中文版本。
+适用于 macOS 的动态墙纸与屏幕保护程序，支持解锁后继续播放、多显示器控制和简体中文界面。
 
-- 汉化菜单栏、视频资料库、墙纸选择、设置、首次启动向导和叠加编辑器。
-- CPU 自动暂停可设置采样间隔、占用率阈值和持续时间。连续两次采样低于阈值后恢复。
-- 独立播放镜像会在屏幕均可播放时对齐视频和进度，单屏恢复后跟随正在播放的屏幕。
+[下载最新版本](https://github.com/x-xxxx/Aerial-zh-Hans/releases/latest) · [反馈问题](https://github.com/x-xxxx/Aerial-zh-Hans/issues)
 
-打开 [最新版本](https://github.com/x-xxxx/Aerial-zh-Hans/releases/latest) 中的 DMG，将 Aerial 拖入「应用程序」。此安装包适用于 Apple Silicon 和 macOS 26 或更新版本。旧版先手动安装一次，之后可在应用内检查此仓库的更新。
+## 系统要求
 
-构建需要 Xcode。打开 `Aerial.xcodeproj` 并选择 `Aerial` scheme，或运行：
+- macOS 26 或更新版本。
+- 发布的 DMG 适用于 Apple Silicon（M 系列芯片）。
+
+## 安装与更新
+
+1. 从最新版本页面下载 DMG。
+2. 打开 DMG，将 Aerial 拖入「应用程序」。
+3. 启动 Aerial，在系统设置中选择 Aerial 墙纸或屏幕保护程序。
+
+安装后可在「设置 → 自动更新」检查更新，更新来源为本仓库。
+
+## 主要功能
+
+- **简体中文界面**：菜单栏、视频资料库、墙纸选择、设置、首次启动向导和叠加编辑器。
+- **多屏播放**：支持独立播放、镜像及独立播放镜像。独立播放镜像使用相同视频，各屏幕独立暂停；同时满足播放条件时同步进度。
+- **随机跳转**：点击骰子随机选片。独立播放时，各屏幕分别抽取并保存历史；镜像模式共用随机结果。
+- **可配置防重复**：在「设置 → 高级 → 播放」调整骰子防重复范围，默认 75%，支持 0%–100%。按可选视频数量向下取整，例如 46 个视频默认排除最近 34 个随机结果。0% 关闭历史排除，100% 最多排除总数减一；修改后下次点骰子生效。
+- **自动暂停**：支持按窗口遮挡、电池、温度和 CPU 使用率暂停。CPU 规则可设置阈值、采样间隔与持续超阈值时间；连续两次采样低于阈值且没有其他暂停条件时恢复。
+- **手动控制**：暂停所有墙纸、调节播放速度、切换收藏或播放列表。手动换片在墙纸被遮挡时也会更新。
+- **文件定位**：在视频右键菜单选择打开文件位置，在访达中定位本地视频。
+
+## 常见问题
+
+**墙纸暂停不动**
+
+先查看菜单栏面板底部的暂停原因。窗口遮挡、CPU 占用、电池等规则均可能触发暂停，可在设置中调整。
+
+**出现黑屏或纯色**
+
+可在「设置 → 墙纸 → 故障排除」点击「重新启动墙纸服务」。程序包含解码阻塞恢复及静态画面兜底；不同机器的开机恢复效果可能不同。
+
+## 从源码构建
+
+需要安装 Xcode 和适用于目标系统的 macOS SDK。
+
+```bash
+git clone https://github.com/x-xxxx/Aerial-zh-Hans.git
+cd Aerial-zh-Hans
+open Aerial.xcodeproj
+```
+
+在 Xcode 中选择 `Aerial` 构建方案并运行，或使用命令行：
 
 ```bash
 xcodebuild -project Aerial.xcodeproj -scheme Aerial -configuration Release \
-  -derivedDataPath DerivedData CODE_SIGN_IDENTITY=- CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM= build
+  -derivedDataPath DerivedData ARCHS=arm64 \
+  CODE_SIGN_IDENTITY=- CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM= build
 ```
 
 构建产物位于 `DerivedData/Build/Products/Release/Aerial.app`。
 
----
+## 许可证
 
-# Aerial 4
-
-[![Total downloads](https://img.shields.io/github/downloads/AerialScreensaver/Aerial/total?style=flat-square&logo=apple&logoColor=white)](https://github.com/AerialScreensaver/Aerial/releases) [![Latest release](https://img.shields.io/github/v/release/AerialScreensaver/Aerial?style=flat-square)](https://github.com/AerialScreensaver/Aerial/releases/latest)
-
-![Aerial screensaver showing weather, clock, and now-playing overlays atop a sunset video](screenshot.webp)
-
-The Apple TV screensaver for your mac, now with optional wallpaper continuity. With optional overlays, multi-monitor support, time-of-day adaptation, live camera feeds support and many more features. 
-
-Check-out the website for more info : [aerialscreensaver.github.io](https://aerialscreensaver.github.io)
-
-## Requirements
-
-- macOS 26 (Tahoe) or later.
-- Xcode 16 or later to build from source.
-
-For earlier macOS versions, check the [download page](https://aerialscreensaver.github.io/download/) to see the last supported release.
-
-## Something not working ? 
-
-Bugs happen, and some features may not work as intended. 
-
-First, make sure you check out the [FAQ](https://aerialscreensaver.github.io/faq/) as it contains a lot of information about limitations and how to use some of the more niche features. 
-
-If you don't find your answer, you can check the existing [issues](https://github.com/AerialScreensaver/Aerial/issues) and post your own if nothing match. Or you can reach out on our [Discord server](https://discord.com/invite/TPuA5WG) in the `#support` channel. 
-
-Whichever way you pick, remember Aerial is very much a one-person passion project. Be kind.
-
-Interested in how it works? See the technical info below.
-
-## App Extension
-
-With version 4.0, the screensaver is distributed as an App Extension, bundled inside `Aerial.app`. Launching the app  registers the screensaver which can then be found in System Settings, ready to be used. 
-
-Screensaver App Extensions were introduced by Apple in macOS 10.*15* (yes, Catalina!) and bring a lot of improvements, including a much improved security model compared to the old, unsafe, plugins that shared their host's memory. Screensaver App Extensions run in their own sandboxed process instead. They also fix many issues that have crept in over the years with the old `.saver` plugin format and its `legacyScreenSaver.appex` compatibility layer.
-
-If you want to make your own macOS screensaver App Extension, I recommend you check [AppexSaverMinimal](https://github.com/AerialScreensaver/AppexSaverMinimal) first. It's a minimal working sample, with a clear documentation of what works, what changed from the old API, and what you should adapt if you already have a `.saver` project. Porting an existing `.saver` project is fairly easy as much of the old API is retained, with a few caveats. 
-
-Version 4.1 of Aerial went one step further and moved to the `com.apple.wallpaper` extension point, backed by Apple's private `WallpaperExtensionKit` framework. Those extensions register as both a dynamic wallpaper and a screensaver. This is what enables the seamless continuity that Aerial 4 provides. It is however a more complex and undocumented API, with a very different instance-based lifecycle and remote `CAContext` rendering.  
-
-To enable wallpapers and screensavers, Aerial relies on [PaperSaver](https://github.com/AerialScreensaver/PaperSaver). You can use this library to set your own screensaver as the old `defaults` plist configuration no longer works.
-
-## Build from source
-
-```bash
-git clone https://github.com/AerialScreensaver/Aerial.git
-cd Aerial
-open Aerial.xcodeproj
-```
-
-In Xcode, pick the **Aerial** scheme and run (`⌘R`).
-
-Note that `ScreenSaver/Source/Models/API/APISecrets.swift` ships with a blank OpenWeather key in the public source. The weather overlay won't display data unless you put your own key. Everything else in the app works without it.
-
-## Thank you
-
-Weather overlays are provided thanks to [Openweather](https://openweathermap.org) who has offerred free support for Aerial for *many* years now ! Many thanks to them !
-
-<a href="https://openweathermap.org"><img src="Aerial/Resources/Assets.xcassets/OpenWeatherLogo.imageset/ow_logo.svg" alt="OpenWeather" width="200"></a>
-
-Aerial relies on a few great open source projects, you should check them out : 
-- [Sparkle](https://sparkle-project.org) for auto-updates
-- [KeyboardShortcuts](https://github.com/sindresorhus/KeyboardShortcuts) by Sindre Sorhus for global shortcuts handling
-- [Github releases to discord](https://github.com/SethCohen/github-releases-to-discord) by Seth Cohen for release notes in the community Discord
-- [Swift Argument parser](https://github.com/apple/swift-argument-parser) by Apple (not used directly by Aerial, but [PaperSaver](https://github.com/AerialScreensaver/PaperSaver) does use it)
-- [mediaremote-adapter](https://github.com/ungive/mediaremote-adapter) by Jonas van den Berg which restored access to the `mediaremote` framework
-- [PaperSaver](https://github.com/AerialScreensaver/PaperSaver) by Guillaume Louel to enable the app extensions
-
-Thanks to those maintainers and their contributors !
-
-And finally, to everyone who has used, supported or contributed to Aerial, thanks for your continued support over those long years! 
-
-## Contributing
-
-Contributions welcome, but **please open an issue first** for substantial changes so we can discuss the approach before you put time into it.
-
-## License
-
-MIT — see [LICENSE](LICENSE).
+采用 MIT 许可证，详见 [LICENSE](LICENSE)。
