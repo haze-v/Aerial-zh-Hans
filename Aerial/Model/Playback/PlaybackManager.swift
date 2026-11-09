@@ -751,14 +751,15 @@ final class PlaybackProgressModel: ObservableObject {
     private init() {}
 }
 
-/// 骰子按播放作用域记忆最近四分之三的候选，重启后继续避开这些视频。
+/// 骰子按播放作用域和设置比例记忆候选，重启后继续避开这些视频。
 enum RandomVideoHistory {
     static func choose(from videoIDs: [String], currentVideoID: String?,
                        screenUUID: String?, defaults: UserDefaults = .standard) -> String? {
         let ids = Set(videoIDs)
         guard ids.count > 1 else { return nil }
         let key = "randomVideoHistory." + (screenUUID ?? "shared")
-        let limit = ids.count * 3 / 4
+        let percent = min(100, max(0, (defaults.object(forKey: "randomVideoHistoryPercent") as? Double) ?? 75))
+        let limit = min(ids.count - 1, Int(Double(ids.count) * percent / 100))
         var recent = Array((defaults.stringArray(forKey: key) ?? []).filter { ids.contains($0) }.suffix(limit))
         let eligible = ids.subtracting(recent)
         let alternatives = eligible.filter { $0 != currentVideoID }

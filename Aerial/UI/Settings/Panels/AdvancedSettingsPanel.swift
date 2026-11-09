@@ -23,6 +23,7 @@ struct AdvancedSettingsPanel: View {
     @State private var audioVolume: Double = WallpaperControl.shared.currentAudioVolume
 
     // Playback
+    @AppStorage("randomVideoHistoryPercent") private var randomVideoHistoryPercent: Double = 75
     @State private var onBatteryMode: Int = PrefsVideos.onBatteryMode.rawValue
     @State private var favorOrientation: Bool = PrefsAdvanced.favorOrientation
 
@@ -265,6 +266,20 @@ struct AdvancedSettingsPanel: View {
                             .onChange(of: onBatteryMode) { newValue in
                                 PrefsVideos.onBatteryMode = OnBatteryMode(rawValue: newValue)!
                             }
+                        }
+
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack {
+                                Text("骰子防重复范围")
+                                Spacer()
+                                Text("\(Int(randomVideoHistoryPercent))%")
+                                    .monospacedDigit()
+                            }
+                            Slider(value: $randomVideoHistoryPercent, in: 0...100, step: 5)
+                                .accessibilityLabel("骰子防重复范围")
+                            Text("按可选视频总数计算，向下取整。0% 关闭历史排除；100% 最多排除总数减一。独立播放时各屏幕分别记忆，下次点骰子生效。")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
                         }
 
                         Toggle("Favor orientation", isOn: $favorOrientation)
