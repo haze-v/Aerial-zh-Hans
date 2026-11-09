@@ -750,3 +750,22 @@ final class PlaybackProgressModel: ObservableObject {
 
     private init() {}
 }
+
+/// 骰子按播放作用域记忆最近四分之三的候选，重启后继续避开这些视频。
+enum RandomVideoHistory {
+    static func choose(from videoIDs: [String], currentVideoID: String?,
+                       screenUUID: String?, defaults: UserDefaults = .standard) -> String? {
+        let ids = Set(videoIDs)
+        guard ids.count > 1 else { return nil }
+        let key = "randomVideoHistory." + (screenUUID ?? "shared")
+        let limit = ids.count * 3 / 4
+        var recent = Array((defaults.stringArray(forKey: key) ?? []).filter { ids.contains($0) }.suffix(limit))
+        let eligible = ids.subtracting(recent)
+        let alternatives = eligible.filter { $0 != currentVideoID }
+        // 手动选片可能占用唯一未进入历史的候选，优先保证历史窗口不重复。
+        guard let selected = (alternatives.isEmpty ? Array(eligible) : Array(alternatives)).randomElement() else { return nil }
+        recent.append(selected)
+        defaults.set(Array(recent.suffix(limit)), forKey: key)
+        return selected
+    }
+}

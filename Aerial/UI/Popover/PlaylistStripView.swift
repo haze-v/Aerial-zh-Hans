@@ -170,12 +170,20 @@ struct PlaylistSectionView: View {
         Button {
             if PrefsDisplays.viewingMode == .independent {
                 for screen in playbackManager.availableScreens {
-                    guard let choice = randomCandidates(for: screen.uuid).randomElement() else { continue }
+                    let candidates = randomCandidates(for: screen.uuid)
+                    let playlist = PlaylistManager.shared.allEntries(for: screen.uuid)
+                    let current = PlaylistManager.shared.currentIndex(for: screen.uuid)
+                    let currentID = playlist.indices.contains(current) ? playlist[current].videoId : nil
+                    guard let videoID = RandomVideoHistory.choose(from: candidates.map { $0.entry.videoId },
+                                                                 currentVideoID: currentID, screenUUID: screen.uuid),
+                          let choice = candidates.first(where: { $0.entry.videoId == videoID }) else { continue }
                     PlaylistManager.shared.setCurrentIndex(choice.index, for: screen.uuid)
                     playbackManager.skipTo(playlistIndex: choice.index, screenUUID: screen.uuid)
                     debugLog("[RandomJump] screen=\(screen.uuid) video=\(choice.entry.videoId)")
                 }
-            } else if let index = entries.indices.filter({ $0 != selectedIdx }).randomElement() {
+            } else if let videoID = RandomVideoHistory.choose(from: entries.map(\.videoId),
+                                                               currentVideoID: currentVideoID, screenUUID: nil),
+                      let index = entries.firstIndex(where: { $0.videoId == videoID }) {
                 tapEntry(index: index)
             }
         } label: {
@@ -186,7 +194,7 @@ struct PlaylistSectionView: View {
         }
         .buttonStyle(.borderless)
         .disabled(PrefsDisplays.viewingMode == .independent
-                  ? !playbackManager.availableScreens.contains { !randomCandidates(for: $0.uuid).isEmpty }
+                  ? !playbackManager.availableScreens.contains { randomCandidates(for: $0.uuid).count > 1 }
                   : entries.count < 2)
         .help("Jump to a random video")
         .accessibilityLabel("Jump to a random video")
@@ -565,15 +573,12 @@ struct PlaylistSectionView: View {
         playbackManager.skipTo(playlistIndex: playlistIndex, screenUUID: scopeScreenUUID)
     }
 
-    /// 每块屏幕按自己的播放列表和时段筛选随机候选，避开当前视频。
+    /// 每块屏幕按自己的播放列表和时段筛选随机候选。
     private func randomCandidates(for screenUUID: String) -> [(index: Int, entry: PlaylistEntry)] {
         let playlist = PlaylistManager.shared.allEntries(for: screenUUID)
-        let current = PlaylistManager.shared.currentIndex(for: screenUUID)
-        let currentID = playlist.indices.contains(current) ? playlist[current].videoId : nil
         let restricted = TimeManagement.sharedInstance.shouldRestrictPlaybackToDayNightVideo().0
         return playlist.enumerated().compactMap { index, entry in
-            guard entry.videoId != currentID,
-                  let video = videoById[entry.videoId],
+            guard let video = videoById[entry.videoId],
                   !restricted || TimeManagement.videoMatchesCurrentTime(video) else { return nil }
             return (index, entry)
         }
