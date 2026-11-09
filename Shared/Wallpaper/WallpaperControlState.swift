@@ -63,6 +63,12 @@ struct WallpaperScreenControl: Codable, Equatable {
     var jumpIndex: Int = 0
 }
 
+/// An explicit video choice for all displays in Independent Mirror mode.
+struct MirrorVideoJump: Codable, Equatable, Sendable {
+    let videoID: String
+    let token: Int
+}
+
 /// Root state shared between Companion and the wallpaper extension.
 struct WallpaperControlState: Codable, Equatable {
     /// Monotonic version number, bumped on every Companion write.
@@ -111,6 +117,8 @@ struct WallpaperControlState: Codable, Equatable {
     /// the screen's CGDisplayCreateUUIDFromDisplayID output (matches
     /// what the playlist code keys by).
     var screens: [String: WallpaperScreenControl] = [:]
+
+    var mirrorVideoJump: MirrorVideoJump?
 
     /// Bumped by Companion whenever displays-related settings change
     /// (viewing mode, display mode, aspect, margins). The extension
@@ -245,6 +253,7 @@ extension WallpaperControlState {
         cpuPaused = try c.decodeIfPresent(Bool.self, forKey: .cpuPaused) ?? false
         cameraPaused = try c.decodeIfPresent(Bool.self, forKey: .cameraPaused) ?? false
         screens = try c.decodeIfPresent([String: WallpaperScreenControl].self, forKey: .screens) ?? [:]
+        mirrorVideoJump = try c.decodeIfPresent(MirrorVideoJump.self, forKey: .mirrorVideoJump)
         settingsGeneration = try c.decodeIfPresent(Int.self, forKey: .settingsGeneration) ?? 0
         overlayGeneration = try c.decodeIfPresent(Int.self, forKey: .overlayGeneration) ?? 0
         transitionStyle = try c.decodeIfPresent(String.self, forKey: .transitionStyle)

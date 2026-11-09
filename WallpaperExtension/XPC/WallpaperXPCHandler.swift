@@ -830,16 +830,22 @@ private let mirrorSyncQueue = DispatchQueue(label: "aerial-wallpaper-mirror-sync
 private nonisolated(unsafe) var mirrorSyncWork: DispatchWorkItem?
 private nonisolated(unsafe) var mirrorLeaderKey: String?
 private nonisolated(unsafe) var requestedMirrorLeader: String?
+private nonisolated(unsafe) var pendingMirrorJump: (command: MirrorVideoJump, attempts: Int, retryAt: DispatchTime)?
 
-func scheduleIndependentMirrorSync(preferredScreen: String? = nil) {
+func scheduleIndependentMirrorSync(preferredScreen: String? = nil, jump: MirrorVideoJump? = nil) {
     mirrorSyncQueue.async {
         mirrorSyncWork?.cancel()
         guard PrefsDisplays.viewingMode == .independentMirror else {
             mirrorLeaderKey = nil
             requestedMirrorLeader = nil
+            pendingMirrorJump = nil
             return
         }
         if let preferredScreen { requestedMirrorLeader = preferredScreen }
+        if let jump {
+            pendingMirrorJump = (jump, 0, .now())
+            requestedMirrorLeader = nil
+        }
         let work = DispatchWorkItem { synchronizeIndependentMirror() }
         mirrorSyncWork = work
         mirrorSyncQueue.asyncAfter(deadline: .now() + .milliseconds(350), execute: work)
@@ -865,13 +871,30 @@ private func synchronizeIndependentMirror() {
     guard mirrorPlaybackAllowed() else { return }
     let preferred = requestedMirrorLeader
     requestedMirrorLeader = nil
+    let command = WallpaperControlListener.shared.currentMirrorVideoJump
     let ready = sharedHandlerState.allRenderers().compactMap { shared in
         mirrorSnapshot(shared).map { (shared: shared, snapshot: $0) }
     }.sorted { $0.shared.rendererKey < $1.shared.rendererKey }
     // A screen that resumes must follow the screen that was already playing.
-    guard let leader = ready.first(where: { $0.shared.rendererKey == preferred })
+    guard let currentLeader = ready.first(where: { $0.shared.rendererKey == preferred })
         ?? ready.first(where: { $0.shared.rendererKey == mirrorLeaderKey })
         ?? ready.first else { return }
+    var leader = currentLeader
+    if let jump = pendingMirrorJump, jump.command == command {
+        if let selected = ready.first(where: {
+            mirrorVideoID($0.shared, url: $0.snapshot.assetURL) == jump.command.videoID
+        }) {
+            leader = selected
+        } else {
+            guard DispatchTime.now() >= jump.retryAt else { return }
+            if jump.attempts < 3,
+               applyMirrorVideoJump(jump.command, to: currentLeader.shared, attempt: jump.attempts + 1) {
+                return
+            }
+            debugLog("[Mirror] cannot play selected video \(jump.command.videoID)")
+        }
+    }
+    pendingMirrorJump = nil
     mirrorLeaderKey = leader.shared.rendererKey
     let source = leader.shared
     let snapshot = leader.snapshot
@@ -884,8 +907,7 @@ private func synchronizeIndependentMirror() {
                   abs(follower.snapshot.position - snapshot.position) > 0.18 else { continue }
         }
         let target = follower.shared
-        let sourceID = source.renderer.nowPlayingOverride?.id
-            ?? ExtensionVideoLoader.shared.videoId(forLocalPath: snapshot.assetURL.path)
+        let sourceID = mirrorVideoID(source, url: snapshot.assetURL)
         let playDuration = ExtensionVideoLoader.shared.alignMirrorCursor(videoID: sourceID, screenUUID: target.rendererKey)
         let selection: PlaybackSelection
         if let live = source.renderer.nowPlayingOverride,
@@ -901,6 +923,7 @@ private func synchronizeIndependentMirror() {
         sharedHandlerState.clearPendingSwitch(key: target.rendererKey)
         let stillEligible: @Sendable () -> Bool = {
             guard mirrorPlaybackAllowed(),
+                  WallpaperControlListener.shared.currentMirrorVideoJump == command,
                   let current = mirrorSnapshot(source), current.assetURL == snapshot.assetURL,
                   mirrorSnapshot(target) != nil else { return false }
             return sharedHandlerState.allRenderers().contains { $0 === target }
@@ -913,6 +936,33 @@ private func synchronizeIndependentMirror() {
         switchSharedRenderer(key: target.rendererKey, to: selection, playlistScreenUUID: target.rendererKey,
                              startPosition: position, shouldApply: stillEligible)
     }
+}
+
+private func mirrorVideoID(_ shared: SharedRenderer, url: URL) -> String? {
+    shared.renderer.nowPlayingOverride?.id ?? ExtensionVideoLoader.shared.videoId(forLocalPath: url.path)
+}
+
+private func applyMirrorVideoJump(_ command: MirrorVideoJump, to target: SharedRenderer, attempt: Int) -> Bool {
+    guard let video = VideoList.instance.videos.first(where: { $0.id == command.videoID }) else { return false }
+    let key = target.rendererKey
+    let duration = ExtensionVideoLoader.shared.alignMirrorCursor(videoID: command.videoID, screenUUID: key)
+    guard let selection = playbackSelection(for: video, resumeAt: nil, playDuration: duration) else { return false }
+    let retryAt = DispatchTime.now() + .seconds(2)
+    pendingMirrorJump = (command, attempt, retryAt)
+    sharedHandlerState.clearPendingSwitch(key: key)
+    debugLog("[Mirror] selected video \(command.videoID) → screen \(key.prefix(8))")
+    switchSharedRenderer(key: key, to: selection, playlistScreenUUID: key, shouldApply: {
+        WallpaperControlListener.shared.currentMirrorVideoJump == command
+            && mirrorPlaybackAllowed() && mirrorSnapshot(target) != nil
+            && sharedHandlerState.allRenderers().contains { $0 === target }
+    })
+    // A previous switch may still own this renderer. Retry only while this
+    // choice is pending and a screen can play.
+    mirrorSyncQueue.asyncAfter(deadline: retryAt) {
+        guard pendingMirrorJump?.command == command else { return }
+        synchronizeIndependentMirror()
+    }
+    return true
 }
 
 /// Debounced status write for ORGANIC video changes (natural EOF

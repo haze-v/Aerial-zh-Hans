@@ -55,6 +55,7 @@ struct PlaylistSectionView: View {
                         thumbnails: thumbnails,
                         playbackManager: playbackManager,
                         downloadTracker: downloadTracker,
+                        allowsSelectingCurrent: PrefsDisplays.viewingMode == .independentMirror,
                         onTapEntry: { tapEntry(index: $0) },
                         onDownload: { downloadEntry(videoId: $0) },
                         contextMenu: { videoMenu(for: $0) }
@@ -392,7 +393,7 @@ struct PlaylistSectionView: View {
                 .frame(width: 96)
         }
         .onTapGesture {
-            guard !isCurrent else { return }
+            guard !isCurrent || PrefsDisplays.viewingMode == .independentMirror else { return }
             tapEntry(index: index)
         }
         .contextMenu { videoMenu(for: entry) }
@@ -495,6 +496,11 @@ struct PlaylistSectionView: View {
     // MARK: - Actions
 
     private func tapEntry(index: Int) {
+        if PrefsDisplays.viewingMode == .independentMirror {
+            guard entries.indices.contains(index) else { return }
+            WallpaperControl.shared.jumpToMirrorVideo(videoID: entries[index].videoId)
+            return
+        }
         let playlistIndex = displayToPlaylistIndex[index] ?? index
         PlaylistManager.shared.setCurrentIndex(playlistIndex, for: scopeScreenUUID)
         // Route the jump to the wallpaper extension (the player).

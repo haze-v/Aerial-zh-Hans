@@ -88,6 +88,10 @@ final class WallpaperControlListener: @unchecked Sendable {
         return lastApplied.thermalPaused
     }
 
+    var currentMirrorVideoJump: MirrorVideoJump? {
+        lock.withLock { lastApplied.mirrorVideoJump }
+    }
+
     func mirrorScreenCanPlay(_ uuid: String) -> Bool {
         lock.withLock {
             let state = lastApplied
@@ -245,7 +249,9 @@ final class WallpaperControlListener: @unchecked Sendable {
         // mirror doesn't show the first second at the 1 Hz poll rate.
         wakeContentsSwapPresenters()
         applyDeltas(from: previous, to: fresh)
-        if PrefsDisplays.viewingMode == .independentMirror {
+        if let jump = fresh.mirrorVideoJump, jump != previous.mirrorVideoJump {
+            scheduleIndependentMirrorSync(jump: jump)
+        } else if PrefsDisplays.viewingMode == .independentMirror {
             let scopes = fresh.screens.keys.filter { uuid in
                 guard let after = fresh.screens[uuid] else { return false }
                 let before = previous.screens[uuid] ?? WallpaperScreenControl()

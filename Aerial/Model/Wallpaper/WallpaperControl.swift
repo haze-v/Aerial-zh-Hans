@@ -446,6 +446,7 @@ final class WallpaperControl: @unchecked Sendable {
     func advanceVideo(screenUUID: String?) {
         noteVideoNavigation()
         mutate("advance(\(screenUUID?.prefix(8).description ?? "all"))") { state in
+            state.mirrorVideoJump = nil
             if let uuid = screenUUID {
                 var screen = state.screens[uuid, default: WallpaperScreenControl()]
                 screen.advanceCounter &+= 1
@@ -470,6 +471,7 @@ final class WallpaperControl: @unchecked Sendable {
     func regressVideo(screenUUID: String?) {
         noteVideoNavigation()
         mutate("regress(\(screenUUID?.prefix(8).description ?? "all"))") { state in
+            state.mirrorVideoJump = nil
             if let uuid = screenUUID {
                 var screen = state.screens[uuid, default: WallpaperScreenControl()]
                 screen.regressCounter &+= 1
@@ -494,6 +496,7 @@ final class WallpaperControl: @unchecked Sendable {
     func jumpToVideo(index: Int, screenUUID: String?) {
         noteVideoNavigation()
         mutate("jump(\(index), \(screenUUID?.prefix(8).description ?? "all"))") { state in
+            state.mirrorVideoJump = nil
             if let uuid = screenUUID {
                 var screen = state.screens[uuid, default: WallpaperScreenControl()]
                 screen.jumpIndex = index
@@ -513,6 +516,15 @@ final class WallpaperControl: @unchecked Sendable {
                     state.screens[key] = screen
                 }
             }
+            return true
+        }
+    }
+
+    /// Select the same video for the mirror group regardless of which display is paused.
+    func jumpToMirrorVideo(videoID: String) {
+        noteVideoNavigation()
+        mutate("mirrorJump(\(videoID))") { state in
+            state.mirrorVideoJump = MirrorVideoJump(videoID: videoID, token: state.version &+ 1)
             return true
         }
     }

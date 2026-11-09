@@ -15,6 +15,7 @@ struct PlaylistListView<MenuContent: View>: View {
     let thumbnails: [String: NSImage]
     @ObservedObject var playbackManager: PlaybackManager
     @ObservedObject var downloadTracker: DownloadTracker
+    let allowsSelectingCurrent: Bool
     var onTapEntry: (Int) -> Void
     var onDownload: (String) -> Void
     /// Right-click menu for an entry (the shared `VideoContextMenu`).
@@ -165,7 +166,7 @@ struct PlaylistListView<MenuContent: View>: View {
         )
         .contentShape(Rectangle())
         .onTapGesture {
-            guard !isCurrent else { return }
+            guard !isCurrent || allowsSelectingCurrent else { return }
             onTapEntry(index)
         }
         .contextMenu { contextMenu(entry) }

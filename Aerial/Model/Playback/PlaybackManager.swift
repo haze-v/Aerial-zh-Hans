@@ -686,24 +686,24 @@ class PlaybackManager: ObservableObject {
     func pauseMention(for screenUUID: String?) -> (icon: String, text: String)? {
         guard WallpaperStatusMonitor.shared.isRunning, !isPaused else { return nil }
         if isBatteryPaused {
-            return ("battery.25percent", "Paused — on battery")
+            return ("battery.25percent", String(localized: "Paused — on battery"))
         }
         switch thermalPauseCause {
         case .thermalPressure:
-            return ("thermometer.medium", "Paused — thermal pressure")
+            return ("thermometer.medium", String(localized: "Paused — thermal pressure"))
         case .lowPowerMode:
-            return ("bolt.circle", "Paused — Low Power Mode")
+            return ("bolt.circle", String(localized: "Paused — Low Power Mode"))
         case nil:
             break
         }
         if isCameraPaused {
-            return ("video.fill", "Paused — camera in use")
+            return ("video.fill", String(localized: "Paused — camera in use"))
         }
         if WallpaperControl.shared.currentCPUPaused {
             return ("cpu", String(localized: "Paused — high CPU usage"))
         }
         if isCoveragePaused(for: screenUUID) {
-            return ("macwindow", "Paused — display covered")
+            return ("macwindow", String(localized: "Paused — display covered"))
         }
         return nil
     }
