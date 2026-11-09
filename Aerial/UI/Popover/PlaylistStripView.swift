@@ -168,23 +168,9 @@ struct PlaylistSectionView: View {
 
     private var randomJumpButton: some View {
         Button {
-            if PrefsDisplays.viewingMode == .independent {
-                for screen in playbackManager.availableScreens {
-                    let candidates = randomCandidates(for: screen.uuid)
-                    let playlist = PlaylistManager.shared.allEntries(for: screen.uuid)
-                    let current = PlaylistManager.shared.currentIndex(for: screen.uuid)
-                    let currentID = playlist.indices.contains(current) ? playlist[current].videoId : nil
-                    guard let videoID = RandomVideoHistory.choose(from: candidates.map { $0.entry.videoId },
-                                                                 currentVideoID: currentID, screenUUID: screen.uuid),
-                          let choice = candidates.first(where: { $0.entry.videoId == videoID }) else { continue }
-                    PlaylistManager.shared.setCurrentIndex(choice.index, for: screen.uuid)
-                    playbackManager.skipTo(playlistIndex: choice.index, screenUUID: screen.uuid)
-                    debugLog("[RandomJump] screen=\(screen.uuid) video=\(choice.entry.videoId)")
-                }
-            } else if let videoID = RandomVideoHistory.choose(from: entries.map(\.videoId),
-                                                               currentVideoID: currentVideoID, screenUUID: nil),
-                      let index = entries.firstIndex(where: { $0.videoId == videoID }) {
-                tapEntry(index: index)
+            let selected = playbackManager.jumpToRandomVideo()
+            if PrefsDisplays.viewingMode == .independentMirror {
+                pendingMirrorSelectionID = selected == currentVideoID ? nil : selected
             }
         } label: {
             Image(systemName: "dice")

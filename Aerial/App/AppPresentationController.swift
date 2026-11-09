@@ -471,7 +471,8 @@ final class AppPresentationController: NSObject {
         // Action button
         if let button = item.button {
             button.target = self
-            button.action = #selector(togglePopover(_:))
+            button.action = #selector(statusItemClicked(_:))
+            button.sendAction(on: [.leftMouseUp, .rightMouseUp])
             // VoiceOver: announce as "Aerial" when the user walks the
             // menu bar instead of the SF Symbol's accessibility name.
             button.setAccessibilityLabel("Aerial")
@@ -556,6 +557,18 @@ final class AppPresentationController: NSObject {
             forName: NSPopover.didCloseNotification, object: popover, queue: .main
         ) { _ in
             MainActor.assumeIsolated { PopoverVisibility.shared.isShown = false }
+        }
+    }
+
+    /// 右键直接随机换片，左键仍打开或关闭面板。
+    @objc private func statusItemClicked(_ sender: Any?) {
+        guard NSApp.currentEvent?.type == .rightMouseUp else {
+            togglePopover(sender)
+            return
+        }
+        closePopover(sender: sender)
+        MainActor.assumeIsolated {
+            PlaybackManager.shared.jumpToRandomVideo()
         }
     }
 

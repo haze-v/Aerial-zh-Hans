@@ -329,6 +329,41 @@ class PlaybackManager: ObservableObject {
         WallpaperControl.shared.jumpToVideo(index: playlistIndex, screenUUID: screenUUID)
     }
 
+    /// 状态栏右键与骰子共用随机选片，按播放模式分别保存历史。
+    @discardableResult
+    func jumpToRandomVideo() -> String? {
+        refreshScreenList()
+        let independent = PrefsDisplays.viewingMode == .independent
+        let screens: [String?] = independent ? availableScreens.map { Optional($0.uuid) } : [nil]
+        let lookup = Dictionary(VideoList.instance.videos.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
+        let restricted = TimeManagement.sharedInstance.shouldRestrictPlaybackToDayNightVideo().0
+        var selectedID: String?
+        for screen in screens {
+            let playlist = PlaylistManager.shared.allEntries(for: screen)
+            let current = PlaylistManager.shared.currentIndex(for: screen)
+            let currentID = playlist.indices.contains(current) ? playlist[current].videoId : nil
+            let candidates = playlist.enumerated().filter { index, entry in
+                if independent {
+                    guard let video = lookup[entry.videoId] else { return false }
+                    return !restricted || TimeManagement.videoMatchesCurrentTime(video)
+                }
+                return !restricted || index == current || lookup[entry.videoId].map(TimeManagement.videoMatchesCurrentTime) == true
+            }
+            guard let videoID = RandomVideoHistory.choose(from: candidates.map { $0.element.videoId },
+                                                          currentVideoID: currentID, screenUUID: screen),
+                  let choice = candidates.first(where: { $0.element.videoId == videoID }) else { continue }
+            if PrefsDisplays.viewingMode == .independentMirror {
+                WallpaperControl.shared.jumpToMirrorVideo(videoID: videoID)
+            } else {
+                PlaylistManager.shared.setCurrentIndex(choice.offset, for: screen)
+                skipTo(playlistIndex: choice.offset, screenUUID: screen)
+            }
+            selectedID = videoID
+            debugLog("[RandomJump] screen=\(screen ?? "shared") video=\(videoID)")
+        }
+        return selectedID
+    }
+
     // MARK: - Auto-Advance
 
     /// (Re)start or stop the auto-advance countdown from the current
