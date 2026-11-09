@@ -1,0 +1,125 @@
+# SwiftLint configuration for AerialCompanion
+# Start permissive — focus on high-value rules, silence legacy noise
+
+excluded:
+  - build
+  - Experiments
+  - Scripts        # standalone dev tools, not shipped
+  - Vendor         # vendored third-party packages (mediaremote-adapter)
+  - AerialTests    # `!` is an assertion idiom in tests — a trap there IS the failure
+  - Shared/Time/Solar.swift  # Third-party code
+
+disabled_rules:
+  - line_length
+  - type_body_length
+  - file_length
+  - cyclomatic_complexity
+  - identifier_name
+  - nesting
+  - todo
+  - function_body_length
+  - function_parameter_count
+  - large_tuple
+  - trailing_comma
+  - trailing_whitespace
+  - multiple_closures_with_trailing_closure
+  - opening_brace
+  - vertical_whitespace
+  - colon
+  - comment_spacing
+  - for_where
+  - closure_spacing
+  - statement_position
+  - redundant_string_enum_value
+  - implicit_optional_initialization
+  - blanket_disable_command
+  - function_name_whitespace
+  - trailing_newline
+  - redundant_void_return
+  - optional_data_string_conversion
+  - unused_optional_binding
+  - orphaned_doc_comment
+  - empty_enum_arguments
+  - closure_parameter_position
+  - unused_closure_parameter
+  - unneeded_override
+  - trailing_semicolon
+  - inclusive_language
+  - void_return
+  - control_statement
+  - void_function_in_ternary
+  - shorthand_operator
+  - switch_case_alignment
+
+opt_in_rules:
+  # --- crash-hardening (2026-09-03): every one of these is a runtime trap ---
+  - force_unwrapping
+  - implicitly_unwrapped_optional
+  - unowned_variable_capture
+  # --- style ---
+  - empty_count
+  - contains_over_filter_count
+  - flatmap_over_map_reduce
+  - first_where
+  - last_where
+  - redundant_nil_coalescing
+  - toggle_bool
+
+# Downgrade error-level rules to warnings so they don't break the build
+force_cast:
+  severity: warning
+force_try:
+  severity: warning
+empty_count:
+  severity: warning
+type_name:
+  severity: warning
+attribute_name_spacing:
+  severity: warning
+force_unwrapping:
+  severity: warning
+implicitly_unwrapped_optional:
+  severity: warning
+  mode: all_except_iboutlets
+
+# Crash-hardening custom rules (2026-09-03). Each is a Swift runtime trap
+# that SwiftLint's built-in rules don't cover. Silence a provably safe
+# site with `// swiftlint:disable:next <rule>` plus a one-line reason.
+custom_rules:
+  first_last_force_unwrap:
+    name: "first/last force unwrap"
+    regex: '\.(first|last)!'
+    message: "`.first!`/`.last!` trap on an empty collection — bind with `if let`/`guard let` or `?? default`"
+    severity: warning
+  index_zero_subscript:
+    name: "index-zero subscript"
+    regex: '[A-Za-z0-9_\)\]]\[0\]'
+    message: "`[0]` traps on an empty collection — prefer `.first` unless non-emptiness is checked on the line above"
+    severity: warning
+  remove_first_last_unchecked:
+    name: "removeFirst/removeLast"
+    regex: '\.remove(First|Last)\(\)'
+    message: "removeFirst()/removeLast() trap on an empty collection — guard `!isEmpty` or use popLast()"
+    severity: warning
+  main_queue_sync:
+    name: "DispatchQueue.main.sync"
+    regex: 'DispatchQueue\.main\.sync'
+    message: "Deadlocks when already on the main queue — dispatch async or check Thread.isMainThread"
+    severity: warning
+  # Wallpaper extension only: CALayer position/bounds setters raise an
+  # ObjC exception on NaN/inf and abort the extension (2026-08-28 field
+  # crash). Every geometry assignment must go through
+  # `.sanitized("context")` (GeometrySanitizer.swift) unless it copies
+  # another layer's already-accepted `.frame`/`.bounds`/`.position`.
+  appex_raw_geometry_setter:
+    name: "unsanitized CA geometry"
+    included: ".*WallpaperExtension/.*"
+    # `[ \t]*+` is possessive on purpose: a backtracking `[ \t]*` hands the
+    # copy-exclusion lookahead a leading space and it never rejects.
+    regex: '(?<!let )(?<!var )\b(frame|position|bounds|contentsRect|anchorPoint)[ \t]*=[ \t]*+(?!=)(?![^\n]*\bsanitized\()(?!\S+\.(frame|bounds|position)[ \t]*(?:\n|\z))'
+    excluded_match_kinds:
+      - comment
+      - doccomment
+      - string
+    message: "Route CA geometry through `.sanitized(\"context\")` — a NaN here aborts the extension"
+    severity: warning

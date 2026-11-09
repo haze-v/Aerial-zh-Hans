@@ -1,0 +1,313 @@
+//
+//  FirstLaunchWizardView.swift
+//  Aerial Companion
+//
+//  Top-level SwiftUI view that drives the first-launch wizard. Owns
+//  the WizardState (current step + selections + burn-in toggle) and
+//  the bottom action bar (Back / Next / Done). Includes a conditional
+//  step 0 that embeds `PathMigrationView` when migration is needed,
+//  consolidating both flows in a single window.
+//
+
+import SwiftUI
+
+// MARK: - Wizard state
+
+final class FirstLaunchWizardState: ObservableObject {
+    enum Step: Int, CaseIterable {
+        case welcome    // always first; gates the legacy-container probe
+        case migration  // conditional — only after the user clicks Go ahead AND data is found
+        case mode
+        case overlays
+        case presentation  // menu bar vs Dock
+        case thanks
+    }
+
+    @Published var step: Step = .welcome
+    @Published var overlay: FirstLaunch.OverlayPreset? = .modern
+    @Published var rotateForBurnIn: Bool = false
+
+    /// Three-mode selection (off / still / live). Seeded to the
+    /// recommended default in `init`.
+    @Published var wallpaperMode: WallpaperMode?
+
+    /// Menu bar vs Dock. Seeded to the menu bar (or the already-chosen
+    /// presentation on a re-run) in `init`.
+    @Published var presentation: AppPresentation = FirstLaunch.initialPresentation
+
+    /// True once the user has clicked "Go ahead" AND the legacy
+    /// container probe found data. Drives whether the `.migration`
+    /// step appears in `visibleSteps`. Set only by `advanceFromWelcome`.
+    @Published private(set) var migrationNeeded: Bool = false
+
+    /// False when the probe found 3.x data this process may not read
+    /// (Full Disk Access — see `PathMigration.legacyDataReadable`). The
+    /// migration step then shows the permission screen instead of the
+    /// choices, until "Check Again" succeeds or the user skips.
+    @Published private(set) var legacyDataReadable: Bool = true
+
+    init() {
+        self.wallpaperMode = FirstLaunch.initialWallpaperMode
+    }
+
+    /// Steps that actually render (skipping welcome/migration from
+    /// the user-visible "Step X of Y" indicator; both are present in
+    /// the flow but not counted in the polished four-step progress).
+    var visibleSteps: [Step] {
+        Step.allCases.filter { $0 != .migration || migrationNeeded }
+    }
+
+    /// 1-based progress index for the dot indicator. Counts only the
+    /// polished four (mode / overlays / presentation / thanks).
+    var stepIndex: Int {
+        let counted = visibleSteps.filter { $0 != .welcome && $0 != .migration }
+        return (counted.firstIndex(of: step) ?? 0) + 1
+    }
+
+    var stepCount: Int {
+        visibleSteps.filter { $0 != .welcome && $0 != .migration }.count
+    }
+
+    /// True only on the first counted step (mode). Welcome and
+    /// migration aren't "first steps" in the user's mental model.
+    var isFirstStep: Bool { step == .mode }
+    var isLastStep: Bool { step == .thanks }
+
+    var canAdvance: Bool {
+        switch step {
+        // Welcome + Migration own their own action chrome — the
+        // standard Next button is hidden on both, so canAdvance is
+        // irrelevant. They drive transitions via custom methods.
+        case .welcome:   return false
+        case .migration: return false
+        case .mode:         return wallpaperMode != nil
+        case .overlays:     return overlay != nil
+        case .presentation: return true  // always has a selection
+        case .thanks:       return true
+        }
+    }
+
+    func goNext() {
+        guard let idx = visibleSteps.firstIndex(of: step), idx + 1 < visibleSteps.count else { return }
+        step = visibleSteps[idx + 1]
+    }
+
+    func goBack() {
+        guard let idx = visibleSteps.firstIndex(of: step), idx > 0 else { return }
+        step = visibleSteps[idx - 1]
+    }
+
+    /// Called by the Welcome step.
+    ///   - `probe: false` → Skip; never touch the legacy container path.
+    ///     macOS TCC prompt never fires.
+    ///   - `probe: true`  → Go ahead; call `PathMigration.needsMigration()`
+    ///     (which triggers the TCC prompt on first read, where macOS can
+    ///     show one). If old data is found we transition to `.migration`,
+    ///     otherwise straight to `.mode`. Data that exists but cannot be
+    ///     read still counts as found: the step shows the permission
+    ///     screen.
+    func advanceFromWelcome(probe: Bool) {
+        if probe {
+            migrationNeeded = PathMigration.needsMigration()
+            legacyDataReadable = PathMigration.legacyDataReadable
+        } else {
+            migrationNeeded = false
+        }
+        step = migrationNeeded ? .migration : .mode
+    }
+
+    /// "Check Again" on the permission screen: re-probe after the user
+    /// granted Full Disk Access. Readable now → the choices appear; gone
+    /// entirely → straight to the mode step.
+    func reprobeLegacyData() {
+        PathMigration.probeLegacyData()
+        migrationNeeded = PathMigration.legacyDataFound
+        legacyDataReadable = PathMigration.legacyDataReadable
+        if !migrationNeeded { step = .mode }
+    }
+
+    /// Skip a migration Aerial could not perform (unreadable data or a
+    /// failed attempt): remember to offer it again at a later launch.
+    func skipMigration() {
+        Preferences.legacyMigrationPending = true
+        debugLog("🚚 Migration: skipped in the wizard — will be offered again once the data is readable")
+        step = .mode
+    }
+
+    /// A migration attempt failed: when the cause is that the data cannot
+    /// be read, swap in the permission screen and return true; otherwise
+    /// the step shows its own failure view.
+    func migrationFailed() -> Bool {
+        PathMigration.probeLegacyData()
+        guard PathMigration.legacyDataFound, !PathMigration.legacyDataReadable else { return false }
+        legacyDataReadable = false
+        return true
+    }
+
+    /// Called by the migration step once the chosen operation finishes.
+    func advanceFromMigration() {
+        step = .mode
+    }
+
+    /// The custom-cache step's Done, which does not say whether the
+    /// operation succeeded: a permission failure gets the permission
+    /// screen, anything else moves on.
+    func finishMigration() {
+        if !migrationFailed() { step = .mode }
+    }
+}
+
+// MARK: - Top-level view
+
+struct FirstLaunchWizardView: View {
+    @StateObject private var state = FirstLaunchWizardState()
+    let onComplete: () -> Void
+
+    var body: some View {
+        VStack(spacing: 0) {
+            stepBody
+                .padding(.horizontal, 24)
+                .padding(.top, 20)
+                .padding(.bottom, 12)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+
+            Divider()
+
+            actionBar
+                .padding(.horizontal, 24)
+                .padding(.vertical, 12)
+        }
+        .frame(width: 720, height: 560)
+    }
+
+    // MARK: - Step routing
+
+    @ViewBuilder
+    private var stepBody: some View {
+        switch state.step {
+        case .welcome:
+            FirstLaunchWelcomeStep(state: state)
+        case .migration:
+            // Data Aerial may not read gets the access assistant first
+            // (user-intent grant, Full Disk Access, or the manual route).
+            // Custom-cache scenario keeps the legacy `PathMigrationView`
+            // (its own UI). The "found a previous version" container
+            // case uses the polished `FirstLaunchMigrationStep`.
+            if !state.legacyDataReadable {
+                LegacyAccessAssistView(
+                    onReadable: { state.reprobeLegacyData() },
+                    onFinished: { state.advanceFromMigration() },
+                    onSkip: { state.skipMigration() }
+                )
+            } else if PathMigration.isCustomCacheUser() {
+                customCacheMigrationStep
+            } else {
+                FirstLaunchMigrationStep(state: state)
+            }
+        case .mode:
+            FirstLaunchModeStep(state: state)
+        case .overlays:
+            FirstLaunchOverlayStep(state: state)
+        case .presentation:
+            FirstLaunchPresentationStep(state: state)
+        case .thanks:
+            FirstLaunchThankYouStep()
+        }
+    }
+
+    /// Embeds the legacy `PathMigrationView` ONLY for the custom-cache
+    /// scenario. The container-found case now uses the redesigned
+    /// `FirstLaunchMigrationStep`.
+    @ViewBuilder
+    private var customCacheMigrationStep: some View {
+        PathMigrationView(
+            isCustomCacheUser: true,
+            description: PathMigration.getMigrationDescription(),
+            onMigrate: { type, progress, completion in
+                PathMigration.performMigration(type: type,
+                                               progressCallback: progress,
+                                               completion: completion)
+            },
+            onShowOldLocation: { PathMigration.showOldContainerInFinder() },
+            onShowNewLocation: { PathMigration.showNewLocationInFinder() },
+            onDismiss: { state.finishMigration() }
+        )
+    }
+
+    // MARK: - Action bar
+
+    @ViewBuilder
+    private var actionBar: some View {
+        HStack(spacing: 12) {
+            stepIndicator
+            Spacer()
+
+            // Welcome + Migration own their own action chrome (their
+            // step views embed the buttons). Hide the standard
+            // Back / Next on those screens.
+            if state.step != .welcome && state.step != .migration {
+                if !state.isFirstStep {
+                    Button("Back") { state.goBack() }
+                        .keyboardShortcut(.cancelAction)
+                }
+                Button(state.isLastStep ? "Get Started" : "Next") {
+                    handleAdvance()
+                }
+                .keyboardShortcut(.defaultAction)
+                .disabled(!state.canAdvance)
+            }
+        }
+    }
+
+    /// Apply the chosen prefs at the right step boundaries. Mode is
+    /// committed when leaving the mode step; overlays when leaving the
+    /// overlays step; the presentation (menu bar / Dock) when leaving
+    /// its step — live, so a Dock choice shows its icon before the
+    /// thanks step; the completion sentinel is set when finishing the
+    /// thanks step. Welcome + Migration are handled by their own step
+    /// views — they don't reach this method.
+    private func handleAdvance() {
+        switch state.step {
+        case .welcome, .migration:
+            return  // their step views drive their own transitions
+        case .mode:
+            if let wp = state.wallpaperMode {
+                FirstLaunch.apply(wallpaperMode: wp)
+            }
+            state.goNext()
+        case .overlays:
+            if let overlay = state.overlay {
+                FirstLaunch.apply(overlay: overlay, rotateForBurnIn: state.rotateForBurnIn)
+            }
+            state.goNext()
+        case .presentation:
+            FirstLaunch.apply(presentation: state.presentation)
+            state.goNext()
+        case .thanks:
+            Preferences.firstLaunchCompleted = true
+            onComplete()
+        }
+    }
+
+    /// Tiny step-of-N indicator pinned to the bottom-leading corner.
+    /// Welcome + Migration are excluded from the count so users always
+    /// see "1 of 4" … "4 of 4" for the polished steps.
+    @ViewBuilder
+    private var stepIndicator: some View {
+        if state.step != .welcome && state.step != .migration {
+            let countedSteps = state.visibleSteps.filter { $0 != .welcome && $0 != .migration }
+            let currentIdx = (countedSteps.firstIndex(of: state.step) ?? 0) + 1
+            HStack(spacing: 6) {
+                ForEach(0..<countedSteps.count, id: \.self) { i in
+                    Circle()
+                        .fill(i < currentIdx ? Color.aerial : Color.secondary.opacity(0.3))
+                        .frame(width: 7, height: 7)
+                }
+                Text("Step \(currentIdx) of \(countedSteps.count)")
+                    .font(.system(size: 11))
+                    .foregroundColor(.secondary)
+                    .padding(.leading, 4)
+            }
+        }
+    }
+}

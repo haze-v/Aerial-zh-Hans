@@ -1,0 +1,453 @@
+//
+//  PlaylistStateMachineTests.swift
+//  AerialTests
+//
+//  Tests for PersistedPlaylist.popNextVideo() — the core playlist iteration logic.
+//
+
+import Testing
+import Foundation
+@testable import Aerial
+
+// Simple video stand-in for testing
+private struct FakeVideo: Equatable {
+    let id: String
+}
+
+@Suite("Playlist State Machine")
+struct PlaylistStateMachineTests {
+
+    private func makePlaylist(
+        ids: [String],
+        currentIndex: Int = 0,
+        cycleMode: PlaylistCycleMode = .loop
+    ) -> PersistedPlaylist {
+        let entries = ids.map { PlaylistEntry(videoId: $0, videoName: $0, secondaryName: "", duration: nil) }
+        return PersistedPlaylist(
+            entries: entries,
+            currentIndex: currentIndex,
+            playbackTimestamp: nil,
+            filterMode: 0,
+            filterStrings: [],
+            generatedAt: Date(),
+            cycleMode: cycleMode
+        )
+    }
+
+    private func resolve(_ id: String) -> FakeVideo? {
+        FakeVideo(id: id)
+    }
+
+    // MARK: - Empty Playlist
+
+    @Test("Empty playlist returns nil")
+    func emptyPlaylist() {
+        var playlist = makePlaylist(ids: [])
+        let result = playlist.popNextVideo(isResume: false, resolveVideo: resolve)
+        #expect(result == nil)
+    }
+
+    // MARK: - Single Entry
+
+    @Test("Single entry resume returns the entry")
+    func singleEntryResume() {
+        var playlist = makePlaylist(ids: ["A"])
+        let result = playlist.popNextVideo(isResume: true, resolveVideo: resolve)
+        #expect(result?.video.id == "A")
+        #expect(result?.shouldLoop == true)
+    }
+
+    @Test("Single entry advance wraps to same entry")
+    func singleEntryAdvance() {
+        var playlist = makePlaylist(ids: ["A"], currentIndex: 0)
+        let result = playlist.popNextVideo(isResume: false, resolveVideo: resolve)
+        #expect(result?.video.id == "A")
+        #expect(result?.shouldLoop == true)
+    }
+
+    // MARK: - Sequential Mode
+
+    @Test("Sequential mode advances index")
+    func sequentialAdvance() {
+        var playlist = makePlaylist(ids: ["A", "B", "C"], currentIndex: 0)
+        let result = playlist.popNextVideo(isResume: false, resolveVideo: resolve)
+        #expect(result?.video.id == "B")
+        #expect(playlist.currentIndex == 1)
+    }
+
+    @Test("Sequential mode wraps at end")
+    func sequentialWrap() {
+        var playlist = makePlaylist(ids: ["A", "B", "C"], currentIndex: 2)
+        let result = playlist.popNextVideo(isResume: false, resolveVideo: resolve)
+        #expect(result?.video.id == "A")
+        #expect(playlist.currentIndex == 0)
+    }
+
+    @Test("Sequential mode full cycle")
+    func sequentialFullCycle() {
+        var playlist = makePlaylist(ids: ["A", "B", "C"], currentIndex: 0)
+        // Resume at 0
+        var r = playlist.popNextVideo(isResume: true, resolveVideo: resolve)
+        #expect(r?.video.id == "A")
+        // Advance through B, C, wrap to A
+        r = playlist.popNextVideo(isResume: false, resolveVideo: resolve)
+        #expect(r?.video.id == "B")
+        r = playlist.popNextVideo(isResume: false, resolveVideo: resolve)
+        #expect(r?.video.id == "C")
+        r = playlist.popNextVideo(isResume: false, resolveVideo: resolve)
+        #expect(r?.video.id == "A")
+    }
+
+    // MARK: - Resume Behavior
+
+    @Test("Resume returns current index without advancing")
+    func resumeDoesNotAdvance() {
+        var playlist = makePlaylist(ids: ["A", "B", "C"], currentIndex: 1)
+        let result = playlist.popNextVideo(isResume: true, resolveVideo: resolve)
+        #expect(result?.video.id == "B")
+        #expect(playlist.currentIndex == 1)
+    }
+
+    @Test("Resume clears playback timestamp")
+    func resumeClearsTimestamp() {
+        var playlist = makePlaylist(ids: ["A", "B"], currentIndex: 0)
+        playlist.playbackTimestamp = 42.0
+        _ = playlist.popNextVideo(isResume: true, resolveVideo: resolve)
+        #expect(playlist.playbackTimestamp == nil)
+    }
+
+    // MARK: - Shuffle Mode
+
+    @Test("Shuffle mode reshuffles at wrap")
+    func shuffleReshufflesAtWrap() {
+        var playlist = makePlaylist(ids: ["A", "B", "C", "D", "E"], currentIndex: 4, cycleMode: .shuffle)
+        let result = playlist.popNextVideo(isResume: false, resolveVideo: resolve)
+        #expect(result != nil)
+        #expect(result?.didReshuffle == true)
+    }
+
+    @Test("Shuffle mode does not reshuffle mid-playlist")
+    func shuffleNoReshuffleMid() {
+        var playlist = makePlaylist(ids: ["A", "B", "C"], currentIndex: 0, cycleMode: .shuffle)
+        let result = playlist.popNextVideo(isResume: false, resolveVideo: resolve)
+        #expect(result?.didReshuffle == false)
+    }
+
+    // MARK: - shouldPlay Filter
+
+    @Test("shouldPlay filter skips entries")
+    func shouldPlayFilterSkips() {
+        var playlist = makePlaylist(ids: ["A", "B", "C"], currentIndex: 0)
+        let result = playlist.popNextVideo(
+            isResume: false,
+            resolveVideo: resolve,
+            shouldPlay: { $0.id != "B" }
+        )
+        #expect(result?.video.id == "C")
+        #expect(playlist.currentIndex == 2)
+    }
+
+    @Test("shouldPlay filter falls back when all filtered")
+    func shouldPlayFallback() {
+        var playlist = makePlaylist(ids: ["A", "B"], currentIndex: 0)
+        // Filter rejects everything — should fall back to pass 2
+        let result = playlist.popNextVideo(
+            isResume: false,
+            resolveVideo: resolve,
+            shouldPlay: { _ in false }
+        )
+        #expect(result?.video.id == "B")
+    }
+
+    // MARK: - resolveVideo Returning Nil
+
+    @Test("Unresolvable entries are skipped")
+    func skipUnresolvable() {
+        var playlist = makePlaylist(ids: ["A", "B", "C"], currentIndex: 0)
+        let result = playlist.popNextVideo(isResume: false, resolveVideo: { id in
+            id == "B" ? nil : FakeVideo(id: id)
+        })
+        #expect(result?.video.id == "C")
+    }
+
+    @Test("All unresolvable returns nil")
+    func allUnresolvable() {
+        var playlist = makePlaylist(ids: ["A", "B"], currentIndex: 0)
+        let result = playlist.popNextVideo(isResume: false, resolveVideo: { _ in nil as FakeVideo? })
+        #expect(result == nil)
+    }
+
+    // MARK: - reshuffleEntries Invariant
+
+    @Test("Reshuffle ensures first differs from old last")
+    func reshuffleInvariant() {
+        for _ in 0..<50 {
+            var playlist = makePlaylist(ids: ["A", "B", "C", "D"])
+            // Set last entry to "D"
+            playlist.entries = [
+                PlaylistEntry(videoId: "A", videoName: "A", secondaryName: "", duration: nil),
+                PlaylistEntry(videoId: "B", videoName: "B", secondaryName: "", duration: nil),
+                PlaylistEntry(videoId: "C", videoName: "C", secondaryName: "", duration: nil),
+                PlaylistEntry(videoId: "D", videoName: "D", secondaryName: "", duration: nil),
+            ]
+            let lastBefore = playlist.entries.last!.videoId
+            playlist.reshuffleEntries()
+            #expect(playlist.entries.first!.videoId != lastBefore)
+        }
+    }
+
+    // MARK: - On-screen index resolution (progress sidecar)
+    //
+    // The extension's cursor runs one entry ahead of the screen (the
+    // renderer pre-pops its next reader), so the sidecar resolves the
+    // presenting video's index by searching BACKWARDS from the cursor.
+
+    @Test("index(ofVideoId:) resolves the entry at the cursor")
+    func indexOfVideoAtCursor() {
+        let pl = makePlaylist(ids: ["a", "b", "c", "d"], currentIndex: 2)
+        #expect(pl.index(ofVideoId: "c") == 2)
+    }
+
+    @Test("Cursor one ahead (pre-popped next reader) → on-screen entry is cursor − 1")
+    func indexOfVideoBehindCursor() {
+        let pl = makePlaylist(ids: ["a", "b", "c", "d"], currentIndex: 3)
+        #expect(pl.index(ofVideoId: "c") == 2)
+        #expect(pl.index(ofVideoId: "a") == 0)
+    }
+
+    @Test("Backward search wraps past index 0")
+    func indexOfVideoWraps() {
+        let pl = makePlaylist(ids: ["a", "b", "c", "d"], currentIndex: 0)
+        #expect(pl.index(ofVideoId: "d") == 3)
+        #expect(pl.index(ofVideoId: "c") == 2)
+    }
+
+    @Test("Duplicate entries resolve to the occurrence at or just before the cursor")
+    func indexOfDuplicateVideo() {
+        let pl = makePlaylist(ids: ["x", "a", "x", "b", "x"], currentIndex: 3)
+        #expect(pl.index(ofVideoId: "x") == 2)
+        #expect(pl.index(ofVideoId: "x", searchingBackFrom: 1) == 0)
+        #expect(pl.index(ofVideoId: "x", searchingBackFrom: 4) == 4)
+    }
+
+    @Test("Absent video and empty playlist → nil")
+    func indexOfMissingVideo() {
+        #expect(makePlaylist(ids: ["a", "b"], currentIndex: 1).index(ofVideoId: "zzz") == nil)
+        #expect(makePlaylist(ids: [], currentIndex: 0).index(ofVideoId: "a") == nil)
+    }
+}
+
+// MARK: - Bounded Loop Plan (file engine)
+
+/// Tests for the pass-boundary decision behind the wallpaper extension's
+/// bounded looping (PlaybackMath.boundedLoopPlan). Times are timebase
+/// seconds; a pass runs from passStart to passStart + clipDuration.
+@Suite("Bounded Loop Plan")
+struct BoundedLoopPlanTests {
+
+    @Test("60 s on a 10 s clip queues five more passes, then advances at the sixth pass end")
+    func sixPassesExactly() {
+        var passStart = 0.0
+        var loops = 0
+        while true {
+            let plan = PlaybackMath.boundedLoopPlan(passStart: passStart, clipDuration: 10, budgetStart: 0, budget: 60)
+            guard plan.loopAgain else {
+                #expect(plan.cutAt == nil)   // budget ends exactly at the pass end → natural EOF
+                break
+            }
+            loops += 1
+            passStart += 10
+        }
+        #expect(loops == 5)
+        #expect(passStart == 50)
+    }
+
+    @Test("Budget shorter than the clip cuts mid-pass at budgetStart + budget")
+    func shortBudgetCutsMidPass() {
+        let plan = PlaybackMath.boundedLoopPlan(passStart: 0, clipDuration: 600, budgetStart: 0, budget: 60)
+        #expect(plan.loopAgain == false)
+        #expect(plan.cutAt == 60)
+    }
+
+    @Test("Budget not a multiple of the clip: loops while a pass fits, then cuts inside the last pass")
+    func nonMultipleBudget() {
+        // 25 s on a 10 s clip: the passes at 0 and 10 loop, the pass at 20 cuts at 25.
+        #expect(PlaybackMath.boundedLoopPlan(passStart: 0, clipDuration: 10, budgetStart: 0, budget: 25).loopAgain == true)
+        #expect(PlaybackMath.boundedLoopPlan(passStart: 10, clipDuration: 10, budgetStart: 0, budget: 25).loopAgain == true)
+        let last = PlaybackMath.boundedLoopPlan(passStart: 20, clipDuration: 10, budgetStart: 0, budget: 25)
+        #expect(last.loopAgain == false)
+        #expect(last.cutAt == 25)
+    }
+
+    @Test("Cold-start resume: the window opens at the resumed position, passes start at their PTS base")
+    func resumedWindow() {
+        // Resumed 22.7 s into a 30 s clip with a 60 s budget → the window ends at 82.7.
+        #expect(PlaybackMath.boundedLoopPlan(passStart: 0, clipDuration: 30, budgetStart: 22.7, budget: 60).loopAgain == true)
+        #expect(PlaybackMath.boundedLoopPlan(passStart: 30, clipDuration: 30, budgetStart: 22.7, budget: 60).loopAgain == true)
+        let last = PlaybackMath.boundedLoopPlan(passStart: 60, clipDuration: 30, budgetStart: 22.7, budget: 60)
+        #expect(last.loopAgain == false)
+        #expect(last.cutAt.map { abs($0 - 82.7) < 1e-9 } == true)
+    }
+
+    @Test("Stubs shorter than minTail snap to the pass edges")
+    func minTailSnapping() {
+        // 10.5 s on a 10 s clip: the extra half second isn't worth another pass.
+        let tail = PlaybackMath.boundedLoopPlan(passStart: 0, clipDuration: 10, budgetStart: 0, budget: 10.5)
+        #expect(tail.loopAgain == false)
+        #expect(tail.cutAt == nil)
+        // 9.6 s on a 10 s clip: cutting 0.4 s before the natural end is pointless.
+        let nearEnd = PlaybackMath.boundedLoopPlan(passStart: 0, clipDuration: 10, budgetStart: 0, budget: 9.6)
+        #expect(nearEnd.loopAgain == false)
+        #expect(nearEnd.cutAt == nil)
+        // 0.3 s budget: no sub-second stub either.
+        let stub = PlaybackMath.boundedLoopPlan(passStart: 0, clipDuration: 10, budgetStart: 0, budget: 0.3)
+        #expect(stub.loopAgain == false)
+        #expect(stub.cutAt == nil)
+    }
+
+    @Test("No budget, no clip length, or non-finite input → play once")
+    func degenerateInputs() {
+        #expect(PlaybackMath.boundedLoopPlan(passStart: 0, clipDuration: 10, budgetStart: 0, budget: 0).loopAgain == false)
+        #expect(PlaybackMath.boundedLoopPlan(passStart: 0, clipDuration: 0, budgetStart: 0, budget: 60).loopAgain == false)
+        #expect(PlaybackMath.boundedLoopPlan(passStart: 0, clipDuration: .nan, budgetStart: 0, budget: 60).cutAt == nil)
+        #expect(PlaybackMath.boundedLoopPlan(passStart: 0, clipDuration: 10, budgetStart: .infinity, budget: 60).loopAgain == false)
+    }
+}
+
+@Suite("Resume clamp + gapless re-base")
+struct ResumeClampTests {
+    @Test("resume position inside the clip is kept")
+    func inRange() {
+        #expect(PlaybackMath.resumeStart(requested: 5, clipDuration: 12) == 5)
+        #expect(PlaybackMath.resumeStart(requested: 10.9, clipDuration: 12) == 10.9)
+    }
+
+    @Test("stale positions past the clip, inside the tail, negative or nil start from 0")
+    func outOfRange() {
+        #expect(PlaybackMath.resumeStart(requested: 16.3, clipDuration: 12) == 0)
+        #expect(PlaybackMath.resumeStart(requested: 11.2, clipDuration: 12) == 0)   // inside the 1 s tail
+        #expect(PlaybackMath.resumeStart(requested: 12.0, clipDuration: 12) == 0)
+        #expect(PlaybackMath.resumeStart(requested: -3, clipDuration: 12) == 0)
+        #expect(PlaybackMath.resumeStart(requested: 0, clipDuration: 12) == 0)
+        #expect(PlaybackMath.resumeStart(requested: nil, clipDuration: 12) == 0)
+        #expect(PlaybackMath.resumeStart(requested: .nan, clipDuration: 12) == 0)
+    }
+
+    @Test("unknown clip duration trusts the request")
+    func unknownDuration() {
+        #expect(PlaybackMath.resumeStart(requested: 16.3, clipDuration: 0) == 16.3)
+        #expect(PlaybackMath.resumeStart(requested: 16.3, clipDuration: .nan) == 16.3)
+    }
+
+    @Test("gapless swap keeps the enqueued end when the decoder is ahead")
+    func swapAhead() {
+        let ahead = PlaybackMath.gaplessSwapBase(enqueuedEnd: 12.0, now: 11.3)
+        #expect(ahead.base == 12.0)
+        #expect(ahead.rebased == false)
+        let equal = PlaybackMath.gaplessSwapBase(enqueuedEnd: 12.0, now: 12.0)
+        #expect(equal.base == 12.0)
+        #expect(equal.rebased == false)
+    }
+
+    @Test("gapless swap re-bases to now when the decoder is behind")
+    func swapBehind() {
+        let cold = PlaybackMath.gaplessSwapBase(enqueuedEnd: 0, now: 16.31)
+        #expect(cold.base == 16.31)
+        #expect(cold.rebased == true)
+        let late = PlaybackMath.gaplessSwapBase(enqueuedEnd: 5.93, now: 16.31)
+        #expect(late.base == 16.31)
+        #expect(late.rebased == true)
+        let bad = PlaybackMath.gaplessSwapBase(enqueuedEnd: 5.93, now: .nan)
+        #expect(bad.base == 5.93)
+        #expect(bad.rebased == false)
+    }
+}
+
+// MARK: - Saver launch pop rule
+
+@Suite("Saver launch pop rule")
+struct PlaylistPopRuleTests {
+
+    private let record: (index: Int, timestamp: Double?) = (index: 0, timestamp: 12.5)
+
+    private func makePlaylist(ids: [String], currentIndex: Int, cycleMode: PlaylistCycleMode = .loop) -> PersistedPlaylist {
+        let entries = ids.map { PlaylistEntry(videoId: $0, videoName: $0, secondaryName: "", duration: nil) }
+        return PersistedPlaylist(entries: entries, currentIndex: currentIndex, playbackTimestamp: nil,
+                                 filterMode: 0, filterStrings: [], generatedAt: Date(), cycleMode: cycleMode)
+    }
+
+    @Test("without a request: cold resume, teardown resume, plain advance")
+    func baseline() {
+        let cold = PlaylistPopRule.decide(isFirstActivation: true, sidecarTimestamp: 30, teardownResume: nil, advanceRequested: false)
+        #expect(cold == .init(isResume: true, resumeTimestamp: 30, cursorOverride: nil, path: .coldResume))
+        let teardown = PlaylistPopRule.decide(isFirstActivation: false, sidecarTimestamp: nil, teardownResume: record, advanceRequested: false)
+        #expect(teardown == .init(isResume: true, resumeTimestamp: 12.5, cursorOverride: 0, path: .teardownResume))
+        let advance = PlaylistPopRule.decide(isFirstActivation: false, sidecarTimestamp: nil, teardownResume: nil, advanceRequested: false)
+        #expect(advance == .init(isResume: false, resumeTimestamp: nil, cursorOverride: nil, path: .advance))
+    }
+
+    @Test("a launch advance drops the resume position but keeps the teardown record's cursor")
+    func launchAdvance() {
+        let cold = PlaylistPopRule.decide(isFirstActivation: true, sidecarTimestamp: 30, teardownResume: nil, advanceRequested: true)
+        #expect(cold == .init(isResume: false, resumeTimestamp: nil, cursorOverride: nil, path: .launchAdvance(overrode: .coldResume)))
+        let teardown = PlaylistPopRule.decide(isFirstActivation: false, sidecarTimestamp: nil, teardownResume: record, advanceRequested: true)
+        #expect(teardown == .init(isResume: false, resumeTimestamp: nil, cursorOverride: 0, path: .launchAdvance(overrode: .teardownResume)))
+        let plain = PlaylistPopRule.decide(isFirstActivation: false, sidecarTimestamp: nil, teardownResume: nil, advanceRequested: true)
+        #expect(plain == .init(isResume: false, resumeTimestamp: nil, cursorOverride: nil, path: .launchAdvance(overrode: .nothing)))
+    }
+
+    @Test("a teardown record never applies to an activation's first pop")
+    func recordIgnoredOnFirstActivation() {
+        let resume = PlaylistPopRule.decide(isFirstActivation: true, sidecarTimestamp: 3, teardownResume: record, advanceRequested: false)
+        #expect(resume.cursorOverride == nil)
+        #expect(resume.path == .coldResume)
+        let advance = PlaylistPopRule.decide(isFirstActivation: true, sidecarTimestamp: 3, teardownResume: record, advanceRequested: true)
+        #expect(advance.cursorOverride == nil)
+        #expect(advance.path == .launchAdvance(overrode: .coldResume))
+    }
+
+    @Test("end to end: the launch advance lands on the entry after the one on screen")
+    func popLandsOnNext() {
+        // After a teardown: on screen A (index 0), stored cursor 1 (pre-popped B).
+        var playlist = makePlaylist(ids: ["A", "B", "C"], currentIndex: 1)
+        let decision = PlaylistPopRule.decide(isFirstActivation: false, sidecarTimestamp: nil,
+                                              teardownResume: (index: 0, timestamp: 5), advanceRequested: true)
+        if let cursor = decision.cursorOverride { playlist.currentIndex = cursor }
+        let popped = playlist.popNextVideo(isResume: decision.isResume, resolveVideo: { FakeVideo(id: $0) })
+        #expect(popped?.video == FakeVideo(id: "B"))
+
+        // Cold start: the sidecar cursor IS the on-screen entry.
+        var cold = makePlaylist(ids: ["A", "B", "C"], currentIndex: 0)
+        let coldDecision = PlaylistPopRule.decide(isFirstActivation: true, sidecarTimestamp: 9, teardownResume: nil, advanceRequested: true)
+        let coldPop = cold.popNextVideo(isResume: coldDecision.isResume, resolveVideo: { FakeVideo(id: $0) })
+        #expect(coldPop?.video == FakeVideo(id: "B"))
+
+        // Shuffle wrap on an advance still reshuffles.
+        var wrap = makePlaylist(ids: ["A", "B", "C"], currentIndex: 2, cycleMode: .shuffle)
+        let wrapDecision = PlaylistPopRule.decide(isFirstActivation: true, sidecarTimestamp: nil, teardownResume: nil, advanceRequested: true)
+        let wrapPop = wrap.popNextVideo(isResume: wrapDecision.isResume, resolveVideo: { FakeVideo(id: $0) })
+        #expect(wrapPop?.didReshuffle == true)
+    }
+}
+
+// MARK: - Overlay cut delay
+
+@Suite("Overlay cut delay")
+struct OverlayCutDelayTests {
+
+    @Test("apply now once the content position reached zero")
+    func applyNow() {
+        #expect(PlaybackMath.overlayCutDelay(position: 0, rate: 1) == nil)
+        #expect(PlaybackMath.overlayCutDelay(position: 3.2, rate: 0.125) == nil)
+        #expect(PlaybackMath.overlayCutDelay(position: .nan, rate: 1) == nil)
+    }
+
+    @Test("hold for the remaining time to the cut, floored and capped")
+    func hold() {
+        #expect(PlaybackMath.overlayCutDelay(position: -0.5, rate: 1) == 0.5)
+        #expect(PlaybackMath.overlayCutDelay(position: -2, rate: 1) == 1.0)
+        #expect(PlaybackMath.overlayCutDelay(position: -2, rate: 0.125) == 1.0)
+        #expect(PlaybackMath.overlayCutDelay(position: -0.05, rate: 1) == 0.1)
+        #expect(PlaybackMath.overlayCutDelay(position: -2, rate: 0) == 1.0)
+    }
+}
