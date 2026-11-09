@@ -16,6 +16,7 @@
 //  cases, and the diagnostics bundle prints the same verdict.
 //
 
+import CoreGraphics
 import Darwin
 import Foundation
 
@@ -133,6 +134,80 @@ enum WallpaperExtensionHealth {
         }
         try? await Task.sleep(for: .seconds(3))
         WallpaperStatusMonitor.shared.reload()
+    }
+
+    // macOS can terminate the extension on app registration without
+    // reconnecting WallpaperAgent. Watch the PID without adding a timer.
+    @MainActor private static var watchedPID = 0
+    @MainActor private static var exitSource: (any DispatchSourceProcess)?
+    @MainActor private static var recoveryTask: Task<Void, Never>?
+    @MainActor private static var lastRecoveredPID = 0
+    @MainActor private static var lastRecovery: ContinuousClock.Instant?
+
+    @MainActor
+    static func watchForExit(status: WallpaperStatusState, isRunning: Bool) {
+        guard status.pid > 0, !status.nowPlayingPosition.isEmpty,
+              !status.saverActive, !status.lockedActive else { return }
+        if !isRunning {
+            scheduleExitRecovery(pid: status.pid)
+            return
+        }
+        guard watchedPID != status.pid, let path = hostedExecutablePath(pid: status.pid),
+              isOurAppex(path: path) else { return }
+        exitSource?.cancel()
+        watchedPID = status.pid
+        let pid = status.pid
+        let source = DispatchSource.makeProcessSource(identifier: pid_t(pid), eventMask: .exit, queue: .main)
+        source.setEventHandler {
+            Task { @MainActor in scheduleExitRecovery(pid: pid) }
+        }
+        exitSource = source
+        source.activate()
+    }
+
+    @MainActor
+    private static func scheduleExitRecovery(pid: Int) {
+        guard recoveryTask == nil, pid != lastRecoveredPID else { return }
+        recoveryTask = Task { @MainActor in
+            defer { recoveryTask = nil }
+            // Let macOS reconnect by itself first, then recheck the
+            // actual desktop selection and the most recent status.
+            try? await Task.sleep(for: .seconds(3))
+            guard !isAlive(pid: pid), !SystemSleepState.shared.isAsleep,
+                  CGDisplayIsAsleep(CGMainDisplayID()) == 0,
+                  let current = JSONPreferencesStore.shared.read(WallpaperStatusState.self,
+                                                                  from: WallpaperStatusState.fileURL),
+                  current.pid == pid, !current.saverActive, !current.lockedActive,
+                  WallpaperControl.isAerialSystemWallpaper() == true else { return }
+            let now = ContinuousClock.now
+            if let lastRecovery, now - lastRecovery < .seconds(60) { return }
+            lastRecovery = now
+            lastRecoveredPID = pid
+            restartAgent(reason: "wallpaper extension exited (pid \(pid))")
+        }
+    }
+
+    @MainActor private static var decoderRecoveryCount = 0
+
+    /// 校验进程身份后重载卡住的扩展，每次启动最多两次且相隔至少一分钟。
+    @MainActor
+    static func recoverStalledDecoder(status: WallpaperStatusState, isRunning: Bool) {
+        guard status.decoderRecoveryRequested, isRunning, !status.lockedActive,
+              !status.saverActive, !SystemSleepState.shared.isAsleep,
+              decoderRecoveryCount < 2, status.pid != lastRecoveredPID,
+              let path = hostedExecutablePath(pid: status.pid), isOurAppex(path: path),
+              isInsideThisApp(path: path), WallpaperControl.isAerialSystemWallpaper() == true else { return }
+        let now = ContinuousClock.now
+        if let lastRecovery, now - lastRecovery < .seconds(60) { return }
+        guard kill(pid_t(status.pid), SIGKILL) == 0 else {
+            errorLog("[DecoderRecovery] failed to terminate stalled extension pid=\(status.pid), errno=\(errno)")
+            return
+        }
+        lastRecovery = now
+        lastRecoveredPID = status.pid
+        decoderRecoveryCount += 1
+        debugLog("[DecoderRecovery] restarting stalled extension pid=\(status.pid), attempt=\(decoderRecoveryCount)")
+        restartAgent(reason: "decoder stalled; safe process reload")
     }
 
     // MARK: - Startup check

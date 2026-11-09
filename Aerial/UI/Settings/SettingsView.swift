@@ -122,7 +122,7 @@ struct SettingsView: View {
     }
 
     var body: some View {
-        NavigationSplitView {
+        NavigationSplitView(columnVisibility: .constant(.all)) {
             // Sidebar
             VStack(alignment: .leading, spacing: 4) {
                 Text("Settings")
@@ -142,7 +142,7 @@ struct SettingsView: View {
 
                 Spacer()
             }
-            .frame(minWidth: 200, maxWidth: 220)
+            .navigationSplitViewColumnWidth(min: 200, ideal: 220, max: 260)
             .background(Color(NSColor.windowBackgroundColor))
             // The sidebar-toggle item is added to the sidebar column's
             // toolbar slot — `.toolbar(removing:)` only takes effect

@@ -5,8 +5,7 @@
 //  The selection state machine behind both the menubar "Now Playing"
 //  section and the Dashboard's per-screen playback picker. Extracted from
 //  the old `NowPlayingSectionView` so the exact same commit / reload logic
-//  (per-screen vs global, user-playlist handling, the programmatic-reseat
-//  suppression guard) is shared rather than duplicated.
+//  (per-screen vs global and user-playlist handling) is shared.
 //
 //  The only behavioral fork is `effectiveScreenUUID`, derived from `scope`.
 //
@@ -36,7 +35,7 @@ final class PlaybackSelectorModel: ObservableObject {
     let scope: PlaybackScope
     let playbackManager: PlaybackManager
 
-    @Published var popoverCategory: PopoverCategory
+    @Published private(set) var popoverCategory: PopoverCategory
     @Published var selectedItems: Set<String>
     @Published var isExpanded: Bool = false
     @Published var thumbnails: [String: NSImage] = [:]
@@ -44,11 +43,6 @@ final class PlaybackSelectorModel: ObservableObject {
     /// Bumped to force the user-playlist list to re-render when the active
     /// playlist changes (PlaylistManager isn't observable).
     @Published var playlistActivationTick: Int = 0
-
-    /// Set before a programmatic `popoverCategory` write so the next
-    /// `handleCategoryChange` skips the commit/regenerate branch — only real
-    /// user picker changes should regenerate.
-    var suppressCategoryOnChange: Bool = false
 
     init(scope: PlaybackScope, playbackManager: PlaybackManager? = nil) {
         self.scope = scope
@@ -188,22 +182,18 @@ final class PlaybackSelectorModel: ObservableObject {
 
     // MARK: - Category change
 
-    /// Programmatic write that suppresses the next `.onChange` firing — used
-    /// by `reloadState()` to mirror authoritative state without committing.
-    func setCategorySilently(_ newValue: PopoverCategory) {
+    private func syncCategory(_ newValue: PopoverCategory) {
         guard popoverCategory != newValue else { return }
-        suppressCategoryOnChange = true
         popoverCategory = newValue
     }
 
-    func handleCategoryChange(_ newValue: PopoverCategory) {
-        if suppressCategoryOnChange {
-            suppressCategoryOnChange = false
-            return
-        }
+    /// Commit a choice made in the picker. Refreshes only call syncCategory.
+    func selectCategory(_ newValue: PopoverCategory) {
+        guard popoverCategory != newValue else { return }
+        popoverCategory = newValue
+        isExpanded = hasSourceGrid
         switch newValue {
         case .filter(let mode):
-            isExpanded = false
             thumbnails = [:]
             loadThumbnails()
             if isPerScreen {
@@ -229,7 +219,7 @@ final class PlaybackSelectorModel: ObservableObject {
                 commitGlobalFilter()
             }
         case .playlists:
-            isExpanded = false
+            break
         }
     }
 
@@ -241,7 +231,7 @@ final class PlaybackSelectorModel: ObservableObject {
         let effectiveUUID = effectiveScreenUUID
         let userPlaylistActive = PlaylistManager.shared.isUserPlaylistActive(for: effectiveUUID)
 
-        if userPlaylistActive { setCategorySilently(.playlists) }
+        if userPlaylistActive { syncCategory(.playlists) }
 
         // User playlist active → persisted filterMode is -1, which
         // filterInfo() can't parse; bail before the regenerate branch below
@@ -253,15 +243,15 @@ final class PlaybackSelectorModel: ObservableObject {
 
         if let screenUUID = effectiveUUID {
             if let info = PlaylistManager.shared.filterInfo(for: screenUUID) {
-                if !showingPlaylists { setCategorySilently(.filter(info.mode)) }
+                if !showingPlaylists { syncCategory(.filter(info.mode)) }
                 selectedItems = Set(info.filterStrings)
             } else {
-                if !showingPlaylists { setCategorySilently(.filter(PrefsVideos.newShouldPlay)) }
+                if !showingPlaylists { syncCategory(.filter(PrefsVideos.newShouldPlay)) }
                 selectedItems = Set(PrefsVideos.newShouldPlayString)
                 PlaylistManager.shared.regenerate(for: screenUUID, mode: selectedCategory, filterStrings: Array(selectedItems))
             }
         } else {
-            if !showingPlaylists { setCategorySilently(.filter(PrefsVideos.newShouldPlay)) }
+            if !showingPlaylists { syncCategory(.filter(PrefsVideos.newShouldPlay)) }
             selectedItems = Set(PrefsVideos.newShouldPlayString)
         }
         loadThumbnails()
@@ -327,6 +317,7 @@ final class PlaybackSelectorModel: ObservableObject {
         } else {
             PlaylistManager.shared.regenerate()
         }
-        popoverCategory = .filter(mode)
+        syncCategory(.filter(mode))
+        isExpanded = hasSourceGrid
     }
 }

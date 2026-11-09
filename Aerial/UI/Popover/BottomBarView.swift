@@ -83,7 +83,7 @@ struct BottomBarView: View {
 
             // Exit button
             Button(action: onExit) {
-                chipLabel(icon: "xmark.circle")
+                chipLabel(icon: "xmark.circle", iconSize: 16, width: 32, height: 28)
             }
             .buttonStyle(.plain)
             .help("Quit Aerial")
@@ -103,11 +103,11 @@ struct BottomBarView: View {
         }
     }
 
-    private func chipLabel(icon: String) -> some View {
+    private func chipLabel(icon: String, iconSize: CGFloat = 22, width: CGFloat = 44, height: CGFloat = 36) -> some View {
         Image(systemName: icon)
-            .font(.system(size: 22, weight: .semibold))
+            .font(.system(size: iconSize, weight: .semibold))
             .foregroundColor(.aerial)
-            .frame(width: 44, height: 36)
+            .frame(width: width, height: height)
             .background(Color.aerial.opacity(0.1))
             .cornerRadius(8)
             .contentShape(Rectangle())

@@ -57,9 +57,7 @@ struct PlaybackSelectorView: View {
         }
         .padding(.vertical, 4)
         .onAppear { model.reloadState() }
-        // Re-sync whenever any code path regenerates the playlist. The
-        // programmatic-sync guard inside `handleCategoryChange` keeps the
-        // reseat idempotent.
+        // Re-sync whenever any code path regenerates the playlist.
         .onReceive(NotificationCenter.default.publisher(for: PlaylistManager.playlistDidChangeNotification)) { _ in
             model.reloadState()
         }
@@ -68,7 +66,7 @@ struct PlaybackSelectorView: View {
     // MARK: - Category Picker
 
     private var categoryPicker: some View {
-        Picker("", selection: $model.popoverCategory) {
+        Picker("", selection: Binding(get: { model.popoverCategory }, set: { model.selectCategory($0) })) {
             Label("Everything", systemImage: "infinity").tag(PopoverCategory.filter(.everything))
             Divider()
             Label("Locations", systemImage: "location").tag(PopoverCategory.filter(.location))
@@ -87,9 +85,6 @@ struct PlaybackSelectorView: View {
         .labelsHidden()
         .fixedSize()
         .help("Filter what's playing — by location, time, scene, source, expansion, live feed, or playlist")
-        .onChange(of: model.popoverCategory) { newValue in
-            model.handleCategoryChange(newValue)
-        }
     }
 
     // MARK: - Expanded Grid

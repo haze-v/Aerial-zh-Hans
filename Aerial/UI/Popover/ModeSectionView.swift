@@ -20,11 +20,8 @@ struct ModeSectionView: View {
     /// refreshed on appear and on every status echo.
     @State private var wallpaperPaused = WallpaperControl.shared.currentPaused
 
-    private var pauseScope: String? { playbackManager.mirrorPauseScope(playbackManager.effectiveScreenUUID) }
-
     private func reloadPause() {
-        wallpaperPaused = pauseScope.map { WallpaperControl.shared.screenUserPaused($0) }
-            ?? WallpaperControl.shared.currentPaused
+        wallpaperPaused = WallpaperControl.shared.currentPaused
     }
 
     var body: some View {
@@ -47,19 +44,12 @@ struct ModeSectionView: View {
         .onReceive(statusMonitor.$status) { _ in reloadPause() }
     }
 
-    /// Wallpaper control: a play/pause toggle for the wallpaper extension.
-    /// When it's running, flips static ↔ animated (`WallpaperControl.paused`);
-    /// when Aerial 4 isn't the active system wallpaper yet, it points the
-    /// user at System Settings (enabling it in-app is a future PaperSaver
-    /// capability — see WallpaperControl TODOs).
+    /// Pause or resume the desktop wallpaper on every display.
     private var wallpaperButton: some View {
         Button(action: {
             if statusMonitor.isRunning {
-                if let pauseScope {
-                    WallpaperControl.shared.toggleScreenUserPause(pauseScope)
-                } else {
-                    WallpaperControl.shared.setPaused(!wallpaperPaused)
-                }
+                let control = WallpaperControl.shared
+                control.setPaused(!control.currentPaused)
                 reloadPause()
             } else {
                 _ = Helpers.shell(launchPath: "/usr/bin/open", arguments: [
@@ -70,7 +60,7 @@ struct ModeSectionView: View {
         }) {
             modeLabel(
                 icon: wallpaperButtonIcon,
-                title: "Wallpaper",
+                title: wallpaperButtonTitle,
                 isActive: statusMonitor.isRunning && !wallpaperPaused,
                 stopWhenActive: false
             )
@@ -84,12 +74,16 @@ struct ModeSectionView: View {
         return wallpaperPaused ? "play.fill" : "pause.fill"
     }
 
+    private var wallpaperButtonTitle: String {
+        if !statusMonitor.isRunning { return "Wallpaper" }
+        return wallpaperPaused ? "Resume all wallpapers" : "Pause all wallpapers"
+    }
+
     private var wallpaperButtonHelp: String {
         if !statusMonitor.isRunning {
             return "Choose Aerial 4 in System Settings → Wallpaper to use the live wallpaper"
         }
-        if pauseScope != nil { return wallpaperPaused ? "Resume this display" : "Pause this display" }
-        return wallpaperPaused ? "Resume the animated wallpaper" : "Pause the wallpaper (static frame)"
+        return wallpaperButtonTitle
     }
 
     private func modeLabel(

@@ -18,6 +18,9 @@ struct WallpaperStatusState: Codable, Equatable {
     /// Extension process id — changes on every respawn.
     var pid: Int = 0
 
+    /// 解码线程阻塞，需要主程序安全重载扩展。
+    var decoderRecoveryRequested: Bool = false
+
     /// Wall-clock of the last write. Companion treats the extension as
     /// running while this is at most ~90 s old (writes land every 30 s).
     var lastSeen: Date = .distantPast
@@ -102,6 +105,7 @@ extension WallpaperStatusState {
     init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         pid = try c.decodeIfPresent(Int.self, forKey: .pid) ?? 0
+        decoderRecoveryRequested = try c.decodeIfPresent(Bool.self, forKey: .decoderRecoveryRequested) ?? false
         lastSeen = try c.decodeIfPresent(Date.self, forKey: .lastSeen) ?? .distantPast
         saverActive = try c.decodeIfPresent(Bool.self, forKey: .saverActive) ?? false
         lockedActive = try c.decodeIfPresent(Bool.self, forKey: .lockedActive) ?? false

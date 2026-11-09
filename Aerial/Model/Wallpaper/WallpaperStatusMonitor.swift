@@ -7,7 +7,8 @@
 //  `com.glouel.aerial.wallpaper-status` Darwin notification. This
 //  monitor mirrors that into observable state: the Dashboard's
 //  wallpaper card and the auto-pause coordinator key off `isRunning`
-//  (status fresh within 90 s) instead of writing commands blind.
+//  (a live process and status fresh within 90 s) instead of writing
+//  commands blind.
 //
 
 import CoreGraphics
@@ -71,9 +72,10 @@ final class WallpaperStatusMonitor: ObservableObject {
             from: WallpaperStatusState.fileURL
         )
         status = loaded
-        isRunning = loaded.map {
+        let statusIsFresh = loaded.map {
             Date().timeIntervalSince($0.lastSeen) < Self.freshnessWindow
         } ?? false
+        isRunning = statusIsFresh && WallpaperExtensionHealth.isAlive(pid: loaded?.pid ?? 0)
         Self.updateNowPlayingSnapshot(isRunning ? Set((loaded?.nowPlayingId ?? [:]).values) : [])
 
         // Desktop-wallpaper activation for the extension (screensaver-only
@@ -83,6 +85,10 @@ final class WallpaperStatusMonitor: ObservableObject {
         // Stale-build check (one evaluation per launch, restart once per
         // installed build) + post-restart "resolved" log.
         if let loaded {
+            if statusIsFresh {
+                WallpaperExtensionHealth.recoverStalledDecoder(status: loaded, isRunning: isRunning)
+                WallpaperExtensionHealth.watchForExit(status: loaded, isRunning: isRunning)
+            }
             WallpaperExtensionHealth.evaluate(status: loaded, isRunning: isRunning)
         }
 

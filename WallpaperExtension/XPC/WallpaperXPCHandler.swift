@@ -772,8 +772,11 @@ func registerDockObserver() {
 /// poke it via Darwin notification. The forward control channel has no
 /// acknowledgment — this is how Companion knows the extension is
 /// running at all.
+private let decoderRecoveryRequested = OSAllocatedUnfairLock(initialState: false)
+
 func writeWallpaperStatus(reason: String) {
     var status = WallpaperStatusState()
+    status.decoderRecoveryRequested = decoderRecoveryRequested.withLock { $0 }
     status.pid = Int(ProcessInfo.processInfo.processIdentifier)
     status.lastSeen = Date()
     status.appliedControlVersion = WallpaperControlListener.shared.lastAppliedVersion
@@ -848,7 +851,11 @@ func scheduleIndependentMirrorSync(preferredScreen: String? = nil, jump: MirrorV
         }
         let work = DispatchWorkItem { synchronizeIndependentMirror() }
         mirrorSyncWork = work
-        mirrorSyncQueue.asyncAfter(deadline: .now() + .milliseconds(350), execute: work)
+        if jump != nil {
+            work.perform()
+        } else {
+            mirrorSyncQueue.asyncAfter(deadline: .now() + .milliseconds(350), execute: work)
+        }
     }
 }
 
@@ -872,6 +879,29 @@ private func synchronizeIndependentMirror() {
     let preferred = requestedMirrorLeader
     requestedMirrorLeader = nil
     let command = WallpaperControlListener.shared.currentMirrorVideoJump
+    // 手动选择必须立即换片；播放资格只决定换片后是否继续播放。
+    if let jump = pendingMirrorJump, jump.command == command {
+        let targets = sharedHandlerState.allRenderers().filter {
+            $0.rendererKey != broadcastRendererKey && $0.renderer.subscriberCount > 0
+                && !$0.renderer.statusSnapshot().saverActive
+        }
+        let remaining = targets.filter {
+            mirrorVideoID($0, url: $0.renderer.statusSnapshot().assetURL) != jump.command.videoID
+        }
+        if !remaining.isEmpty {
+            guard DispatchTime.now() >= jump.retryAt else { return }
+            guard jump.attempts < 3 else {
+                debugLog("[Mirror] cannot apply selected video \(jump.command.videoID)")
+                pendingMirrorJump = nil
+                return
+            }
+            for target in remaining {
+                _ = applyMirrorVideoJump(jump.command, to: target, attempt: jump.attempts + 1)
+            }
+            return
+        }
+        if !targets.isEmpty { pendingMirrorJump = nil }
+    }
     let ready = sharedHandlerState.allRenderers().compactMap { shared in
         mirrorSnapshot(shared).map { (shared: shared, snapshot: $0) }
     }.sorted { $0.shared.rendererKey < $1.shared.rendererKey }
@@ -879,21 +909,7 @@ private func synchronizeIndependentMirror() {
     guard let currentLeader = ready.first(where: { $0.shared.rendererKey == preferred })
         ?? ready.first(where: { $0.shared.rendererKey == mirrorLeaderKey })
         ?? ready.first else { return }
-    var leader = currentLeader
-    if let jump = pendingMirrorJump, jump.command == command {
-        if let selected = ready.first(where: {
-            mirrorVideoID($0.shared, url: $0.snapshot.assetURL) == jump.command.videoID
-        }) {
-            leader = selected
-        } else {
-            guard DispatchTime.now() >= jump.retryAt else { return }
-            if jump.attempts < 3,
-               applyMirrorVideoJump(jump.command, to: currentLeader.shared, attempt: jump.attempts + 1) {
-                return
-            }
-            debugLog("[Mirror] cannot play selected video \(jump.command.videoID)")
-        }
-    }
+    let leader = currentLeader
     pendingMirrorJump = nil
     mirrorLeaderKey = leader.shared.rendererKey
     let source = leader.shared
@@ -953,7 +969,7 @@ private func applyMirrorVideoJump(_ command: MirrorVideoJump, to target: SharedR
     debugLog("[Mirror] selected video \(command.videoID) → screen \(key.prefix(8))")
     switchSharedRenderer(key: key, to: selection, playlistScreenUUID: key, shouldApply: {
         WallpaperControlListener.shared.currentMirrorVideoJump == command
-            && mirrorPlaybackAllowed() && mirrorSnapshot(target) != nil
+            && mirrorPlaybackAllowed() && target.renderer.subscriberCount > 0
             && sharedHandlerState.allRenderers().contains { $0 === target }
     })
     // A previous switch may still own this renderer. Retry only while this
@@ -1842,11 +1858,16 @@ private func installFileHooks(on renderer: VideoRenderer, rendererKey: String, p
         pushCurrentVideoToOverlays(rendererKey: rendererKey, reason: "video-change")
     }
 
-    // Watchdog escalation: the reader cancel did not free the pump. Log
-    // only for now — the mirror keeps status/snapshot/control served;
-    // a renderer replacement hangs off this hook if field logs show it.
+    // 将故障发布给主程序，不在读帧期间跨线程销毁解码器。
     renderer.onQueueWedged = {
-        debugLog("🐕 [Handler] renderer key=\(shortKey(rendererKey)) queue still wedged after the watchdog cancel — replacement not implemented; status/snapshot keep serving from the mirror")
+        let first = decoderRecoveryRequested.withLock { requested in
+            guard !requested else { return false }
+            requested = true
+            return true
+        }
+        guard first else { return }
+        debugLog("[DecoderRecovery] requested for screen \(shortKey(rendererKey))")
+        statusWriteQueue.async { writeWallpaperStatus(reason: "decoder-stalled") }
     }
 }
 
@@ -2033,11 +2054,7 @@ func switchSharedRenderer(key: String, to selection: PlaybackSelection, playlist
             onFailure: { rendererSwitchQueue.async { switchesInFlight.remove(key) } },
             startPosition: startPosition
         ) { newRenderer, videoURL in
-            // Three hops, order preserved: replace (switch queue) →
-            // migrate the windows (handler queue, which owns the presenter
-            // rebinds) → stop the old engine and clear the in-flight mark
-            // (switch queue again: stop() is a bounded renderer-queue sync,
-            // never run on the handler queue).
+            // 在切换队列停止旧播放器，再由处理队列迁移显示层。
             rendererSwitchQueue.async {
                 guard shouldApply?() != false else {
                     switchesInFlight.remove(key)
@@ -2051,6 +2068,12 @@ func switchSharedRenderer(key: String, to selection: PlaybackSelection, playlist
                     newRenderer.stop()
                     return
                 }
+                // 先在切换队列等旧播放器停止回调，避免它关闭新播放器的送帧回调。
+                for (_, wallpaper) in sharedHandlerState.allWallpapers()
+                    where wallpaper.mirror.rendererKey == key {
+                    old.renderer.removeSubscriber(wallpaper.displayLayer)
+                }
+                old.renderer.stop()
                 handlerQueue.async {
                     // Migrate every wallpaper on this key (rekey ordering):
                     // the per-acquire layers survive; only the feeder moves.
@@ -2062,7 +2085,7 @@ func switchSharedRenderer(key: String, to selection: PlaybackSelection, playlist
                         // get a presenter — leave it black.
                         guard !state.saverExcluded else { continue }
                         let layer = wallpaper.displayLayer
-                        old.renderer.removeSubscriber(layer)
+                        layer.sampleBufferRenderer.flush()
                         newRenderer.addSubscriber(layer)
                         noteDisplayRefresh(wallpaper, renderer: newRenderer)
                         if wallpaper.isScreenSaver {
@@ -2078,7 +2101,6 @@ func switchSharedRenderer(key: String, to selection: PlaybackSelection, playlist
                     }
                     seedPauseState(newRenderer, rendererKey: key, activitySuspended: false)
                     rendererSwitchQueue.async {
-                        old.renderer.stop()
                         switchesInFlight.remove(key)
                         debugLog("🔁 engine switch key=\(shortKey(key)) → \(videoURL.lastPathComponent)")
                         dumpTopology(reason: "engine-switch key=\(shortKey(key))")

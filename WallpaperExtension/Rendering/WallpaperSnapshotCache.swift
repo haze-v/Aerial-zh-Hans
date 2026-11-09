@@ -19,6 +19,7 @@
 
 import Accelerate
 import AppKit
+import CoreImage
 import CoreGraphics
 import CoreVideo
 import Foundation
@@ -27,7 +28,12 @@ import ImageIO
 private let snapshotDir = URL(fileURLWithPath: "/Users/Shared/Aerial/wallpaper-snapshots", isDirectory: true)
 
 private func snapshotURL(displayID: UInt32) -> URL {
-    snapshotDir.appendingPathComponent("did-\(displayID).heic")
+    // 数字编号会随开机和插拔改变，使用系统为物理显示器提供的固定标识。
+    if let uuid = CGDisplayCreateUUIDFromDisplayID(displayID)?.takeRetainedValue(),
+       let identifier = CFUUIDCreateString(nil, uuid) {
+        return snapshotDir.appendingPathComponent("display-\(identifier).heic")
+    }
+    return snapshotDir.appendingPathComponent("did-\(displayID).heic")
 }
 
 /// Pre-HEIC snapshots (≤ 2026-09) — still readable, retired on the next
@@ -180,11 +186,34 @@ func bgraCGImage(from buffer: CVPixelBuffer) -> CGImage? {
 func loadCachedSnapshotImage(displayID: UInt32) -> CGImage? {
     // HEIC first, then the pre-2026-09 PNG (kept readable so an upgrade
     // doesn't cold-boot to aerial blue).
-    for url in [snapshotURL(displayID: displayID), legacySnapshotURL(displayID: displayID)] {
+    for url in [snapshotURL(displayID: displayID),
+                snapshotDir.appendingPathComponent("did-\(displayID).heic"),
+                legacySnapshotURL(displayID: displayID)] {
         guard FileManager.default.fileExists(atPath: url.path),
               let data = try? Data(contentsOf: url),
               let rep = NSBitmapImageRep(data: data) else { continue }
         return rep.cgImage
     }
     return nil
+}
+
+private let firstFrameCacheQueue = DispatchQueue(label: "aerial-first-frame-cache", qos: .utility)
+private nonisolated(unsafe) var cachedFirstFrameDisplays = Set<UInt32>()
+
+/// 每个扩展进程为每块屏幕保存一次真实首帧，供下次登录加载时占位。
+func cacheFirstPresentedFrame(_ buffer: CVPixelBuffer, displayID: UInt32) {
+    firstFrameCacheQueue.async {
+        guard !cachedFirstFrameDisplays.contains(displayID) else { return }
+        let frame = CIImage(cvPixelBuffer: buffer)
+        let scale = min(1, 1920 / max(frame.extent.width, frame.extent.height))
+        let preview = frame.transformed(by: CGAffineTransform(scaleX: scale, y: scale))
+        let context = CIContext(options: [.cacheIntermediates: false])
+        guard let image = context.createCGImage(preview, from: preview.extent) else {
+            errorLog("[SnapshotCache] cannot convert first frame for did=\(displayID)")
+            return
+        }
+        writeSnapshot(image, for: displayID)
+        cachedFirstFrameDisplays.insert(displayID)
+        debugLog("[SnapshotCache] saved first displayed frame for did=\(displayID)")
+    }
 }

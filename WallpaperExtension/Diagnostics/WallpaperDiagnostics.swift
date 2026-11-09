@@ -274,6 +274,7 @@ final class ContentsSwapPresenter {
     private weak var layer: CALayer?
     private weak var renderer: (any PlaybackRenderer)?
     private let wid: String
+    private let displayID: UInt32?
     /// Strong ref to the displayed buffer — `contents` holds the
     /// IOSurface, not the CVPixelBuffer that owns it. Main-only.
     private var presented: CVPixelBuffer?
@@ -290,6 +291,7 @@ final class ContentsSwapPresenter {
         self.layer = layer
         self.renderer = renderer
         self.wid = wid
+        self.displayID = displayID
 
         var link: CVDisplayLink?
         if let did = displayID {
@@ -328,6 +330,10 @@ final class ContentsSwapPresenter {
            let buffer = renderer.presentingImageBuffer(),
            buffer !== presented,
            let surface = CVPixelBufferGetIOSurface(buffer)?.takeUnretainedValue() {
+            if presented == nil {
+                if let displayID { cacheFirstPresentedFrame(buffer, displayID: displayID) }
+                debugLog("  [Presenter] first frame displayed wid=\(wid.prefix(8)) video=\(renderer.currentAssetURL.lastPathComponent)")
+            }
             presented = buffer
             unchangedTicks = 0
             if isIdle { upshift() }

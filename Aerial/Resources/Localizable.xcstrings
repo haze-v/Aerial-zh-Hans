@@ -3341,6 +3341,16 @@
         }
       }
     },
+    "Jump to a random video": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "随机跳转"
+          }
+        }
+      }
+    },
     "Keep": {
       "localizations": {
         "zh-Hans": {
@@ -4811,6 +4821,16 @@
         }
       }
     },
+    "Pause all wallpapers": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "暂停所有墙纸"
+          }
+        }
+      }
+    },
     "Pause in Low Power Mode": {
       "localizations": {
         "zh-Hans": {
@@ -5847,6 +5867,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "继续播放所有显示器"
+          }
+        }
+      }
+    },
+    "Resume all wallpapers": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "恢复所有墙纸"
           }
         }
       }

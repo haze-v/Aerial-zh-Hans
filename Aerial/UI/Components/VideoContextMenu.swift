@@ -66,6 +66,13 @@ struct VideoContextMenu: View {
             }
         }
 
+        Button {
+            NSWorkspace.shared.activateFileViewerSelecting(localFileURLs)
+        } label: {
+            Label("打开文件位置", systemImage: "folder")
+        }
+        .disabled(localFileURLs.isEmpty)
+
         // Favorite / Unfavorite
         let allFavorited = videos.allSatisfy { PrefsVideos.favorites.contains($0.id) }
         Button {
@@ -144,6 +151,15 @@ struct VideoContextMenu: View {
                 Label(deletable.count == 1 ? "Delete Video" : "Delete \(deletable.count) Videos",
                       systemImage: "trash")
             }
+        }
+    }
+
+    /// 定位实际缓存或导入文件，未下载的视频和直播流没有可打开的位置。
+    private var localFileURLs: [URL] {
+        videos.filter { !$0.isLive }.compactMap { video in
+            let path = VideoList.instance.localPathFor(video: video)
+            guard !path.isEmpty, FileManager.default.fileExists(atPath: path) else { return nil }
+            return URL(fileURLWithPath: path)
         }
     }
 

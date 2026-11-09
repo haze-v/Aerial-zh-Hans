@@ -21,6 +21,7 @@ struct PlaylistSectionView: View {
     @State private var entries: [PlaylistEntry] = []
     @State private var uncachedEntries: [PlaylistEntry] = []
     @State private var currentIdx: Int = 0
+    @State private var pendingMirrorSelectionID: String?
     @State private var thumbnails: [String: NSImage] = [:]
     @State private var listMode: Bool = Preferences.playlistListMode
     @State private var cycleMode: PlaylistCycleMode = Preferences.playlistMode
@@ -38,6 +39,9 @@ struct PlaylistSectionView: View {
             } else {
                 HStack {
                     cycleModeIndicator
+                    if scope == .popover {
+                        randomJumpButton
+                    }
                     timeFilterIndicator
                     if !listMode {
                         directionIndicator
@@ -52,6 +56,7 @@ struct PlaylistSectionView: View {
                         entries: entries,
                         uncachedEntries: uncachedEntries,
                         currentIdx: currentIdx,
+                        selectedIdx: selectedIdx,
                         thumbnails: thumbnails,
                         playbackManager: playbackManager,
                         downloadTracker: downloadTracker,
@@ -74,6 +79,9 @@ struct PlaylistSectionView: View {
             }
         }
         .videoCacheDeleteAlert($pendingCacheDelete) { reload() }
+        .onChange(of: currentVideoID) { _, videoID in
+            if videoID == pendingMirrorSelectionID { pendingMirrorSelectionID = nil }
+        }
         .onAppear { reload() }
         .onChange(of: playbackManager.popoverScreenUUID) { _ in
             // Only the popover scope follows the active screen; a pinned
@@ -156,6 +164,23 @@ struct PlaylistSectionView: View {
         .help(help)
         .accessibilityLabel(cycleMode == mode ? "\(label) on" : label)
         .accessibilityAddTraits(cycleMode == mode ? .isSelected : [])
+    }
+
+    private var randomJumpButton: some View {
+        Button {
+            if let index = entries.indices.filter({ $0 != selectedIdx }).randomElement() {
+                tapEntry(index: index)
+            }
+        } label: {
+            Image(systemName: "dice")
+                .font(.system(size: 14))
+                .frame(width: 28, height: 28)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.borderless)
+        .disabled(entries.count < 2)
+        .help("Jump to a random video")
+        .accessibilityLabel("Jump to a random video")
     }
 
     // MARK: - Time Filter Indicator
@@ -266,7 +291,7 @@ struct PlaylistSectionView: View {
                     .padding(.horizontal, sidePadding)
                     .padding(.vertical, 2)
                 }
-                .onChange(of: currentIdx) { newIndex in
+                .onChange(of: selectedIdx) { newIndex in
                     guard newIndex >= 0 && newIndex < entries.count else { return }
                     withAnimation(.easeInOut(duration: 0.3)) {
                         proxy.scrollTo(newIndex, anchor: .center)
@@ -277,14 +302,15 @@ struct PlaylistSectionView: View {
                     // horizontal offset outlives a smaller playlist.
                     guard newCount > 0 else { return }
                     DispatchQueue.main.async {
-                        proxy.scrollTo(min(max(currentIdx, 0), newCount - 1), anchor: .center)
+                        proxy.scrollTo(min(max(selectedIdx, 0), newCount - 1), anchor: .center)
                     }
                 }
                 .onAppear {
                     // Scroll to current on appear
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [entries, currentIdx] in
-                        guard currentIdx >= 0 && currentIdx < entries.count else { return }
-                        proxy.scrollTo(currentIdx, anchor: .center)
+                    let index = selectedIdx
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [entries] in
+                        guard entries.indices.contains(index) else { return }
+                        proxy.scrollTo(index, anchor: .center)
                     }
                 }
             }
@@ -309,6 +335,7 @@ struct PlaylistSectionView: View {
 
     private func playlistThumbnail(entry: PlaylistEntry, index: Int) -> some View {
         let isCurrent = index == currentIdx
+        let isSelected = index == selectedIdx
 
         return VStack(spacing: 2) {
             ZStack(alignment: .leading) {
@@ -383,12 +410,19 @@ struct PlaylistSectionView: View {
                     .keyboardShortcut(.space, modifiers: [])
                 }
             }
-            .shadow(color: isCurrent ? Color.aerial.opacity(0.3) : .clear, radius: 4)
+            .shadow(color: isSelected ? Color.aerial.opacity(0.3) : .clear, radius: 4)
+            .overlay {
+                if isSelected && !isCurrent {
+                    RoundedRectangle(cornerRadius: 4)
+                        .strokeBorder(Color.aerial, lineWidth: 2)
+                        .allowsHitTesting(false)
+                }
+            }
 
             // Label
             Text(entry.secondaryName.isEmpty ? entry.videoName : entry.secondaryName)
                 .font(.system(size: 9))
-                .foregroundColor(isCurrent ? .primary : .secondary)
+                .foregroundColor(isSelected ? .primary : .secondary)
                 .lineLimit(1)
                 .frame(width: 96)
         }
@@ -402,7 +436,7 @@ struct PlaylistSectionView: View {
         // own label so it remains separately reachable.
         .accessibilityElement(children: .combine)
         .accessibilityLabel(thumbnailAccessibilityLabel(entry: entry, index: index))
-        .accessibilityAddTraits(isCurrent ? [.isSelected, .isButton] : .isButton)
+        .accessibilityAddTraits(isSelected ? [.isSelected, .isButton] : .isButton)
     }
 
     private func thumbnailAccessibilityLabel(entry: PlaylistEntry, index: Int) -> String {
@@ -495,10 +529,25 @@ struct PlaylistSectionView: View {
 
     // MARK: - Actions
 
+    private var currentVideoID: String? {
+        entries.indices.contains(currentIdx) ? entries[currentIdx].videoId : nil
+    }
+
+    // A paused renderer may keep its last frame while the new choice is queued.
+    private var selectedIdx: Int {
+        guard scope == .popover, PrefsDisplays.viewingMode == .independentMirror,
+              let pendingMirrorSelectionID else { return currentIdx }
+        return entries.firstIndex { $0.videoId == pendingMirrorSelectionID } ?? currentIdx
+    }
+
     private func tapEntry(index: Int) {
         if PrefsDisplays.viewingMode == .independentMirror {
             guard entries.indices.contains(index) else { return }
-            WallpaperControl.shared.jumpToMirrorVideo(videoID: entries[index].videoId)
+            let videoID = entries[index].videoId
+            if scope == .popover {
+                pendingMirrorSelectionID = videoID == currentVideoID ? nil : videoID
+            }
+            WallpaperControl.shared.jumpToMirrorVideo(videoID: videoID)
             return
         }
         let playlistIndex = displayToPlaylistIndex[index] ?? index

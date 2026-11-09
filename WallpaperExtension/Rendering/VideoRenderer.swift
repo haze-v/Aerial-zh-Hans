@@ -813,6 +813,8 @@ final class VideoRenderer: @unchecked Sendable {
             layer.controlTimebase = self.timebase
             let wasEmpty = subscribers.isEmpty
             subscribers.append(layer)
+            // 冷启动即使已暂停，也先解出一帧填充桌面；此时已注册到健康监测。
+            primeFirstFrameOnQueue()
             subscribedAt[ObjectIdentifier(layer)] = CFAbsoluteTimeGetCurrent()
             debugLog("  [Renderer] subscriber +1 → \(subscribers.count) total (layer \(Self.layerTag(layer)))")
             // Instant join: present the most recent decoded frame right
@@ -963,18 +965,25 @@ final class VideoRenderer: @unchecked Sendable {
         }
     }
 
-    /// Stop playback. Tears down on the queue, serialized with the pump,
-    /// with a bound so a teardown can never hang behind a wedged pump (the
-    /// teardown timer thread used to block forever). Only if the bound
-    /// lapses are the readers cancelled from this thread — the one
-    /// AVFoundation call that unblocks a pump stuck inside
-    /// `copyNextSampleBuffer`. The queued body still runs once the queue
-    /// frees up, which is the intended teardown.
+    /// 换片前准备一帧，暂停或旧显示层缓存未清空时也能立即显示新画面。
+    private func primeFirstFrameOnQueue() {
+        guard lastSample == nil else { return }
+        pollStallInjector()
+        guard let sample = blockingCopyNext() else { return }
+        let pts = CMSampleBufferGetPresentationTimeStamp(sample)
+        lastSample = sample
+        lastEnqueuedEnd = CMTimeAdd(pts, CMSampleBufferGetDuration(sample))
+        transition.noteEnqueued(sample, pts: pts)
+        publish()
+        debugLog("  [Renderer] first frame ready: \(asset.url.lastPathComponent)")
+    }
+
+    /// 在解码队列停止播放器；队列超时交给进程恢复，避免读帧与取消并发。
     func stop() {
-        cancelDeepPauseTimer()
-        cancelRamp()
-        cancelWatchdogRecreateTimer()
         let finished: Void? = BoundedSync.run(on: queue, timeout: .seconds(5)) { [self] in
+            cancelDeepPauseTimer()
+            cancelRamp()
+            cancelWatchdogRecreateTimer()
             isRunning = false
             deepPauseResumePosition = .zero
             audio?.teardown()
@@ -985,15 +994,8 @@ final class VideoRenderer: @unchecked Sendable {
             publish()
         }
         if finished == nil {
-            // Wedged queue (blocked copyNext/startReading): cancelling from
-            // here is the only way to unblock it. Never step one — an
-            // off-queue cancel races a LIVE pump and tears the reader down
-            // under copyNextSampleBuffer/startReading (2026-10-22 engine
-            // switch to a live feed crashes).
-            let (current, next) = published.withLockUnchecked { ($0.currentReader, $0.nextReader) }
-            current?.cancelReading()
-            next?.cancelReading()
-            debugLog("⚠️ [Renderer] stop(): queue unresponsive after 5s — readers cancelled off-queue, teardown left queued")
+            debugLog("[Renderer] stop timed out — requesting process recovery without concurrent reader cancellation")
+            onQueueWedged?()
         }
     }
 
@@ -1777,51 +1779,20 @@ final class VideoRenderer: @unchecked Sendable {
         _ = withPumpMarker(reader: reader, phase: "startReading") { reader.startReading() }
     }
 
-    /// The watchdog proper: runs from the 2 s feed-health timer OFF the
-    /// renderer queue. Reads the marker, and past `stallThreshold` cancels
-    /// the stuck reader (the one call that makes a pending
-    /// `copyNextSampleBuffer` return); if the queue is still inside the
-    /// same call `escalateAfterCancel` later, AVFoundation ignored the
-    /// cancel and the handler's escalation hook fires. Never calls
-    /// AVFoundation under the lock.
+    /// 读帧超时只请求重载，不能从另一线程取消正在读取的 AVAssetReader。
     private func runPumpWatchdogOffQueue() {
         pollStallInjector()
         let now = CFAbsoluteTimeGetCurrent()
-        var cancelTarget: AVAssetReader?
-        var escalate = false
-        var blockedFor: TimeInterval = 0
-        var phase = ""
-        pumpBlock.withLockUnchecked { block in
-            guard var b = block else { return }
-            blockedFor = now - b.enteredAt
-            phase = b.phase
-            switch PumpWatchdogPolicy.decide(enteredAt: b.enteredAt, cancelIssuedAt: b.cancelIssuedAt,
-                                             escalated: b.escalated, now: now) {
-            case .none:
-                return
-            case .cancel:
-                b.cancelIssuedAt = now
-                cancelTarget = b.reader
-            case .escalate:
-                b.escalated = true
-                escalate = true
-            }
-            block = b
+        let stalled = pumpBlock.withLockUnchecked { block -> Bool in
+            guard var current = block, !current.escalated,
+                  now - current.enteredAt >= 8 else { return false }
+            current.escalated = true
+            block = current
+            return true
         }
-        if let cancelTarget {
-            watchdogCancelledReader.withLockUnchecked { $0 = cancelTarget }
-            let (cancels, name) = published.withLockUnchecked { p -> (Int, String) in
-                p.wdCancels += 1
-                p.lastWatchdogCancelAt = now
-                return (p.wdCancels, p.asset.url.lastPathComponent)
-            }
-            debugLog("⚠️🐕 [Renderer] pump watchdog: \(phase) blocked \(String(format: "%.1f", blockedFor))s (asset=\(name)) — cancelReading() from watchdog (#\(cancels))")
-            cancelTarget.cancelReading()
-        }
-        if escalate {
-            debugLog("⚠️🐕 [Renderer] pump still blocked \(String(format: "%.1f", blockedFor))s after cancelReading — renderer queue wedged; escalating")
-            onQueueWedged?()
-        }
+        guard stalled else { return }
+        debugLog("[Renderer] decoder stalled for 8s — requesting safe process recovery")
+        onQueueWedged?()
     }
 
     /// The pump's nil branch for a watchdog-cancelled reader. Marks the

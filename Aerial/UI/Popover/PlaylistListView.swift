@@ -12,6 +12,7 @@ struct PlaylistListView<MenuContent: View>: View {
     let entries: [PlaylistEntry]
     let uncachedEntries: [PlaylistEntry]
     let currentIdx: Int
+    let selectedIdx: Int
     let thumbnails: [String: NSImage]
     @ObservedObject var playbackManager: PlaybackManager
     @ObservedObject var downloadTracker: DownloadTracker
@@ -37,7 +38,7 @@ struct PlaylistListView<MenuContent: View>: View {
                 .padding(.vertical, 2)
             }
             .frame(height: 220)
-            .onChange(of: currentIdx) { newIndex in
+            .onChange(of: selectedIdx) { newIndex in
                 guard newIndex >= 0 && newIndex < entries.count else { return }
                 withAnimation(.easeInOut(duration: 0.3)) {
                     proxy.scrollTo(newIndex, anchor: .center)
@@ -50,13 +51,13 @@ struct PlaylistListView<MenuContent: View>: View {
                 // once layout settles.
                 guard newCount > 0 else { return }
                 DispatchQueue.main.async {
-                    proxy.scrollTo(min(max(currentIdx, 0), newCount - 1), anchor: .center)
+                    proxy.scrollTo(min(max(selectedIdx, 0), newCount - 1), anchor: .center)
                 }
             }
             .onAppear {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                    guard currentIdx >= 0 && currentIdx < entries.count else { return }
-                    proxy.scrollTo(currentIdx, anchor: .center)
+                    guard entries.indices.contains(selectedIdx) else { return }
+                    proxy.scrollTo(selectedIdx, anchor: .center)
                 }
             }
         }
@@ -66,6 +67,7 @@ struct PlaylistListView<MenuContent: View>: View {
 
     private func cachedRow(entry: PlaylistEntry, index: Int) -> some View {
         let isCurrent = index == currentIdx
+        let isSelected = index == selectedIdx
         let video = VideoList.instance.videos.first(where: { $0.id == entry.videoId })
 
         return HStack(spacing: 8) {
@@ -127,7 +129,7 @@ struct PlaylistListView<MenuContent: View>: View {
             VStack(alignment: .leading, spacing: 2) {
                 if !entry.secondaryName.isEmpty {
                     Text(entry.secondaryName)
-                        .font(.system(size: 12, weight: isCurrent ? .bold : .semibold))
+                        .font(.system(size: 12, weight: isSelected ? .bold : .semibold))
                         .foregroundColor(.primary)
                         .lineLimit(1)
                 }
@@ -162,7 +164,7 @@ struct PlaylistListView<MenuContent: View>: View {
         .padding(.vertical, 4)
         .background(
             RoundedRectangle(cornerRadius: 6)
-                .fill(isCurrent ? Color.aerial.opacity(0.1) : Color.clear)
+                .fill(isSelected ? Color.aerial.opacity(0.1) : Color.clear)
         )
         .contentShape(Rectangle())
         .onTapGesture {
@@ -170,6 +172,7 @@ struct PlaylistListView<MenuContent: View>: View {
             onTapEntry(index)
         }
         .contextMenu { contextMenu(entry) }
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 
     // MARK: - Uncached Row
