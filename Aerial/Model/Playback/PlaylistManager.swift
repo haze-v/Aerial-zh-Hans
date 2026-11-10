@@ -583,6 +583,55 @@ class PlaylistManager {
     /// Same window WallpaperStatusMonitor uses for "extension alive".
     private static let extensionNowPlayingFreshness: TimeInterval = 90
 
+    /// 镜像组只选一次上一条或下一条，再将同一视频交给各屏幕独立播放。
+    func selectMirrorAdjacentVideo(forward: Bool) -> String? {
+        let status = store.read(WallpaperStatusState.self, from: WallpaperStatusState.fileURL)
+        let selected: String? = queue.sync(flags: .barrier) {
+            guard var playlist = state.sharedPlaylist, !playlist.entries.isEmpty else { return nil }
+            // 连按快捷键时从上次指令继续，避免旧状态回报把游标拉回去。
+            let pending = pendingJump["broadcast"]
+            let awaitingJump = pending.map { Date().timeIntervalSince($0.at) < Self.pendingJumpTimeout } ?? false
+            if !awaitingJump, let status,
+               Date().timeIntervalSince(status.lastSeen) < Self.extensionNowPlayingFreshness {
+                let keys = status.nowPlayingId.keys.sorted()
+                let leader = keys.first { !status.pausedScreens.contains($0) } ?? keys.first
+                if let leader, let id = status.nowPlayingId[leader],
+                   let index = playlist.entries.firstIndex(where: { $0.videoId == id }) {
+                    playlist.currentIndex = index
+                }
+            }
+            let resolve: (String) -> AerialVideo? = { id in
+                VideoList.instance.videos.first { $0.id == id && $0.isAvailableOffline }
+            }
+            let video: AerialVideo?
+            if forward {
+                video = playlist.popNextVideo(
+                    isResume: false, resolveVideo: resolve,
+                    shouldPlay: { TimeManagement.videoMatchesCurrentTime($0) },
+                    shouldPlayFallback: { TimeManagement.videoMatchesCurrentTimeWithFallback($0) }
+                )?.video
+            } else {
+                video = playlist.popPreviousVideo(resolveVideo: resolve)?.video
+            }
+            guard let video else { return nil }
+            playlist.playbackTimestamp = nil
+            state.sharedPlaylist = playlist
+            pendingJump["broadcast"] = (playlist.currentIndex, Date())
+            for uuid in mirrorScreens {
+                state.screenPlaylists[uuid] = playlist
+                pendingJump[uuid] = (playlist.currentIndex, Date())
+            }
+            persist()
+            store.delete(at: PlaylistProgressState.fileURL)
+            return video.id
+        }
+        if let selected {
+            prewarmIfLiveFeed(videoID: selected)
+            postPlaylistDidChange(nil)
+        }
+        return selected
+    }
+
     /// Jump to a specific index in the playlist, persist, and notify.
     func setCurrentIndex(_ index: Int, for screenUUID: String? = nil) {
         queue.sync(flags: .barrier) {
@@ -615,6 +664,12 @@ class PlaylistManager {
     func applyExtensionNowPlaying(_ ids: [String: String]) {
         var changed = false
         queue.sync(flags: .barrier) {
+            if PrefsDisplays.viewingMode == .independentMirror,
+               let pending = pendingJump["broadcast"], let shared = state.sharedPlaylist,
+               shared.entries.indices.contains(pending.index), !ids.isEmpty,
+               ids.values.allSatisfy({ $0 == shared.entries[pending.index].videoId }) {
+                pendingJump["broadcast"] = nil
+            }
             for (key, videoId) in ids {
                 // "broadcast" is the extension's shared-renderer key
                 // (cloned / spanned / mirrored); any other key is an

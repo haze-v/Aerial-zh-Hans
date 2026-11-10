@@ -34,6 +34,11 @@ enum BetaChannel {
     }
 }
 
+private enum AutoInstallMode: String {
+    case off = "Off"
+    case immediately = "Immediately"
+}
+
 final class SparkleGentleDelegate: NSObject, ObservableObject, SPUUpdaterDelegate, SPUStandardUserDriverDelegate {
 
     @Published var updateAvailable: Bool = false

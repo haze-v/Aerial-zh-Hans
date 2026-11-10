@@ -28,6 +28,8 @@ enum AspectMode: Int {
 enum ViewingMode: Int {
     case independent, cloned, spanned, mirrored, independentMirror
 
+    static let defaultMode: Self = .independentMirror
+
     var usesPerDisplayPlayback: Bool {
         self == .independent || self == .independentMirror
     }
@@ -113,7 +115,7 @@ struct PrefsDisplays {
 
     static var viewingMode: ViewingMode {
         get {
-            return ViewingMode(rawValue: intViewingMode) ?? .independent
+            return ViewingMode(rawValue: intViewingMode) ?? ViewingMode.defaultMode
         }
         set(value) {
             intViewingMode = value.rawValue

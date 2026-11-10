@@ -444,6 +444,12 @@ final class WallpaperControl: @unchecked Sendable {
 
     /// Bump the advance counter for one screen (or all screens if nil).
     func advanceVideo(screenUUID: String?) {
+        if PrefsDisplays.viewingMode == .independentMirror {
+            if let videoID = PlaylistManager.shared.selectMirrorAdjacentVideo(forward: true) {
+                jumpToMirrorVideo(videoID: videoID)
+            }
+            return
+        }
         noteVideoNavigation()
         mutate("advance(\(screenUUID?.prefix(8).description ?? "all"))") { state in
             state.mirrorVideoJump = nil
@@ -469,6 +475,12 @@ final class WallpaperControl: @unchecked Sendable {
 
     /// Mirror of `advanceVideo`, bumping `regressCounter` instead.
     func regressVideo(screenUUID: String?) {
+        if PrefsDisplays.viewingMode == .independentMirror {
+            if let videoID = PlaylistManager.shared.selectMirrorAdjacentVideo(forward: false) {
+                jumpToMirrorVideo(videoID: videoID)
+            }
+            return
+        }
         noteVideoNavigation()
         mutate("regress(\(screenUUID?.prefix(8).description ?? "all"))") { state in
             state.mirrorVideoJump = nil
@@ -522,6 +534,10 @@ final class WallpaperControl: @unchecked Sendable {
 
     /// Select the same video for the mirror group regardless of which display is paused.
     func jumpToMirrorVideo(videoID: String) {
+        // 点选、骰子和快捷键共用镜像组游标，下一次导航从同一位置出发。
+        if let index = PlaylistManager.shared.allEntries().firstIndex(where: { $0.videoId == videoID }) {
+            PlaylistManager.shared.setCurrentIndex(index)
+        }
         noteVideoNavigation()
         mutate("mirrorJump(\(videoID))") { state in
             state.mirrorVideoJump = MirrorVideoJump(videoID: videoID, token: state.version &+ 1)

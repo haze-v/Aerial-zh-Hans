@@ -17,8 +17,11 @@ import SwiftUI
 import AppKit
 
 struct AboutContent: View {
+    @ObservedObject private var updaterState = UpdaterMenuState.shared
+
     /// Shared with the Help menu (`AerialCommands`).
     enum AboutLinks {
+        static let github = URL(string: "https://github.com/haze-v/Aerial-zh-Hans")!
         static let website   = URL(string: "https://aerialscreensaver.github.io/")!
         static let discord   = URL(string: "https://discord.gg/TPuA5WG")!
         static let inferno   = URL(string: "https://infernodesign.com")!
@@ -46,18 +49,7 @@ struct AboutContent: View {
                     .foregroundStyle(.secondary)
             }
 
-            Text("A free, open-source macOS screen saver and video wallpaper app, made and maintained by Guillaume Louel.")
-                .font(.system(size: 13))
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-                .fixedSize(horizontal: false, vertical: true)
-                .padding(.horizontal, 8)
-
             VStack(spacing: 8) {
-                Text("Looking for support?")
-                    .font(.system(size: 13, weight: .medium))
-                    .foregroundStyle(.secondary)
-
                 HStack(spacing: 12) {
                     Button {
                         NSWorkspace.shared.open(AboutLinks.website)
@@ -77,13 +69,31 @@ struct AboutContent: View {
                 }
             }
 
-            Link("Icon by Inferno design", destination: AboutLinks.inferno)
+            HStack(spacing: 12) {
+                Link(destination: AboutLinks.github) {
+                    Label("GitHub", systemImage: "arrow.up.right.square")
+                }
+                Button {
+                    AppDelegate.shared?.sparkleController.updater.checkForUpdates()
+                } label: {
+                    Label("Check for Updates…", systemImage: "arrow.triangle.2.circlepath")
+                }
+                .disabled(!updaterState.canCheckForUpdates)
+            }
+            .buttonStyle(.bordered)
+
+            Text("更新来源：haze-v/Aerial-zh-Hans")
                 .font(.system(size: 11))
-                .foregroundStyle(.tertiary)
-                .padding(.top, 4)
+                .foregroundStyle(.secondary)
+
+            Text("由 pan 独立改造")
+                .font(.system(size: 11))
+                .foregroundStyle(.secondary)
+
         }
         .padding(24)
         .frame(width: 380)
+
     }
 
 }

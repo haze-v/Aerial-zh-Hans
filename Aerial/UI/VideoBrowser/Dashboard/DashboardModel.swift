@@ -132,27 +132,10 @@ final class DashboardModel: ObservableObject {
         }
     }
 
-    /// Apply a viewing-mode change live. Beyond writing the pref this must
-    /// rebuild playlists for the new topology and restart playback —
-    /// otherwise the running wallpaper keeps the old layout. Route ALL mode
-    /// changes through here (never set `PrefsDisplays.viewingMode` from a
-    /// view) so the side effects stay consistent.
+    /// Change the active layout and refresh the dashboard projections.
     func applyViewingModeChange(_ newMode: ViewingMode) {
         guard newMode != PrefsDisplays.viewingMode else { return }
         playbackManager.changeViewingMode(newMode)
-
-        // Rebuild the shared playlist for the new topology.
-        // `regenerate(for: nil)` also clears stale per-screen playlists when
-        // leaving independent.
-        if newMode != .independentMirror {
-            PlaylistManager.shared.regenerate(for: nil,
-                                              mode: PrefsVideos.newShouldPlay,
-                                              filterStrings: PrefsVideos.newShouldPlayString)
-        }
-
-        // The extension restarts playback on its own when the playlist
-        // generation bumps; rescan downloads under the new mode.
-        DownloadCoordinator.shared.selectionDidChange()
 
         // Re-render (card layout switches independent ↔ single shared card)
         // and recompute projections for the new scope set.

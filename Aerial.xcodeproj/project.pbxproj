@@ -128,7 +128,6 @@
 		F0EXP0092F30000000000001 /* InstallFromLinkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0EXP00D2F30000000000001 /* InstallFromLinkView.swift */; };
 		F0EXP00F2F30000000000001 /* expansions.json in Resources */ = {isa = PBXBuildFile; fileRef = F0EXP00E2F30000000000001 /* expansions.json */; };
 		F0F66C7B2F1FC2BA007E6377 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0F66C782F1FC2BA007E6377 /* SettingsView.swift */; };
-		F0F66C7C2F1FC2BA007E6377 /* AutoUpdatesPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0F66C752F1FC2BA007E6377 /* AutoUpdatesPanel.swift */; };
 		F0F66C7F2F1FD502007E6377 /* MyVideosViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0F66C7E2F1FD502007E6377 /* MyVideosViewModel.swift */; };
 		F0F66C822F1FD502007E6377 /* CacheSettingsPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0F66C812F1FD502007E6377 /* CacheSettingsPanel.swift */; };
 		F0F66C852F1FD502007E6377 /* DisplayPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0F66C832F1FD502007E6377 /* DisplayPreviewView.swift */; };
@@ -592,7 +591,6 @@
 		F0EXT0B62F30000000000001 /* WeatherSymbols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherSymbols.swift; sourceTree = "<group>"; };
 		F0EXT0B72F30000000000001 /* WeatherOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherOverlayView.swift; sourceTree = "<group>"; };
 		F0EXT0D22F30000000000001 /* MusicOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MusicOverlayView.swift; sourceTree = "<group>"; };
-		F0F66C752F1FC2BA007E6377 /* AutoUpdatesPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoUpdatesPanel.swift; sourceTree = "<group>"; };
 		F0F66C782F1FC2BA007E6377 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		F0F66C7E2F1FD502007E6377 /* MyVideosViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyVideosViewModel.swift; sourceTree = "<group>"; };
 		F0F66C812F1FD502007E6377 /* CacheSettingsPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CacheSettingsPanel.swift; sourceTree = "<group>"; };
@@ -1200,7 +1198,6 @@
 				F0KBS0072F50000000000001 /* AccessibilityPanel.swift */,
 				F0F66C8A2F1FD502007E6377 /* AdvancedSettingsPanel.swift */,
 				F0WPL00092F30000000000001 /* Aerial4WallpaperPanel.swift */,
-				F0F66C752F1FC2BA007E6377 /* AutoUpdatesPanel.swift */,
 				F0F66C812F1FD502007E6377 /* CacheSettingsPanel.swift */,
 				F0DSK0002F30000000000001 /* DesktopSettingsPanel.swift */,
 				F0F66C832F1FD502007E6377 /* DisplayPreviewView.swift */,
@@ -1866,7 +1863,6 @@
 				F0C0611D2E4F70580066F2C4 /* PrefsVideos.swift in Sources */,
 				F0STL0012F30000000000001 /* ScreensaverTimelineView.swift in Sources */,
 				F0F66C7B2F1FC2BA007E6377 /* SettingsView.swift in Sources */,
-				F0F66C7C2F1FC2BA007E6377 /* AutoUpdatesPanel.swift in Sources */,
 				F0F66C822F1FD502007E6377 /* CacheSettingsPanel.swift in Sources */,
 				F0F66C852F1FD502007E6377 /* DisplayPreviewView.swift in Sources */,
 				F0F66C862F1FD502007E6377 /* DisplaysSettingsPanel.swift in Sources */,
@@ -2369,7 +2365,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 26.0;
-				MARKETING_VERSION = 4.1.26;
+				MARKETING_VERSION = 4.1.27;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.glouel.Aerial-App";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -2400,7 +2396,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 26.0;
-				MARKETING_VERSION = 4.1.26;
+				MARKETING_VERSION = 4.1.27;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.glouel.Aerial-App";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -2467,7 +2463,7 @@
 					"@executable_path/../../../../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 26.0;
-				MARKETING_VERSION = 4.1.26;
+				MARKETING_VERSION = 4.1.27;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.glouel.Aerial-App.Aerial4WallpaperExtension";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -2501,7 +2497,7 @@
 					"@executable_path/../../../../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 26.0;
-				MARKETING_VERSION = 4.1.26;
+				MARKETING_VERSION = 4.1.27;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.glouel.Aerial-App.Aerial4WallpaperExtension";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;

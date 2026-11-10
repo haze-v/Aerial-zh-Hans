@@ -61,7 +61,7 @@ struct AerialCommands: Commands {
 // MARK: - Check for Updates
 
 /// Mirrors Sparkle's `canCheckForUpdates` KVO flag for the menu item's
-/// enabled state (same publisher `AutoUpdatesPanel` uses).
+/// enabled state.
 final class UpdaterMenuState: ObservableObject {
     static let shared = UpdaterMenuState()
 

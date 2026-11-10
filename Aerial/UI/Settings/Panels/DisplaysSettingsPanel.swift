@@ -17,7 +17,7 @@ struct DisplaysSettingsPanel: View {
     @State private var overlayPerScreen: Bool = false
     @State private var singleDisplayOverlayScreenUUID: String = ""
     @State private var singleDisplayOverlayScreenName: String = ""
-    @State private var viewingMode: ViewingMode = .independent
+    @State private var viewingMode = PrefsDisplays.viewingMode
     @State private var aspectMode: AspectMode = .fill
     @State private var horizontalMargin: Double = 0
     @State private var verticalMargin: Double = 0

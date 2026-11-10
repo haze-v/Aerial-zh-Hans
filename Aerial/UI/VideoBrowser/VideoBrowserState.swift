@@ -68,8 +68,11 @@ class VideoBrowserState: ObservableObject {
     /// the fixed range anchor that shift-extends pivot around.
     @Published var focusedVideoId: String?
     @Published var searchText: String = ""
+    @Published var favoriteFilter: VideoLibraryFilter = .all
+    @Published var downloadFilter: VideoLibraryFilter = .all
     @Published var sortOrder: VideoSortOrder = .name
     @Published var viewMode: VideoViewMode = .grid
+    @Published var previewURL: URL?
     @Published var thumbnails: [String: NSImage] = [:]
     @Published var refreshTrigger: Int = 0
     @Published var userPlaylists: [UserPlaylistSummary] = []
@@ -103,7 +106,7 @@ class VideoBrowserState: ObservableObject {
 
     private var cancellables = Set<AnyCancellable>()
 
-    init() {
+    init(initialCategory: BrowseCategory? = nil) {
         // The Dashboard is the default landing view (the property's
         // initial value above). A caller can still override the initial
         // selection via `pendingInitialCategory` below.
@@ -112,7 +115,9 @@ class VideoBrowserState: ObservableObject {
         // before openWindow(id: "videoBrowser") — e.g. the About box's
         // "Browse Expansions" button. Consume and clear so it only
         // applies to this fresh window.
-        if let pending = Self.pendingInitialCategory {
+        if let initialCategory {
+            selectedSidebarItem = initialCategory
+        } else if let pending = Self.pendingInitialCategory {
             selectedSidebarItem = pending
             Self.pendingInitialCategory = nil
         }
@@ -306,11 +311,6 @@ class VideoBrowserState: ObservableObject {
         return false
     }
 
-    var isLiveFeeds: Bool {
-        if case .source("Live Feeds") = selectedSidebarItem { return true }
-        return false
-    }
-
     var isUserPlaylist: Bool {
         if case .userPlaylist = selectedSidebarItem { return true }
         return false
@@ -328,13 +328,11 @@ class VideoBrowserState: ObservableObject {
 
     /// True for sections whose content is rendered by `VideoGridView`
     /// and therefore supports the grid/list view-mode toggle. False for
-    /// Now Playing, Live Feeds, User Playlists, the Expansions showcase,
+    /// Now Playing, User Playlists, the Expansions showcase,
     /// and Activity — all of which have bespoke content layouts.
     var supportsViewMode: Bool {
         switch selectedSidebarItem {
         case .dashboard, .nowPlaying, .userPlaylist, .expansions, .activity:
-            return false
-        case .source(let name) where name == "Live Feeds":
             return false
         default:
             return true
@@ -346,7 +344,7 @@ class VideoBrowserState: ObservableObject {
     /// collapsing as you select/deselect. Exactly the views that render
     /// selectable `VideoBrowserCardView`s: the grid/list browsing views plus
     /// the per-monitor Now Playing sections and the Activity feed. Home, User
-    /// Playlists, Live Feeds, and Expansions don't use the shared video
+    /// Playlists and Expansions don't use the shared video
     /// selection, so they're excluded.
     var keepsInspectorOpen: Bool {
         supportsViewMode || isNowPlaying || isActivity
@@ -392,6 +390,8 @@ class VideoBrowserState: ObservableObject {
             result = allVideos.filter { !PrefsVideos.hidden.contains($0.id) }
         }
 
+        result = result.filter { matchesFilters($0) }
+
         // Search filter
         if !searchText.isEmpty {
             let query = searchText.lowercased()
@@ -411,6 +411,15 @@ class VideoBrowserState: ObservableObject {
         // behavior (ghost cards, broken context menus), so never let them
         // through even if VideoList regresses.
         return result.unique(for: \.id)
+    }
+
+    var hasActiveFilters: Bool {
+        favoriteFilter != .all || downloadFilter != .all
+    }
+
+    func matchesFilters(_ video: AerialVideo) -> Bool {
+        favoriteFilter.matches(PrefsVideos.favorites.contains(video.id))
+            && downloadFilter.matches(video.isAvailableOffline)
     }
 
     var currentTimeRestriction: (active: Bool, restrictTo: String) {
@@ -567,7 +576,9 @@ class VideoBrowserState: ObservableObject {
     func globalSearchGroups(excluding excludedSource: String? = nil) -> [GlobalSearchSourceGroup] {
         let query = searchText.lowercased()
         guard !query.isEmpty else { return [] }
-        let matches = VideoList.instance.videos.filter { Self.matches($0, query: query) }
+        let matches = VideoList.instance.videos.filter {
+            Self.matches($0, query: query) && matchesFilters($0)
+        }
         let bySource = Dictionary(grouping: matches, by: { $0.source.name })
         var groups: [GlobalSearchSourceGroup] = []
         for (sourceName, videos) in bySource {
@@ -582,21 +593,36 @@ class VideoBrowserState: ObservableObject {
         // not-yet-installed pack whose stripped metadata matches the
         // query. Installed packs are skipped — the live Source above
         // is the source of truth for them.
-        for expansion in ExpansionStore.shared.expansions {
-            guard !ExpansionStore.shared.isInstalled(expansion) else { continue }
-            guard let assets = expansion.assets, !assets.isEmpty else { continue }
-            let matched = assets.filter { Self.matches($0, query: query) }
-            guard !matched.isEmpty else { continue }
-            groups.append(GlobalSearchSourceGroup(
-                backing: .available(
-                    expansion,
-                    matched.sorted { ($0.title ?? "") < ($1.title ?? "") }
-                )
-            ))
+        if !hasActiveFilters {
+            for expansion in ExpansionStore.shared.expansions {
+                guard !ExpansionStore.shared.isInstalled(expansion) else { continue }
+                guard let assets = expansion.assets, !assets.isEmpty else { continue }
+                let matched = assets.filter { Self.matches($0, query: query) }
+                guard !matched.isEmpty else { continue }
+                groups.append(GlobalSearchSourceGroup(
+                    backing: .available(
+                        expansion,
+                        matched.sorted { ($0.title ?? "") < ($1.title ?? "") }
+                    )
+                ))
+            }
         }
         return groups.sorted {
             if $0.sortPriority != $1.sortPriority { return $0.sortPriority < $1.sortPriority }
             return $0.displayName < $1.displayName
+        }
+    }
+}
+
+/// 三态条件供资料库组合筛选使用。
+enum VideoLibraryFilter: Int, CaseIterable {
+    case all, yes, no
+
+    func matches(_ value: Bool) -> Bool {
+        switch self {
+        case .all: return true
+        case .yes: return value
+        case .no: return !value
         }
     }
 }

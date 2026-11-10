@@ -14,12 +14,12 @@ struct ScreenCoverageInfo: Identifiable {
 }
 
 struct DesktopSettingsPanel: View {
-    @State private var pauseOnHighCPU = false
+    @State private var pauseOnHighCPU = Preferences.desktopPauseOnHighCPU
     @State private var cpuThreshold = 70.0
     @State private var cpuHighLoadDuration = 5.0
     @State private var cpuSampleInterval = 1.0
     @State private var autoPauseEnabled: Bool = true
-    @State private var autoPauseThreshold: Double = 0.6
+    @State private var autoPauseThreshold = Preferences.desktopAutoPauseThreshold
     @State private var screenCoverages: [ScreenCoverageInfo] = []
     /// Live list of apps currently covering any watched screen, merged
     /// across screens (each app shows its highest coverage), refreshed
@@ -32,7 +32,7 @@ struct DesktopSettingsPanel: View {
     /// Used to switch the auto-pause copy and per-screen badges between
     /// independent ("would pause") and shared ("would pause all"
     /// + "paused (other screen)") wording.
-    @State private var viewingMode: ViewingMode = .independent
+    @State private var viewingMode = PrefsDisplays.viewingMode
 
     /// Pause desktop wallpaper / fullscreen-window playback on battery.
     @State private var pauseOnBattery: Bool = false
@@ -65,7 +65,7 @@ struct DesktopSettingsPanel: View {
     /// Mirror of `Preferences.showRestartWallpaperButton` — the
     /// Troubleshooting checkbox that adds a restart button to the menu
     /// bar popover and the Home dashboard.
-    @State private var showRestartButton = false
+    @State private var showRestartButton = Preferences.showRestartWallpaperButton
 
     private let autoAdvanceIntervals: [(label: String, minutes: Int)] = [
         ("15 minutes", 15),

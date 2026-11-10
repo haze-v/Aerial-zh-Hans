@@ -16,7 +16,7 @@ final class VideoBrowserWindowController: NSWindowController {
     private convenience init() {
         let hosting = NSHostingController(rootView: VideoBrowserView())
         let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 1320, height: 880),
+            contentRect: NSRect(x: 0, y: 0, width: 1100, height: 700),
             styleMask: [.titled, .closable, .miniaturizable, .resizable],
             backing: .buffered,
             defer: false
@@ -24,7 +24,7 @@ final class VideoBrowserWindowController: NSWindowController {
         window.title = String(localized: "Video Library")
         window.contentViewController = hosting
         window.isReleasedWhenClosed = false
-        window.minSize = NSSize(width: 1230, height: 830)
+        window.minSize = NSSize(width: 900, height: 650)
         window.center()
         self.init(window: window)
     }

@@ -43,7 +43,7 @@ struct AerialCompanionApp: App {
                 VideoBrowserView()
             }
         }
-        .defaultSize(width: 1320, height: 880)
+        .defaultSize(width: 1100, height: 700)
         .defaultLaunchBehavior(.suppressed)
         .restorationBehavior(.disabled)
         .commands {

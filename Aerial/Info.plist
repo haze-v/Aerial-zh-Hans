@@ -38,7 +38,7 @@
 		<true/>
 	</dict>
 	<key>SUFeedURL</key>
-	<string>https://github.com/x-xxxx/Aerial-zh-Hans/releases/latest/download/appcast.xml</string>
+	<string>https://github.com/haze-v/Aerial-zh-Hans/releases/latest/download/appcast.xml</string>
 	<key>SUPublicEDKey</key>
 	<string>HddQNnr/4aUXGaAb2ZRxnL3TEYM7xRlC3XUNfkEmlVs=</string>
 	<key>SURequireSignedFeed</key>

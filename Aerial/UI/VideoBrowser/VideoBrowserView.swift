@@ -11,9 +11,13 @@
 //
 
 import SwiftUI
+import AVKit
+import AppKit
 
 struct VideoBrowserView: View {
     @StateObject private var state = VideoBrowserState()
+    @State private var previewPlayer: AVPlayer?
+    @State private var escapeMonitor: Any?
     @Environment(\.openWindow) private var openWindow
 
     var body: some View {
@@ -63,6 +67,30 @@ struct VideoBrowserView: View {
                 }
                 if state.supportsViewMode {
                     ToolbarItem(placement: .primaryAction) {
+                        Menu {
+                            Picker("收藏", selection: $state.favoriteFilter) {
+                                Text("全部").tag(VideoLibraryFilter.all)
+                                Text("已收藏").tag(VideoLibraryFilter.yes)
+                                Text("未收藏").tag(VideoLibraryFilter.no)
+                            }
+                            Picker("下载", selection: $state.downloadFilter) {
+                                Text("全部").tag(VideoLibraryFilter.all)
+                                Text("已下载").tag(VideoLibraryFilter.yes)
+                                Text("未下载").tag(VideoLibraryFilter.no)
+                            }
+                            if state.hasActiveFilters {
+                                Divider()
+                                Button("清除筛选") {
+                                    state.favoriteFilter = .all
+                                    state.downloadFilter = .all
+                                }
+                            }
+                        } label: {
+                            Label("筛选", systemImage: state.hasActiveFilters ? "line.3.horizontal.decrease.circle.fill" : "line.3.horizontal.decrease.circle")
+                        }
+                        .help("筛选视频")
+                    }
+                    ToolbarItem(placement: .primaryAction) {
                         Button(action: {
                             state.viewMode = state.viewMode == .grid ? .list : .grid
                         }) {
@@ -94,17 +122,68 @@ struct VideoBrowserView: View {
         // managed by the split-view container, not the detail.
         .toolbar(removing: .title)
         .navigationSplitViewStyle(.balanced)
-        // Minimum = the smallest layout Home still reads well at
-        // (measured 1229×832 pt); first-open size and persistence are
-        // handled by the scene's `.defaultSize` + AppPresentationController.
-        .frame(minWidth: 1230, minHeight: 830)
+        .onChange(of: state.favoriteFilter) { _, _ in state.clearSelection() }
+        .onChange(of: state.downloadFilter) { _, _ in state.clearSelection() }
+        .onChange(of: state.previewURL) { _, url in
+            if let escapeMonitor {
+                NSEvent.removeMonitor(escapeMonitor)
+                self.escapeMonitor = nil
+            }
+            previewPlayer?.pause()
+            previewPlayer?.replaceCurrentItem(with: nil)
+            previewPlayer = url.map { AVPlayer(url: $0) }
+            previewPlayer?.play()
+            if url != nil {
+                let browserState = state
+                escapeMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
+                    guard event.keyCode == 53 else { return event }
+                    browserState.previewURL = nil
+                    return nil
+                }
+            }
+        }
+        // The sidebar and inspector remain scrollable on smaller displays.
+        // First-open size and persistence are handled by the scene and AppPresentationController.
+        .frame(minWidth: 900, minHeight: 600)
         .tint(.aerial)
+        .overlay {
+            if let previewPlayer {
+                GeometryReader { geometry in
+                    let width = min(geometry.size.width * 0.82, geometry.size.height * 0.82 * 16 / 9)
+                    ZStack {
+                        Color.black.opacity(0.3)
+                            .contentShape(Rectangle())
+                            .onTapGesture { state.previewURL = nil }
+                        VideoPlayer(player: previewPlayer)
+                            .frame(width: width, height: width * 9 / 16)
+                            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                            .overlay {
+                                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                    .strokeBorder(Color.white.opacity(0.8), lineWidth: 2)
+                                    .allowsHitTesting(false)
+                            }
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .onExitCommand { state.previewURL = nil }
+                }
+                .ignoresSafeArea()
+            }
+        }
         // External routing: callers (e.g. About box's "Browse
         // Expansions") post `openCategoryRequest` after openWindow to
         // jump an already-open Video Library to a specific sidebar
         // category. Clears the search field first so the content view
         // routes to that category instead of staying on global search
         // results.
+        .onDisappear {
+            if let escapeMonitor {
+                NSEvent.removeMonitor(escapeMonitor)
+                self.escapeMonitor = nil
+            }
+            previewPlayer?.pause()
+            previewPlayer = nil
+            state.previewURL = nil
+        }
         .onReceive(NotificationCenter.default.publisher(for: VideoBrowserState.openCategoryRequest)) { note in
             guard let category = note.object as? BrowseCategory else { return }
             state.searchText = ""
@@ -133,8 +212,6 @@ struct VideoBrowserView: View {
             PlaylistSummaryView(state: state)
         } else if state.isUserPlaylist {
             UserPlaylistContentView(state: state)
-        } else if state.isLiveFeeds {
-            LiveFeedsContentView(state: state)
         } else if state.isExpansions {
             ExpansionsContentView(state: state)
         } else if state.isActivity {

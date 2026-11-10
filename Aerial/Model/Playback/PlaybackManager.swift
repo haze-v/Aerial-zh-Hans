@@ -205,6 +205,7 @@ class PlaybackManager: ObservableObject {
 
     // MARK: - Screen Management
 
+    /// Apply a new display layout to the active wallpaper and playlist.
     func changeViewingMode(_ mode: ViewingMode) {
         let previous = PrefsDisplays.viewingMode
         guard mode != previous else { return }
@@ -214,8 +215,13 @@ class PlaybackManager: ObservableObject {
         }
         if mode == .independentMirror {
             PlaylistManager.shared.updateMirrorScreens(availableScreens.map(\.uuid), startTogether: true)
+        } else {
+            PlaylistManager.shared.regenerate(for: nil,
+                                              mode: PrefsVideos.newShouldPlay,
+                                              filterStrings: PrefsVideos.newShouldPlayString)
         }
         WallpaperControl.shared.displaysConfigDidChange()
+        DownloadCoordinator.shared.selectionDidChange()
     }
 
     func mirrorPauseScope(_ screenUUID: String?) -> String? {

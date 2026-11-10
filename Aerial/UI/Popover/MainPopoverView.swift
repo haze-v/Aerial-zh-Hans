@@ -143,11 +143,8 @@ struct MainPopoverView: View {
         .onAppear {
             refreshSetupChecks()
         }
-        // The popover's NSHostingController is persistent, so `.onAppear`
-        // only fires once for the lifetime of the host. Subscribe to AppKit's
-        // pre-show signal so we re-check the active wallpaper/screensaver
-        // every time the popover is about to become visible (catches users
-        // changing them in System Settings while Aerial is running).
+        // Re-check system roles when the popover opens; AppKit can deliver
+        // willShow before SwiftUI mounts the visible content.
         .onReceive(NotificationCenter.default.publisher(for: NSPopover.willShowNotification)) { _ in
             refreshSetupChecks()
         }

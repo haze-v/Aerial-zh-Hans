@@ -18,7 +18,6 @@ struct VideoBrowserSidebar: View {
     /// it and you'll re-show the badge to existing users.
     private enum NewBadgeID: String {
         case expansions
-        case liveFeeds
         case myVideos
     }
 
@@ -95,14 +94,8 @@ struct VideoBrowserSidebar: View {
 
             sidebarRow(icon: "film.stack", title: "All Videos", category: .allVideos)
             sidebarRow(icon: "folder", title: "My Videos", category: .source("My Videos"), showNewBadge: showNewBadge(.myVideos))
-            sidebarRow(icon: "dot.radiowaves.left.and.right", title: "Live Feeds", category: .source("Live Feeds"), showNewBadge: showNewBadge(.liveFeeds))
 
-            // Expansions: same DisclosureGroup widget as By Location /
-            // By Source below, so the chevron looks identical. The
-            // label uses the same tight HStack as `disclosureLabel`
-            // (no internal padding) so the icon sits flush after the
-            // system chevron, plus a selection pill so tapping the
-            // row still navigates to the Expansions showcase.
+            // Expansions can also navigate to its showcase when the title is clicked.
             if installedExpansionSources.isEmpty {
                 sidebarRow(icon: "sparkles", title: "Expansions", category: .expansions, showNewBadge: showNewBadge(.expansions))
             } else {
@@ -129,29 +122,25 @@ struct VideoBrowserSidebar: View {
             }
 
             // By Location
-            DisclosureGroup {
+            BrowseDisclosureGroup("By Location", systemImage: "map") {
                 ForEach(VideoList.instance.getSources(mode: .location), id: \.self) { loc in
                     sidebarRow(icon: "mappin", title: loc, category: .location(loc))
                         .padding(.leading, 12)
                 }
-            } label: {
-                disclosureLabel("By Location", systemImage: "map")
             }
             .padding(.horizontal, 8)
 
             // By Scene
-            DisclosureGroup {
+            BrowseDisclosureGroup("By Scene", systemImage: "photo.on.rectangle") {
                 ForEach(SourceScene.allCases, id: \.self) { scene in
                     sidebarRow(icon: sceneIcon(scene), title: scene.rawValue, category: .scene(scene))
                         .padding(.leading, 12)
                 }
-            } label: {
-                disclosureLabel("By Scene", systemImage: "photo.on.rectangle")
             }
             .padding(.horizontal, 8)
 
             // By Time of Day
-            DisclosureGroup {
+            BrowseDisclosureGroup("By Time of Day", systemImage: "clock") {
                 sidebarRow(icon: "sun.max", title: "Day", category: .timeOfDay("day"))
                     .padding(.leading, 12)
                 sidebarRow(icon: "sunrise", title: "Sunrise", category: .timeOfDay("sunrise"))
@@ -160,23 +149,19 @@ struct VideoBrowserSidebar: View {
                     .padding(.leading, 12)
                 sidebarRow(icon: "moon.stars", title: "Night", category: .timeOfDay("night"))
                     .padding(.leading, 12)
-            } label: {
-                disclosureLabel("By Time of Day", systemImage: "clock")
             }
             .padding(.horizontal, 8)
 
             // By Source — Apple-shipped manifests only (macOS / tvOS).
             // Community / online / installed-from-link packs live under
             // the Expansions section above instead of here.
-            DisclosureGroup {
+            BrowseDisclosureGroup("By Source", systemImage: "tray.2") {
                 ForEach(VideoList.instance.getSources(mode: .source).filter {
                     $0.hasPrefix("tvOS") || $0.hasPrefix("macOS")
                 }, id: \.self) { src in
                     sidebarRow(icon: "tray", title: src, category: .source(src))
                         .padding(.leading, 12)
                 }
-            } label: {
-                disclosureLabel("By Source", systemImage: "tray.2")
             }
             .padding(.horizontal, 8)
 
@@ -205,8 +190,6 @@ struct VideoBrowserSidebar: View {
                 dismissNewBadge(.expansions)
             case .source("My Videos"):
                 dismissNewBadge(.myVideos)
-            case .source("Live Feeds"):
-                dismissNewBadge(.liveFeeds)
             case .source(let name) where installedExpansionSources.contains(where: { $0.name == name }):
                 dismissNewBadge(.expansions)
             default:
@@ -281,21 +264,7 @@ struct VideoBrowserSidebar: View {
             .background(Capsule().fill(Color.orange))
     }
 
-    private func disclosureLabel(_ title: String, systemImage: String) -> some View {
-        HStack(spacing: 8) {
-            Image(systemName: systemImage)
-                .font(.system(size: 15))
-                .foregroundColor(.secondary)
-                .frame(width: 20)
-            Text(LocalizedStringKey(title))
-                .font(.system(size: 14))
-        }
-    }
-
-    /// Mirrors `disclosureLabel` (no horizontal padding, so the icon
-    /// sits flush after the system chevron) but adds the Aerial
-    /// selection highlight + tap gesture so the row still navigates
-    /// to the Expansions showcase.
+    /// The title both opens the showcase and toggles installed sources.
     private var expansionsDisclosureLabel: some View {
         let isSelected = state.selectedSidebarItem == .expansions
         let highContrastSelected = isSelected && highContrast
@@ -320,6 +289,7 @@ struct VideoBrowserSidebar: View {
         .cornerRadius(6)
         .contentShape(Rectangle())
         .onTapGesture {
+            expansionsExpanded.toggle()
             state.clearSelection()
             state.selectedSidebarItem = .expansions
         }
@@ -348,7 +318,7 @@ struct VideoBrowserSidebar: View {
 
     /// Sources we treat as "installed expansions": everything in
     /// `SourceList.list` that isn't a local source, isn't the special
-    /// "My Videos" / "Live Feeds" entries, and isn't an Apple-shipped
+    /// "My Videos" entry or the Live Feeds source, and isn't an Apple-shipped
     /// `tvOS …` / `macOS …` manifest. The `state.refreshTrigger`
     /// dependency below makes the sidebar re-render when sources are
     /// added or removed.
@@ -363,6 +333,40 @@ struct VideoBrowserSidebar: View {
         }
     }
 
+}
+
+/// The native chevron and the full title row control the same disclosure.
+private struct BrowseDisclosureGroup<Content: View>: View {
+    let title: LocalizedStringKey
+    let systemImage: String
+    @ViewBuilder let content: () -> Content
+    @State private var isExpanded = false
+
+    init(_ title: LocalizedStringKey, systemImage: String, @ViewBuilder content: @escaping () -> Content) {
+        self.title = title
+        self.systemImage = systemImage
+        self.content = content
+    }
+
+    var body: some View {
+        DisclosureGroup(isExpanded: $isExpanded, content: content) {
+            Button {
+                isExpanded.toggle()
+            } label: {
+                HStack(spacing: 8) {
+                    Image(systemName: systemImage)
+                        .font(.system(size: 15))
+                        .foregroundColor(.secondary)
+                        .frame(width: 20)
+                    Text(title)
+                        .font(.system(size: 14))
+                    Spacer(minLength: 0)
+                }
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+        }
+    }
 }
 
 struct VideoBrowserSidebar_Previews: PreviewProvider {

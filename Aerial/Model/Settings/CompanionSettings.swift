@@ -202,6 +202,9 @@ struct CompanionSettings: Codable {
 
     // MARK: - Defaults
 
+    static let defaultDesktopAutoPauseThreshold = 0.5
+    static let defaultDesktopPauseOnHighCPU = true
+
     /// Default settings for fresh install
     static let `default` = CompanionSettings(
         intLaunchMode: LaunchMode.manual.rawValue,
@@ -212,7 +215,6 @@ struct CompanionSettings: Codable {
         playlistShuffle: false,
         playlistCycleMode: 0,
         desktopAutoPause: true,
-        desktopAutoPauseThreshold: 0.6,
         desktopAutoPauseIgnoredApps: [],
         reclaimMacOSWallpaperVideosAtStartup: false,
         popoverSolidBackground: false,
@@ -255,8 +257,7 @@ struct CompanionSettings: Codable {
             globalSpeed: UserDefaults.standard.object(forKey: "globalSpeed") as? Int ?? 0,
             playlistListMode: true,
             playlistShuffle: false,
-            desktopAutoPause: true,
-            desktopAutoPauseThreshold: 0.6
+            desktopAutoPause: true
         )
     }
 
@@ -266,7 +267,7 @@ struct CompanionSettings: Codable {
          globalSpeed: Int, playlistListMode: Bool,
          playlistShuffle: Bool, playlistCycleMode: Int = 0,
          desktopAutoPause: Bool = true,
-         desktopAutoPauseThreshold: Double = 0.6,
+         desktopAutoPauseThreshold: Double = CompanionSettings.defaultDesktopAutoPauseThreshold,
          desktopAutoPauseIgnoredApps: [String] = [],
          reclaimMacOSWallpaperVideosAtStartup: Bool = false,
          popoverSolidBackground: Bool = false,
@@ -278,7 +279,7 @@ struct CompanionSettings: Codable {
          nowPlayingMode: String? = nil,
          desktopPauseOnBattery: Bool = false,
          desktopPauseOnBatteryMode: String = "anyBattery",
-         desktopPauseOnHighCPU: Bool = false,
+         desktopPauseOnHighCPU: Bool = CompanionSettings.defaultDesktopPauseOnHighCPU,
          desktopCPUThreshold: Double = 70,
          desktopCPUHighLoadDuration: Double = 5,
          desktopCPUSampleInterval: Double = 1,
@@ -287,7 +288,7 @@ struct CompanionSettings: Codable {
          desktopPauseOnCamera: Bool = false,
          desktopAutoAdvance: Bool = false,
          desktopAutoAdvanceMinutes: Int = 60,
-         showRestartWallpaperButton: Bool = false,
+         showRestartWallpaperButton: Bool = true,
          intWallpaperMode: Int? = nil,
          wallpaperModeChosen: Bool? = nil,
          lastLaunchedVersion: String? = nil,
@@ -352,7 +353,7 @@ struct CompanionSettings: Codable {
         // legacy shuffle Bool.
         playlistCycleMode = try container.decodeIfPresent(Int.self, forKey: .playlistCycleMode) ?? (playlistShuffle ? 1 : 0)
         desktopAutoPause = try container.decodeIfPresent(Bool.self, forKey: .desktopAutoPause) ?? true
-        desktopAutoPauseThreshold = try container.decodeIfPresent(Double.self, forKey: .desktopAutoPauseThreshold) ?? 0.6
+        desktopAutoPauseThreshold = try container.decodeIfPresent(Double.self, forKey: .desktopAutoPauseThreshold) ?? Self.defaultDesktopAutoPauseThreshold
         desktopAutoPauseIgnoredApps = try container.decodeIfPresent([String].self, forKey: .desktopAutoPauseIgnoredApps) ?? []
         reclaimMacOSWallpaperVideosAtStartup = try container.decodeIfPresent(Bool.self, forKey: .reclaimMacOSWallpaperVideosAtStartup) ?? false
         popoverSolidBackground = try container.decodeIfPresent(Bool.self, forKey: .popoverSolidBackground) ?? false
@@ -364,7 +365,7 @@ struct CompanionSettings: Codable {
         nowPlayingMode = try container.decodeIfPresent(String.self, forKey: .nowPlayingMode)
         desktopPauseOnBattery = try container.decodeIfPresent(Bool.self, forKey: .desktopPauseOnBattery) ?? false
         desktopPauseOnBatteryMode = try container.decodeIfPresent(String.self, forKey: .desktopPauseOnBatteryMode) ?? "anyBattery"
-        desktopPauseOnHighCPU = try container.decodeIfPresent(Bool.self, forKey: .desktopPauseOnHighCPU) ?? false
+        desktopPauseOnHighCPU = try container.decodeIfPresent(Bool.self, forKey: .desktopPauseOnHighCPU) ?? Self.defaultDesktopPauseOnHighCPU
         desktopCPUThreshold = min(95, max(5, try container.decodeIfPresent(Double.self, forKey: .desktopCPUThreshold) ?? 70))
         desktopCPUHighLoadDuration = min(30, max(1, try container.decodeIfPresent(Double.self, forKey: .desktopCPUHighLoadDuration) ?? 5))
         desktopCPUSampleInterval = min(5, max(1, try container.decodeIfPresent(Double.self, forKey: .desktopCPUSampleInterval) ?? 1))
@@ -373,7 +374,7 @@ struct CompanionSettings: Codable {
         desktopPauseOnCamera = try container.decodeIfPresent(Bool.self, forKey: .desktopPauseOnCamera) ?? false
         desktopAutoAdvance = try container.decodeIfPresent(Bool.self, forKey: .desktopAutoAdvance) ?? false
         desktopAutoAdvanceMinutes = try container.decodeIfPresent(Int.self, forKey: .desktopAutoAdvanceMinutes) ?? 60
-        showRestartWallpaperButton = try container.decodeIfPresent(Bool.self, forKey: .showRestartWallpaperButton) ?? false
+        showRestartWallpaperButton = try container.decodeIfPresent(Bool.self, forKey: .showRestartWallpaperButton) ?? true
         intWallpaperMode = try container.decodeIfPresent(Int.self, forKey: .intWallpaperMode)
         wallpaperModeChosen = try container.decodeIfPresent(Bool.self, forKey: .wallpaperModeChosen)
         lastLaunchedVersion = try container.decodeIfPresent(String.self, forKey: .lastLaunchedVersion)

@@ -334,13 +334,18 @@ final class ContentsSwapPresenter {
                 if let displayID { cacheFirstPresentedFrame(buffer, displayID: displayID) }
                 debugLog("  [Presenter] first frame displayed wid=\(wid.prefix(8)) video=\(renderer.currentAssetURL.lastPathComponent)")
             }
-            presented = buffer
             unchangedTicks = 0
             if isIdle { upshift() }
-            CATransaction.begin()
-            CATransaction.setDisableActions(true)
-            layer.contents = surface
-            CATransaction.commit()
+            // 远程图层提交前保留旧帧，避免解码池复用仍被合成的画面。
+            // 无动画事务的 completionBlock 会立即执行，不能作为提交屏障。
+            withExtendedLifetime(presented) {
+                CATransaction.begin()
+                CATransaction.setDisableActions(true)
+                layer.contents = surface
+                CATransaction.commit()
+                CATransaction.flush()
+            }
+            presented = buffer
         } else if !isIdle {
             unchangedTicks += 1
             if unchangedTicks >= Self.idleThreshold { downshift() }

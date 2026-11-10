@@ -282,7 +282,7 @@ struct DisplaySettings: Codable {
 
     static let `default` = DisplaySettings(
         intDisplayMode: 0,  // DisplayMode.allDisplays
-        intViewingMode: 0,  // ViewingMode.independent
+        intViewingMode: ViewingMode.defaultMode.rawValue,
         intAspectMode: 0,  // AspectMode.fill
         displayMarginsAdvanced: false,
         horizontalMargin: 0,
@@ -299,7 +299,7 @@ extension DisplaySettings {
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         intDisplayMode = try container.decode(Int.self, forKey: .intDisplayMode)
-        intViewingMode = try container.decode(Int.self, forKey: .intViewingMode)
+        intViewingMode = try container.decodeIfPresent(Int.self, forKey: .intViewingMode) ?? ViewingMode.defaultMode.rawValue
         intAspectMode = try container.decode(Int.self, forKey: .intAspectMode)
         displayMarginsAdvanced = try container.decode(Bool.self, forKey: .displayMarginsAdvanced)
         horizontalMargin = try container.decode(Double.self, forKey: .horizontalMargin)

@@ -25,7 +25,7 @@ struct DashboardSystemRow: View {
     @State private var isSettingWallpaper = false
     @State private var isSettingScreensaver = false
 
-    /// Opt-in "Restart" button in the Wallpaper card (Settings →
+    /// "Restart" button in the Wallpaper card (Settings →
     /// Wallpaper → Troubleshooting). Live-updated via the pref
     /// notification: the Video Library window can stay open while the
     /// Settings checkbox is toggled.
@@ -174,11 +174,18 @@ struct DashboardSystemRow: View {
                     Button {
                         restartWallpaperAgent()
                     } label: {
-                        Label("Restart", systemImage: "arrow.clockwise")
+                        Image(systemName: "arrow.clockwise")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(.aerial)
+                            .frame(width: 32, height: 28)
+                            .background(Color.aerial.opacity(0.1))
+                            .cornerRadius(8)
+                            .contentShape(Rectangle())
                     }
-                    .buttonStyle(.bordered)
+                    .buttonStyle(.plain)
                     .disabled(isRestartingAgent)
-                    .padding(.leading, 8)
+                    .opacity(isRestartingAgent ? 0.5 : 1)
+                    .accessibilityLabel("Restart Wallpaper Agent")
                     .help("Restart the wallpaper agent — use it if you see the default wallpaper or a black screen")
                 }
 

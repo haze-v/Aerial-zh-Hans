@@ -43,23 +43,6 @@ struct VideoBrowserCardView: View {
                     .clipped()
                     .cornerRadius(6)
 
-                // Download status
-                if video.isAvailableOffline {
-                    Image(systemName: "checkmark.circle.fill")
-                        .font(.system(size: 20))
-                        .foregroundColor(.aerial).shadow(color: .black.opacity(0.5), radius: 4, x: 2, y: 2)
-                        .padding(4)
-                } else {
-                    // Dark scrim + download badge
-                    ZStack {
-                        Rectangle()
-                            .fill(Color.black.opacity(0.4))
-                            .cornerRadius(6)
-
-                        downloadBadge(for: video)
-                    }
-                }
-
                 // Time-match dot
                 if showTimeMatch {
                     Circle()
@@ -68,14 +51,38 @@ struct VideoBrowserCardView: View {
                         .position(x: 10, y: 10)
                 }
             }
+            .overlay(alignment: .bottomLeading) {
+                if video.isAvailableOffline {
+                    Button(action: previewVideo) {
+                        Image(systemName: "play.fill")
+                            .font(.system(size: 9, weight: .semibold))
+                            .foregroundColor(.black)
+                            .frame(width: 23, height: 17)
+                            .background(.white, in: RoundedRectangle(cornerRadius: 3))
+                    }
+                    .buttonStyle(.borderless)
+                    .opacity(0.8)
+                    .frame(width: 28, height: 28)
+                    .padding(4)
+                    .help("预览视频")
+                    .accessibilityLabel("预览视频")
+                }
+            }
+            .overlay(alignment: .bottomTrailing) {
+                if !video.isAvailableOffline {
+                    downloadBadge(for: video)
+                        .opacity(0.8)
+                        .frame(width: 28, height: 28)
+                        .padding(4)
+                }
+            }
             .overlay(
                 RoundedRectangle(cornerRadius: 6)
                     .stroke(isCurrent ? Color.aerial : (isSelected ? Color.aerial.opacity(0.5) : Color.clear), lineWidth: 2)
             )
-            .opacity(showTimeMatch && !matchesTime ? 0.6 : 1.0)
 
-            // Name
-            VStack(alignment: .leading, spacing: 1) {
+            // 标题靠左，地点靠右。
+            HStack(alignment: .firstTextBaseline, spacing: 6) {
                 if !video.secondaryName.isEmpty {
                     if isMyVideos, onTitleChanged != nil {
                         HStack(spacing: 4) {
@@ -97,12 +104,18 @@ struct VideoBrowserCardView: View {
                         Text(video.secondaryName)
                             .font(.system(size: 12, weight: .semibold))
                             .lineLimit(1)
+                            .layoutPriority(1)
                     }
+                    Spacer(minLength: 4)
+                    Text(video.name)
+                        .font(.system(size: 11))
+                        .foregroundColor(.secondary)
+                        .lineLimit(1)
+                } else {
+                    Text(video.name)
+                        .font(.system(size: 12, weight: .semibold))
+                        .lineLimit(1)
                 }
-                Text(video.name)
-                    .font(.system(size: 11))
-                    .foregroundColor(.secondary)
-                    .lineLimit(1)
             }
 
             // Metadata row
@@ -216,26 +229,26 @@ struct VideoBrowserCardView: View {
         case .downloading(let progress):
             ZStack {
                 Circle()
-                    .stroke(Color.white.opacity(0.3), lineWidth: 3)
-                    .frame(width: 42, height: 42)
+                    .stroke(Color.white.opacity(0.45), lineWidth: 2)
+                    .frame(width: 20, height: 20)
                 Circle()
                     .trim(from: 0, to: progress)
-                    .stroke(Color.aerial, style: StrokeStyle(lineWidth: 3, lineCap: .round))
-                    .frame(width: 42, height: 42)
+                    .stroke(Color.aerial, style: StrokeStyle(lineWidth: 2, lineCap: .round))
+                    .frame(width: 20, height: 20)
                     .rotationEffect(.degrees(-90))
                 Image(systemName: "arrow.down")
-                    .font(.system(size: 15, weight: .bold))
+                    .font(.system(size: 11, weight: .bold))
                     .foregroundColor(.white)
             }
         case .queued:
             Image(systemName: "arrow.down.circle.fill")
-                .font(.system(size: 33))
-                .foregroundColor(.white.opacity(0.8))
+                .font(.system(size: 19))
+                .foregroundColor(.white)
         case .none:
             Button(action: { downloadTracker.queueDownload(videoId: video.id) }) {
                 Image(systemName: "arrow.down.circle")
-                    .font(.system(size: 33))
-                    .foregroundColor(.white.opacity(0.8))
+                    .font(.system(size: 19))
+                    .foregroundColor(.white)
             }
             .buttonStyle(.borderless)
             .help("Download this video")
@@ -244,6 +257,12 @@ struct VideoBrowserCardView: View {
     }
 
     // MARK: - Actions
+
+    private func previewVideo() {
+        let path = VideoList.instance.localPathFor(video: video)
+        guard !path.isEmpty, FileManager.default.fileExists(atPath: path) else { return }
+        state.previewURL = URL(fileURLWithPath: path)
+    }
 
     private func toggleFavorite() {
         var favs = PrefsVideos.favorites

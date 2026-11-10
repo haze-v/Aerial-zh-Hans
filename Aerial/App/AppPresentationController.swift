@@ -259,6 +259,10 @@ final class AppPresentationController: NSObject {
                 guard let window = note.object as? NSWindow else { return }
                 self?.saveLibraryFrame(window, reason: "resize")
             },
+            center.addObserver(forName: NSWindow.didChangeScreenNotification, object: window, queue: .main) { [weak self] note in
+                guard let window = note.object as? NSWindow else { return }
+                self?.fitLibraryWindowToScreen(window, phase: "screen")
+            },
             center.addObserver(forName: NSWindow.willCloseNotification, object: window, queue: .main) { [weak self] note in
                 guard let window = note.object as? NSWindow else { return }
                 self?.saveLibraryFrame(window, reason: "close")
@@ -281,24 +285,39 @@ final class AppPresentationController: NSObject {
     }
 
     private func restoreLibraryFrame(into window: NSWindow, phase: String) {
-        guard let saved = UserDefaults.standard.string(forKey: Self.libraryFrameKey) else { return }
-        var frame = NSRectFromString(saved)
+        var frame = window.frame
+        if let saved = UserDefaults.standard.string(forKey: Self.libraryFrameKey) {
+            let savedFrame = NSRectFromString(saved)
+            if savedFrame.width >= 100, savedFrame.height >= 100 {
+                frame = savedFrame
+            }
+        }
         guard frame.width >= 100, frame.height >= 100 else { return }
 
-        // Displays change between sessions: shrink to the screen and pull
-        // the window back on it if its saved position is nowhere visible.
-        if let screen = window.screen ?? NSScreen.main {
-            let visible = screen.visibleFrame
-            frame.size.width = min(frame.width, visible.width)
-            frame.size.height = min(frame.height, visible.height)
-            if !visible.intersects(frame) {
-                frame.origin = NSPoint(x: visible.midX - frame.width / 2, y: visible.midY - frame.height / 2)
-            }
-            frame = window.constrainFrameRect(frame, to: screen)
-        }
+        frame = libraryFrameFittingVisibleScreen(frame, for: window)
         guard window.frame != frame else { return }
         window.setFrame(frame, display: true)
         debugLog("🪟 Video Library frame restored (\(phase)): \(NSStringFromRect(frame))")
+    }
+
+    private func fitLibraryWindowToScreen(_ window: NSWindow, phase: String) {
+        let frame = libraryFrameFittingVisibleScreen(window.frame, for: window)
+        guard window.frame != frame else { return }
+        window.setFrame(frame, display: true)
+        debugLog("🪟 Video Library frame fitted (\(phase)): \(NSStringFromRect(frame))")
+    }
+
+    private func libraryFrameFittingVisibleScreen(_ frame: NSRect, for window: NSWindow) -> NSRect {
+        let savedCenter = NSPoint(x: frame.midX, y: frame.midY)
+        guard let screen = NSScreen.screens.first(where: { $0.frame.contains(savedCenter) })
+                ?? window.screen ?? NSScreen.main else { return frame }
+        let visible = screen.visibleFrame
+        var fitted = frame
+        fitted.size.width = min(fitted.width, visible.width)
+        fitted.size.height = min(fitted.height, visible.height)
+        fitted.origin.x = min(max(fitted.origin.x, visible.minX), visible.maxX - fitted.width)
+        fitted.origin.y = min(max(fitted.origin.y, visible.minY), visible.maxY - fitted.height)
+        return window.constrainFrameRect(fitted, to: screen)
     }
 
     /// Whether the Video Library is on screen — lets the 1 Hz playback
@@ -319,7 +338,10 @@ final class AppPresentationController: NSObject {
         }
         // Make it key, not just ordered front: WindowContentGate remounts
         // the dismounted content on didBecomeKey.
-        libraryWindow?.makeKeyAndOrderFront(nil)
+        if let libraryWindow {
+            fitLibraryWindowToScreen(libraryWindow, phase: "open")
+            libraryWindow.makeKeyAndOrderFront(nil)
+        }
         activateForWindow()
     }
 

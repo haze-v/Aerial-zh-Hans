@@ -18,7 +18,6 @@ enum SettingsPanel: String, CaseIterable, Identifiable {
     case overlays = "Overlays"
     case accessibility = "Accessibility"
     case advanced = "Advanced"
-    case autoUpdates = "Auto Updates"
     case about = "About"
 
     var id: String { rawValue }
@@ -41,8 +40,6 @@ enum SettingsPanel: String, CaseIterable, Identifiable {
             return "tv"
         case .accessibility:
             return "accessibility"
-        case .autoUpdates:
-            return "gearshape"
         case .advanced:
             return "wrench.and.screwdriver"
         case .about:
@@ -66,8 +63,6 @@ enum SettingsPanel: String, CaseIterable, Identifiable {
             return "Activation & playback"
         case .accessibility:
             return "Shortcuts & visuals"
-        case .autoUpdates:
-            return "Via Sparkle"
         case .advanced:
             return "Settings & tweaks"
         case .about:
@@ -167,8 +162,6 @@ struct SettingsView: View {
                     ScreensaverSettingsPanel()
                 case .accessibility:
                     AccessibilityPanel()
-                case .autoUpdates:
-                    AutoUpdatesPanel()
                 case .advanced:
                     AdvancedSettingsPanel()
                 case .about:

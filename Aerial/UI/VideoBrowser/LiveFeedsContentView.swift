@@ -2,7 +2,7 @@
 //  LiveFeedsContentView.swift
 //  Aerial Companion
 //
-//  Shown when the "Live Feeds" sidebar row is selected. Lets the user
+//  Opened from About. Lets the user
 //  add, edit, and remove live streams (HLS, YouTube, RTSP). Writes
 //  through LiveFeedManager, which regenerates the shared source folder.
 //
